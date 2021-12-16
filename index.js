@@ -6,9 +6,38 @@ const PORT = process.env.PORT || 5000;
 const { Pool, Client,pg } = require('pg');
 const bcrypt = require("bcrypt");
 const CryptoJS = require("crypto-js");
+const request = require('request');
+const PKAPI = require("pkapi.js");
 
 require('dotenv').config();
 
+const api = new PKAPI({
+	base_url: "https://api.pluralkit.me", // base api url
+	version: 1, // api version
+	token: undefined // for authing requests. only set if you're using this for a single system!
+})
+
+async function pkFetch (i){
+    // pkFetch("mikfh").then((value) => console.log(value));
+    // return api.getSystem({id: i, token:t});
+    return await api.getMember({member: i});
+};
+
+function fetchPKAlters(id){
+    request(`https://api.pluralkit.me/v2/systems/${id}/members`, function (
+      error,
+      response,
+      body
+    ) {
+      var data= JSON.parse(body);
+      // console.log(data);
+      for (i in data){
+        console.log(data[i].name);
+      }
+    });
+}
+var splash;
+// fetchPKAlters("exmpl");
 
 function randomise(arr){
       return arr[Math.floor(Math.random()*arr.length)];
@@ -54,29 +83,66 @@ app.use(bodyParser.urlencoded({extended:true}));
   // PAGES- GET REQUEST
   app.get('/', (req, res) => {
       var imgFolder= path.join(__dirname, 'public/img')
-      res.render(`pages/index`, { session: req.session });
-        }
-    );
+      res.render(`pages/index`, { session: req.session, splash:splash });
+      splash=null;
+  });
   app.get('/about', (req, res, next) => {
-      res.render(`pages/about`, { session: req.session });
+      res.render(`pages/about`, { session: req.session, splash:splash });
+      splash=null;
       // res.locals.user = req.session.user;
       // next();
   });
   app.get('/signup', (req, res, next) => {
-      res.render(`pages/signup`, { session: req.session });
+      res.render(`pages/signup`, { session: req.session, splash:splash });
+      splash=null;
   });
 
   app.get('/login', (req, res, next) => {
-      res.render(`pages/login`, { session: req.session });
+      res.render(`pages/login`, { session: req.session, splash:splash });
+      splash=null;
   });
 
   app.get('/logout', (req, res)=>{
-     req.session.usernmame= null;
+     splash= `See you soon, ${req.session.username}.`;
+     req.session.username= null;
      req.session.loggedin=false;
      res.redirect("/");
   });
+var sysArr;
+  app.get('/system', (req, res, next) => {
+    if (req.session.loggedin== true){
+        client.query({text: "SELECT * FROM systems WHERE user_id=$1",values: [`${req.session.u_id}`]}, (err, result) => {
+            if (err) {
+              console.log(err.stack);
+              console.log("Oops.")
+          } else {
+              req.session.sys = [];
+              for (i in (result.rows)){
+                  (req.session.sys).push(Buffer.from(result.rows[i].alias, 'base64').toString())
+              }
+          }
+          res.render(`pages/system`, { session: req.session, splash:splash, sysArr: req.session.sys });
+        });
+    } else {
+        res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash });
+    }
+    // splash=null;
+  });
 
   // // PAGES- POST REQUEST
+
+  app.post('/system', function (req, res){
+      client.query({text: "INSERT INTO systems (alias, user_id) VALUES ($1, $2)",values: [`'${Buffer.from(req.body.sysname).toString('base64')}'`, `${req.session.u_id}`]}, (err, result) => {
+          if (err) {
+            console.log(err.stack);
+            console.log("Oops.")
+          } else {
+              res.render(`pages/system`, { session: req.session, splash:splash });
+              splash=`Added ${req.body.sysname}.`;
+          }
+      });
+  });
+
   app.post('/signup', function(req, res) {
       // console.log(`${req.body.email}`);
       var splash;
@@ -128,6 +194,8 @@ app.use(bodyParser.urlencoded({extended:true}));
            // console.log(res.rows[0]);
            req.session.loggedin = true;
 		   req.session.username = Buffer.from(result.rows[0].username, 'base64').toString();
+           req.session.u_id= result.rows[0].id;
+           // console.table(result.rows[0])
            res.redirect('/');
        }
    });
@@ -136,7 +204,8 @@ app.use(bodyParser.urlencoded({extended:true}));
   // ERROR ROUTES. DO NOT PUT NEW PAGES BENEATH THESE.
   app.get('*', function(req, res){
      // res.send(404);
-     res.render(`pages/404`, { session: req.session });
+     res.render(`pages/404`, { session: req.session, code:"Not Found", splash:splash });
+     splash=null;
 });
   // End pages.
   app.listen(PORT, () => console.log(`Listening on ${ PORT }`));

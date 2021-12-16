@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <%- include ("../partials/header.ejs") %>
+    </head>
+    <body>
+        <%- include ("../partials/nav.ejs") %>
+        <div id="wrapper">
+            <h2>Your System</h2>
+            <ul>
+            <% for ( i in sysArr) { %>
+                <li><%= sysArr[i] %></li>
+            <% } %>
+        </ui>
+            <p>Lighthouse supports having multiple systems for polyfragmented DID, or anyone who might need it.</p>
+            <!-- Block for system list. Like system1, system 2, etc. -->
+            <button onclick="toggleForm()" id="tbutton">Add a System</button>
+            <form method="post" class="toggle" style="display: none;" aria-hidden="true" id="toggle">
+                <label for="sysname">System Alias</label>
+                <input name="sysname" type="text" autocomplete="off" placeholder="Alias">
+                <input type="submit" value="Create System">
+            </form>
+            <!-- <a href="/system-findpk">Import Public members from PluralKit</a> -->
+        </div>
+        <%- include ("../partials/footer.ejs") %>
+        <script type="text/javascript">
+            function toggleForm(){
+                var togg = document.getElementById('toggle');
+                var tbutton = document.getElementById('tbutton');
+                if (togg.style.display=="none"){
+                    togg.style.display= "block";
+                    togg.style.ariaHidden= "false"
+                    tbutton.innerHTML= "Hide the form";
+                } else {
+                    togg.style.display= "none";
+                    togg.style.ariaHidden= "true"
+                    tbutton.innerHTML= "Add a System";
+                }
+            }
+        </script>
+    </body>
+</html>
