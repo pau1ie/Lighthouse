@@ -15,7 +15,8 @@ const api = new PKAPI({
 	base_url: "https://api.pluralkit.me", // base api url
 	version: 1, // api version
 	token: undefined // for authing requests. only set if you're using this for a single system!
-})
+});
+
 
 async function pkFetch (i){
     // pkFetch("mikfh").then((value) => console.log(value));
@@ -86,6 +87,11 @@ app.use(bodyParser.urlencoded({extended:true}));
       res.render(`pages/index`, { session: req.session, splash:splash });
       splash=null;
   });
+
+  // app.get('/p/:tagId', function(req, res) {
+  //   res.send("tagId is set to " + req.params.tagId);
+  // });
+
   app.get('/about', (req, res, next) => {
       res.render(`pages/about`, { session: req.session, splash:splash });
       splash=null;
@@ -109,11 +115,42 @@ app.use(bodyParser.urlencoded({extended:true}));
   });
 
   app.get('/logout', (req, res)=>{
-     splash= `See you soon, ${req.session.username}.`;
-     req.session.username= null;
-     req.session.loggedin=false;
+     splash= `See you soon, ${req.session.username || randomise(['friend', 'buddy'])}.`;
+	 req.session.destroy();
      res.redirect("/");
   });
+
+  app.get('/editsys/:alt', (req, res)=>{
+	  if (req.session.loggedin== true){
+		  client.query({text: "SELECT * FROM systems WHERE sys_id=$1",values: [`${req.params.alt}`]}, (err, result) => {
+			  if (err) {
+				console.log(err.stack);
+				console.log("Oops.")
+			} else {
+				req.session.chosenSys= result.rows[0];
+				// chosenSys.sys_id, chosenSys.user_id, chosenSys.sys_alias
+			}
+			res.render(`pages/edit_sys`, { session: req.session, splash:splash, alt:req.session.chosenSys });
+		  });
+	  } else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash });}
+	  // res.render(`pages/edit_sys`, { session: req.session, splash:splash, alt:req.params.alt });
+  });
+
+  app.get('/deletesys/:alt', (req, res)=>{
+	  if (req.session.loggedin== true){
+		  client.query({text: "SELECT * FROM systems WHERE sys_id=$1",values: [`${req.params.alt}`]}, (err, result) => {
+			  if (err) {
+				console.log(err.stack);
+				console.log("Oops.")
+			} else {
+				req.session.chosenSys= result.rows[0];
+			}
+			res.render(`pages/delete_sys`, { session: req.session, splash:splash, alt:req.session.chosenSys });
+		  });
+	  } else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash });}
+	  // res.render(`pages/edit_sys`, { session: req.session, splash:splash, alt:req.params.alt });
+  });
+
 var sysArr;
   app.get('/system', (req, res, next) => {
     if (req.session.loggedin== true){
@@ -124,36 +161,119 @@ var sysArr;
           } else {
               req.session.sys = [];
               for (i in (result.rows)){
-                  (req.session.sys).push(Buffer.from(result.rows[i].alias, 'base64').toString())
+                  // (req.session.sys).push(Buffer.from(result.rows[i].sys_alias, 'base64').toString())
+                  (req.session.sys).push({name: Buffer.from(result.rows[i].sys_alias, 'base64').toString(), id: result.rows[i].sys_id})
               }
           }
+		  // console.table(req.session.sys);
           res.render(`pages/system`, { session: req.session, splash:splash, sysArr: req.session.sys });
         });
     } else {
         res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash });
     }
-    // splash=null;
+    splash=null;
   });
 
-  // // PAGES- POST REQUEST
+	/*
+
+
+
+			---		POST REQUEST PAGES		---
+
+
+
+	*/
 
   app.post('/system', function (req, res){
-      client.query({text: "INSERT INTO systems (alias, user_id) VALUES ($1, $2)",values: [`'${Buffer.from(req.body.sysname).toString('base64')}'`, `${req.session.u_id}`]}, (err, result) => {
-          if (err) {
-            console.log(err.stack);
-            console.log("Oops.")
-          } else {
-              res.render(`pages/system`, { session: req.session, splash:splash });
-              splash=`Added ${req.body.sysname}.`;
-          }
-      });
+	  // console.log(req.body);
+	  // console.log(Object.keys(req.body)[0]);
+	  if (req.body.sysname){
+		  client.query({text: "SELECT * FROM systems WHERE sys_alias=$1 AND user_id=$2",values: [`'${Buffer.from(req.body.sysname).toString('base64')}'`, `${req.session.u_id}`]}, (err, result) => {
+			  if (err) {
+				console.log(err.stack);
+				console.log("Oops.")
+			  } else {
+				  // console.table(result.rows);
+				  if ((result.rows).length == 0){
+					  client.query({text: "INSERT INTO systems (sys_alias, user_id) VALUES ($1, $2)",values: [`'${Buffer.from(req.body.sysname).toString('base64')}'`, `${req.session.u_id}`]}, (err, result) => {
+					      if (err) {
+					        console.log(err.stack);
+					        console.log("Oops.")
+					      } else {
+					          splash=`Added ${req.body.sysname}.`;
+							  // res.render(`pages/system`, { session: req.session, splash:splash, sysArr: req.session.sys });
+							  res.redirect("/system");
+					      }
+					  });
+				  } else {
+					// res.render(`pages/system`, { session: req.session, splash:splash, sysArr: req.session.sys });
+					splash=`You already have a system with the alias "${req.body.sysname}". Please use a unique name. Sorry!`;
+					res.render(`pages/system`, { session: req.session, splash:splash, sysArr: req.session.sys });
+				  }
+			  }
+		  });
+	  }
   });
+
+	app.post('/deletesys/:alt', function(req, res){
+		// console.table(req.session.chosenSys);
+		client.query({text: "SELECT * FROM systems WHERE user_id=$1",values: [`${req.session.chosenSys.user_id}`]}, (err, result) => {
+			if (err) {
+              console.log(err.stack);
+              console.log("Oops.")
+		  } else {
+			  if (req.session.u_id= result.rows[0].user_id){
+				  client.query({text: "DELETE FROM systems WHERE sys_id=$1 CASCADE;",values: [`${req.session.chosenSys.sys_id}`]}, (err, result) => {
+					  if (err){
+						  console.log(err.stack);
+						  console.log("Oops.");
+					  } else {
+						  splash=`${Buffer.from(req.session.chosenSys.sys_alias, 'base64').toString()} has been permanently deleted.`;
+						  req.session.chosenSys= null;
+						  res.redirect("/system");
+					  }
+				  });
+			  } else {
+					// Not their system.
+					res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash });
+			  }
+
+		  }
+		});
+	});
+
+	app.post('/editsys/:alt', function(req, res){
+		// console.table(req.session.chosenSys);
+		client.query({text: "SELECT * FROM systems WHERE user_id=$1;",values: [`${req.session.chosenSys.user_id}`]}, (err, result) => {
+			if (err) {
+			  console.log(err.stack);
+			  console.log("Oops.")
+		  } else {
+			  if (req.session.u_id= result.rows[0].user_id){
+				  client.query({text: "UPDATE systems SET sys_alias=$1 WHERE sys_id=$2;",values: [`'${Buffer.from(req.body.sysname).toString('base64')}'`, `${req.session.chosenSys.sys_id}`]}, (err, result) => {
+					  if (err){
+						  console.log(err.stack);
+						  console.log("Oops.");
+					  } else {
+						  splash=`${Buffer.from(req.session.chosenSys.sys_alias, 'base64').toString()} has been permanently deleted.`;
+						  req.session.chosenSys= null;
+						  res.redirect("/system");
+					  }
+				  });
+			  } else {
+					// Not their system.
+					res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash });
+			  }
+
+		  }
+		});
+	});
 
   app.post('/signup', function(req, res) {
       // console.log(`${req.body.email}`);
       var splash;
       var query = {
-        text: "SELECT * FROM users WHERE email=$1 OR username=$2",
+        text: "SELECT * FROM users WHERE email=$1 OR username=$2;",
         values: [`'${Buffer.from(req.body.email).toString('base64')}'`, `'${Buffer.from(req.body.username).toString('base64')}'`]
       }
       client.query(query, (err, result) => {
@@ -202,6 +322,7 @@ var sysArr;
 		   req.session.username = Buffer.from(result.rows[0].username, 'base64').toString();
            req.session.u_id= result.rows[0].id;
            // console.table(result.rows[0])
+           // console.table(req.session)
            res.redirect('/');
        }
    });

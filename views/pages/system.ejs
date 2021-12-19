@@ -7,9 +7,14 @@
         <%- include ("../partials/nav.ejs") %>
         <div id="wrapper">
             <h2>Your System</h2>
+            <% if (splash){ %>
+                <p><%- splash %></p>
+            <% } %>
             <ul>
             <% for ( i in sysArr) { %>
-                <li><%= sysArr[i] %></li>
+                <li><%= sysArr[i].name %> &emsp;&emsp;&emsp;&emsp;<a href="/deletesys/<%= sysArr[i].id %>" name="<%= sysArr[i].id %>">Delete</a>&emsp;<a href="/editsys/<%= sysArr[i].id %>" name="<%= sysArr[i].id %>">Edit</a></li>
+                <!-- <li><%= sysArr[i].name %> <form method="post"><input type="submit" class="edit" name="e-<%= sysArr[i] %>" value="Edit"> <input type="submit" class="delete" name="d-<%= sysArr[i].id %>" value="Delete"></form></li> -->
+                <!-- <li><%= sysArr[i] %> <button name="edit-<%= sysArr[i] %>">Edit</button> <button name="del-<%= sysArr[i] %>">Delete</button></li> -->
             <% } %>
         </ui>
             <p>Lighthouse supports having multiple systems for polyfragmented DID, or anyone who might need it.</p>
