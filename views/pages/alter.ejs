@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <%- include ("../partials/header.ejs") %>
+</head>
+
+<body>
+    <%- include ("../partials/nav.ejs") %>
+    <div id="wrapper">
+        <section>
+            <h2><%= Buffer.from(session.chosenAlter.name, 'base64').toString() %></h2>
+            <p><%= Buffer.from(session.chosenAlter.name, 'base64').toString() %> is a part of <%= Buffer.from(session.chosenAlter.sys_alias, 'base64').toString() %>.</p>
+        </section>
+    </div>
+    <%- include ("../partials/footer.ejs") %>
+</body>
+
+</html>

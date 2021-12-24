@@ -21,6 +21,12 @@ function isLoggedIn(req){
 	return req.session.loggedin == true;
 }
 
+function idCheck(req, str){
+	// does str argument match req.session.u_id?
+	// Use this to check before POST requests that affect systems.
+	return req.session.u_id== str;
+}
+
 async function pkFetch (i){
     // pkFetch("mikfh").then((value) => console.log(value));
     // return api.getSystem({id: i, token:t});
@@ -123,7 +129,7 @@ app.use(bodyParser.urlencoded({extended:true}));
      res.redirect("/");
   });
 
-  app.get('/editsys/:alt', (req, res)=>{
+  app.get('/editsys/:alt', (req, res, next)=>{
 	  if (isLoggedIn(req)){
 		  client.query({text: "SELECT * FROM systems WHERE sys_id=$1",values: [`${req.params.alt}`]}, (err, result) => {
 			  if (err) {
@@ -131,9 +137,24 @@ app.use(bodyParser.urlencoded({extended:true}));
 				console.log("Oops.")
 			} else {
 				req.session.chosenSys= result.rows[0];
-				// chosenSys.sys_id, chosenSys.user_id, chosenSys.sys_alias
+				client.query({text: "SELECT alters.name, alters.alt_id, alters.sys_id, systems.sys_alias FROM alters INNER JOIN systems ON systems.sys_id = alters.sys_id WHERE systems.sys_id=$1;",values: [`${req.params.alt}`]}, (err, result) => {
+					if (err) {
+	  				console.log(err.stack);
+	  				console.log("Oops.")
+				} else {
+					// console.table(result.rows);
+					req.session.alters = result.rows;
+					// console.table(req.session.alters);
+					// req.session.alters = [];
+  	              // for (i in (result.rows)){
+  	              //     // (req.session.sys).push(Buffer.from(result.rows[i].sys_alias, 'base64').toString())
+  	              //     (req.session.alters).push({name: Buffer.from(result.rows[i].name, 'base64').toString(), id: result.rows[i].sys_id, sys_name: Buffer.from(result.rows[i].sys_alias, 'base64').toString()})
+  	              // }
+				  res.render(`pages/edit_sys`, { session: req.session, splash:splash, alt:req.session.chosenSys, alters: result.rows });
+				}
+				});
 			}
-			res.render(`pages/edit_sys`, { session: req.session, splash:splash, alt:req.session.chosenSys });
+			// res.render(`pages/edit_sys`, { session: req.session, splash:splash, alt:req.session.chosenSys });
 		  });
 	  } else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash });}
 	  // res.render(`pages/edit_sys`, { session: req.session, splash:splash, alt:req.params.alt });
@@ -198,7 +219,7 @@ var sysArr;
 	              req.session.alters = [];
 	              for (i in (result.rows)){
 	                  // (req.session.sys).push(Buffer.from(result.rows[i].sys_alias, 'base64').toString())
-	                  (req.session.alters).push({name: Buffer.from(result.rows[i].name, 'base64').toString(), id: result.rows[i].sys_id})
+	                  (req.session.alters).push({name: Buffer.from(result.rows[i].name, 'base64').toString(), id: result.rows[i].sys_id, a_id: result.rows[i].alt_id})
 	              }
 	          }
 			  // console.table(req.session.sys);
@@ -209,6 +230,24 @@ var sysArr;
         res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash });
     }
     splash=null;
+  });
+
+  app.get("/alter/:id", (req, res, next)=>{
+
+	 if (isLoggedIn(req)){
+		 client.query({text: "SELECT alters.name, alters.alt_id, alters.sys_id, systems.sys_alias FROM alters INNER JOIN systems ON systems.sys_id = alters.sys_id WHERE alters.alt_id=$1",values: [`${req.params.id}`]}, (err, result) => {
+			 if (err) {
+			   console.log(err.stack);
+			   console.log("Oops.")
+		   } else {
+			   req.session.chosenAlter = result.rows[0];
+		   }
+		   // console.table(req.session.sys);
+		   res.render(`pages/alter`, { session: req.session, splash:splash });
+		 });
+	 } else {
+		 res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash });
+	 }
   });
 
 

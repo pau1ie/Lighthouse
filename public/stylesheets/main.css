@@ -17,6 +17,15 @@ form{
     text-align: center;
 }
 
+nav{
+    width: 100%;
+}
+nav ul li, footer ul li {
+    display: inline-block;
+    margin: auto calc(2em);
+}
+
+
 /* IDs */
 #wrapper{
     width: 50vw;
@@ -45,4 +54,17 @@ form{
 .warningbutton:hover{
     padding: calc(1em) calc(2em);
     background: red;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, calc(5em));
+  grid-auto-rows: calc(5em);
+}
+.grid > div {
+    /* border: 1px solid black; */
+    text-align: center;
+    display: table-cell;
+    vertical-align: middle;
+    padding: calc(1em);
 }
