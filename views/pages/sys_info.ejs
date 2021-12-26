@@ -16,9 +16,9 @@
             <p><%= Buffer.from(session.chosenSys.sys_alias, 'base64').toString() %> has <%= alterArr.length %> <% if (alterArr.length == 1){ %>member<% } else { %>members<% } %>.</p>
             <% if (alterArr.length > 0){ %>
             <p>Members:</p>
-            <div class="grid">
+            <div class="grid" style="grid-gap:1em;">
                 <% for ( i in alterArr) { %>
-                    <div><a href="/alter/<%= alterArr[i].a_id %>"><%= alterArr[i].name %></a></div>
+                    <div style="background: rgb(<%= Math.floor(Math.random() * (225 - 175 + 1)) + 175; %>,<%= Math.floor(Math.random() * (225 - 175 + 1)) + 175; %>,<%= Math.floor(Math.random() * (225 - 175 + 1)) + 175; %>);"><a href="/alter/<%= alterArr[i].a_id %>"><%= alterArr[i].name %></a></div>
                 <% } %>
             </div>
             <% } %>

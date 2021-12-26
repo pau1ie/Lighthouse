@@ -260,9 +260,17 @@ var sysArr;
   });
 
   app.get('/journal/:id', (req, res)=>{
-
+	  console.table(req.session.chosenAlter);
 	 if (isLoggedIn(req)){
-		res.render(`pages/journal`, { session: req.session, splash:splash });
+		 if (req.session.chosenAlter == null){
+			// redirect back to systems.
+			splash="For safety's sake, you've been redirected back to the systems screen. This is to keep other alters from easily reading other alters' journals.";
+			res.redirect("/system");
+		} else {
+			req.session.chosenAlter = null;
+			res.render(`pages/journal`, { session: req.session, splash:splash });
+		}
+
 		splash=null;
 	 } else {
 		 res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash });

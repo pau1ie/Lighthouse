@@ -25,6 +25,9 @@ nav ul li, footer ul li {
     display: inline-block;
     margin: auto calc(2em);
 }
+textarea{
+    resize: none;
+}
 
 
 /* IDs */
@@ -69,15 +72,21 @@ nav ul li, footer ul li {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(5, calc(5em));
-  grid-auto-rows: calc(5em);
+  grid-template-columns: repeat(5, auto);
+  grid-template-rows: auto;
+  margin-bottom: calc(3em);
 }
 .grid > div {
     /* border: 1px solid black; */
+    /* font-size: .5vw; */
     text-align: center;
     display: table-cell;
-    vertical-align: middle;
     padding: calc(1em);
+    border-radius: 15px;
+}
+.grid > div a {
+    text-decoration: none;
+    color: black;
 }
 .vtinyimg{
     width: calc(2em);

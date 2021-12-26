@@ -13,6 +13,14 @@
                 <p class="splash"><%- splash %></p>
             <% } %>
             <h2>Journal</h2>
+            <p class="splash"><strong>Note:</strong> For safety and privacy, refreshing/reloading will redirect you back to the system screen. This is to keep other alters from easily reading other alters' journals.</p>
+            <form method="post">
+                <h3>Create Journal Entry</h3>
+                <label for="title">Journal title</label><br/>
+                <input type="text" name="title" autocomplete="off"><br/>
+                <label for="body">Journal Body</label><br/>
+                <textarea name="body" autocomplete="off" cols="60" rows="15"></textarea>
+            </form>
         </section>
     </div>
     <%- include ("../partials/footer.ejs") %>
