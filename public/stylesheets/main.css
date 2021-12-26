@@ -8,7 +8,9 @@
 html{
     background: ghostwhite;
     overflow-y: scroll;
-    margin-bottom: 2em;
+}
+body{
+    padding-bottom: 50em;
 }
 
 *{
@@ -51,15 +53,12 @@ nav{
 }
 
 
-nav a, nav div {
+.navel {
     display: inline-block;
     margin: auto calc(2em);
     text-decoration: none;
     transition: 1s;
     vertical-align: middle;
-}
-
-nav a, nav button{
     background: var(--col2);
     padding: 1em;
     border-radius: 0px;
@@ -67,7 +66,7 @@ nav a, nav button{
     border: 0;
 }
 
-nav a:hover, footer a:hover {
+.navel:hover {
     background: var(--col3);
     border-radius: 20px;
     text-decoration: none;
@@ -98,15 +97,23 @@ li {
     left: 1vh;
 } */
 
+
 #wrapper{
     width: 50vw;
     /* border: 1px solid black; */
     height: auto;
+    min-height: 10vh;
     padding: calc(2em);
     margin: 0 auto;
     position: relative;
     top: 10vh;
     max-height: 80vh;
+}
+
+#wrapper::after{
+  content: "";
+  clear: both;
+  display: table;
 }
 
 #blogpopup{
@@ -115,6 +122,11 @@ li {
     width: 25vw;
     z-index: 4;
     position: absolute;
+}
+
+#logo a{
+    color: white;
+    text-decoration: none;
 }
 
 
@@ -201,4 +213,24 @@ li {
 
 .deletebtn {
     background: rgb(190, 110, 110);
+}
+
+@media only screen and (max-width: 600px) {
+  nav a, nav button {
+      font-size: 60%;
+  }
+  nav{
+      padding: 1%;
+  }
+  #wrapper{
+      top: 7vh;
+      /* background: lightblue; */
+      overflow-wrap: break-word;
+  }
+  #logoname{
+      display: none;
+  }
+  #logo img{
+      width:10vw;
+  }
 }
