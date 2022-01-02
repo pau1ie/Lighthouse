@@ -177,6 +177,11 @@ app.use(bodyParser.urlencoded({extended:true}));
 	  // res.render(`pages/edit_sys`, { session: req.session, splash:splash, alt:req.params.alt });
   });
 
+  app.get('/clearalter', (req, res, next)=>{
+	  req.session.journalUser= null;
+	  res.render(`pages/system`, { session: req.session, splash:splash, sysArr: req.session.sys });
+  });
+
 var sysArr;
   app.get('/system', (req, res, next) => {
     if (isLoggedIn(req)){
@@ -260,16 +265,26 @@ var sysArr;
   });
 
   app.get('/journal/:id', (req, res)=>{
-	  // console.table(req.session.chosenAlter);
 	 if (isLoggedIn(req)){
-		 if (req.session.chosenAlter == null){
-			// redirect back to systems.
-			splash="For safety's sake, you've been redirected back to the systems screen. This is to keep other alters from easily reading other alters' journals.";
-			res.redirect("/system");
+		 if (req.session.chosenAlter.alt_id == req.params.id){
+			// grab their journal.
+			client.query({text: "SELECT * FROM posts WHERE j_id=$1 ORDER BY created_on DESC;",values: [`${req.session.altJournal[0].j_id}`]}, (err, result) => {
+ 			   if (err) {
+ 				  console.log(err.stack);
+ 				  console.log("Oops.")
+ 			  } else {
+ 				  req.session.journalPosts = result.rows;
+				  for (i in req.session.journalPosts){
+					  req.session.journalPosts[i].body= decryptWithAES(req.session.journalPosts[i].body);
+					  req.session.journalPosts[i].title= decryptWithAES(req.session.journalPosts[i].title);
+				  }
+				  res.render(`pages/journal`, { session: req.session, splash:splash });
+ 			  }
+		  });
 		} else {
-			req.session.chosenAlter = null;
-			res.render(`pages/journal`, { session: req.session, splash:splash });
+			res.redirect("/system");
 		}
+		// res.render(`pages/journal`, { session: req.session, splash:splash });
 
 		splash=null;
 	 } else {
@@ -286,6 +301,21 @@ var sysArr;
 
 
 	*/
+
+	app.post("/journal/:id", (req, res)=>{
+		if (isLoggedIn(req) && req.session.journalUser == req.params.id){
+			// session.altJournal[0].j_id
+			client.query({text: "INSERT INTO posts (j_id, created_on, body, title) VALUES ($1, $2, $3, $4);",values: [`${req.session.altJournal[0].j_id}`, `${new Date().toISOString().slice(0, 19).replace('T', ' ')}`, `${encryptWithAES(req.body.j_body)}`, `${encryptWithAES(req.body.j_title)}`]}, (err, result) => {
+ 			   if (err) {
+ 				  console.log(err.stack);
+ 				  console.log("Oops.")
+ 			  } else {
+				  res.redirect(`/journal/${req.params.id}`);
+ 			  }
+
+		  });
+		}
+	});
 
 	app.post("/alter/:id", function(req, res){
 			/*
@@ -319,6 +349,7 @@ var sysArr;
 						// splash=`<strong>All set!</strong> Journal made.`;
 						// res.redirect(`/alter/${req.params.id}`);
 					if (result.rows[0].password == `'${CryptoJS.SHA3(req.body.logPass)}'`){
+						req.session.journalUser= req.params.id;
 						res.redirect(`/journal/${req.params.id}`);
 					} else {
 						splash=`<strong>No, not quite...</strong> That's not the right password.`;

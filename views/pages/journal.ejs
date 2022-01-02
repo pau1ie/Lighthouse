@@ -12,15 +12,40 @@
             <% if (typeof splash == 'string'){  %>
                 <p class="splash"><%- splash %></p>
             <% } %>
-            <h2>Journal</h2>
-            <p class="splash"><strong>Note:</strong> For safety and privacy, refreshing/reloading will redirect you back to the system screen. This is to keep other alters from easily reading other alters' journals.</p>
+            <p><a href="/clearalter">Go back to the System page</a></p>
+            <h2><%- Buffer.from(session.chosenAlter.name, 'base64').toString() %>'s Journal</h2>
+            <sub>System: <%- Buffer.from(session.chosenAlter.sys_alias, 'base64').toString() %></sub>
             <form method="post">
                 <h3>Create Journal Entry</h3>
-                <label for="title">Journal title</label><br/>
-                <input type="text" name="title" autocomplete="off"><br/>
-                <label for="body">Journal Body</label><br/>
-                <textarea name="body" autocomplete="off" cols="60" rows="15"></textarea>
+                <label for="j_title">Journal title</label><br/>
+                <input type="text" name="j_title" autocomplete="off"><br/>
+                <label for="j_body">Journal Body</label><br/>
+                <textarea name="j_body" autocomplete="off" cols="60" rows="15"></textarea><br/>
+                <input type="submit" name="submit" value="Write post">
+                <input type="reset" name="reset" value="Start Over">
             </form>
+        </section>
+        <section>
+            <!--
+            journalPosts: [
+              {
+                p_id: uuid,
+                j_id: uuid,
+                created_on: timestamp,
+                title: AES-encrypted string,
+                body: AES-encrypted string
+              }
+            ]
+         -->
+            <section>
+            <% for (i in session.journalPosts) { %>
+                <article>
+                <h2><%= session.journalPosts[i].title %></h2>
+                <p><sub>Created on/around <%= (session.journalPosts[i].created_on).toLocaleString() %></sub></p>
+                <%= session.journalPosts[i].body %>
+            </article>
+            <% } %>
+        </section>
         </section>
     </div>
     <%- include ("../partials/footer.ejs") %>
