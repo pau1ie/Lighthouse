@@ -12,8 +12,14 @@
             <% if (typeof splash == 'string'){  %>
                 <p class="splash"><%- splash %></p>
             <% } %>
-            <h2>Edit</h2>
-            <p>Editing post.</p>
+            <h2>Edit <%- session.jPost.title %></h2>
+            <form method="post">
+                <label for="jTitle">Post title</label><br/>
+                <input type="text" name="jTitle" value="<%- session.jPost.title %>"><br/>
+                <label for="jBody">Post Body</label><br/>
+                <textarea name="jBody" autocomplete="off" cols="60" rows="15"><%- session.jPost.body %></textarea><br/>
+                <input type="submit" value="Edit Post"> <input type="reset" value="Revert changes">
+            </form>
         </section>
     </div>
     <%- include ("../partials/footer.ejs") %>

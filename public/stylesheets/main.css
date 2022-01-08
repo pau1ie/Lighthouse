@@ -84,6 +84,7 @@ article:last-child{
 textarea{
     resize: none;
     white-space: pre-wrap;
+    padding: calc(1em);
 }
 
 p{

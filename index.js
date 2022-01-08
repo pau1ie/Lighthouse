@@ -295,11 +295,46 @@ var sysArr;
   });
 
   app.get('/journal/:id/delete', (req, res)=>{
-	  res.render(`pages/delete_post`, { session: req.session, splash:splash });
+	  if (isLoggedIn(req)){
+		  client.query({text: "SELECT * FROM posts WHERE p_id=$1;",values: [`${req.params.id}`]}, (err, result) => {
+			 if (err) {
+				console.log(err.stack);
+				console.log("Oops.")
+			} else {
+				// console.log(result.rows[0]);
+				req.session.jPost= result.rows[0];
+				req.session.jPost.body= decryptWithAES(req.session.jPost.body);
+				req.session.jPost.title= decryptWithAES(req.session.jPost.title);
+				// console.log(req.session.jPost);
+				res.render(`pages/delete_post`, { session: req.session, splash:splash });
+			}
+		});
+	  } else {
+		  res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash });
+	  }
+
   });
 
   app.get('/journal/:id/edit', (req, res)=>{
-	  res.render(`pages/edit_post`, { session: req.session, splash:splash });
+	  if (isLoggedIn(req)){
+		  client.query({text: "SELECT * FROM posts WHERE p_id=$1;",values: [`${req.params.id}`]}, (err, result) => {
+			 if (err) {
+				console.log(err.stack);
+				console.log("Oops.")
+			} else {
+				// console.log(result.rows[0]);
+				req.session.jPost= result.rows[0];
+				req.session.jPost.body= decryptWithAES(req.session.jPost.body);
+				req.session.jPost.title= decryptWithAES(req.session.jPost.title);
+				// console.log(req.session.jPost);
+				res.render(`pages/edit_post`, { session: req.session, splash:splash });
+			}
+		});
+	  } else {
+		  res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash });
+	  }
+
+
   });
 
 	/*
@@ -311,6 +346,39 @@ var sysArr;
 
 
 	*/
+
+	app.post('/journal/:id/delete', (req, res)=>{
+		if (isLoggedIn(req)){
+			client.query({text: "DELETE FROM posts WHERE p_id=$1; ",values: [`${req.params.id}`]}, (err, result) => {
+ 			   if (err) {
+ 				  console.log(err.stack);
+ 				  console.log("Oops.")
+ 			  } else {
+				  req.session.jPost= null;
+				  res.redirect(`/journal/${req.session.chosenAlter.alt_id}`);
+			  }
+		  });
+		} else {
+			res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash });
+		}
+	});
+
+	app.post('/journal/:id/edit', (req, res)=>{
+		if (isLoggedIn(req)){
+			client.query({text: "UPDATE posts SET title=$1, body=$2 WHERE p_id=$3; ",values: [`${encryptWithAES(req.body.jTitle)}`, `${encryptWithAES(req.body.jBody)}`, `${req.params.id}`]}, (err, result) => {
+ 			   if (err) {
+ 				  console.log(err.stack);
+ 				  console.log("Oops.")
+ 			  } else {
+				  req.session.jPost= null;
+				  res.redirect(`/journal/${req.session.chosenAlter.alt_id}`);
+ 			  }
+
+		  });
+		} else {
+			res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash });
+		}
+	});
 
 	app.post("/journal/:id", (req, res)=>{
 		if (isLoggedIn(req)){
@@ -324,6 +392,8 @@ var sysArr;
  			  }
 
 		  });
+		} else {
+			res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash });
 		}
 	});
 
