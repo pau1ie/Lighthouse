@@ -11,10 +11,10 @@
             <% } %>
             <h2>Your System</h2>
             <ul>
-            <% for ( i in sysArr) { %>
-                <li><a href="/system/<%= sysArr[i].id %>"><%= sysArr[i].name %></a> &emsp;&emsp;&emsp;&emsp;<a href="/deletesys/<%= sysArr[i].id %>" name="<%= sysArr[i].id %>" class="deletebtn">Delete</a>&emsp;<a href="/editsys/<%= sysArr[i].id %>" name="<%= sysArr[i].id %>" class="editbtn">Edit</a></li>
-                <!-- <li><%= sysArr[i].name %> <form method="post"><input type="submit" class="edit" name="e-<%= sysArr[i] %>" value="Edit"> <input type="submit" class="delete" name="d-<%= sysArr[i].id %>" value="Delete"></form></li> -->
-                <!-- <li><%= sysArr[i] %> <button name="edit-<%= sysArr[i] %>">Edit</button> <button name="del-<%= sysArr[i] %>">Delete</button></li> -->
+            <% for ( i in session.sys ) { %>
+                <li><a href="/system/<%= session.sys[i].id %>"><%= session.sys[i].name %></a> &emsp;&emsp;&emsp;&emsp;<a href="/deletesys/<%= session.sys[i].id %>" name="<%= session.sys[i].id %>" class="deletebtn">Delete</a>&emsp;<a href="/editsys/<%= session.sys[i].id %>" name="<%= session.sys[i].id %>" class="editbtn">Edit</a></li>
+                <!-- <li><%= session.sys[i].name %> <form method="post"><input type="submit" class="edit" name="e-<%= session.sys[i] %>" value="Edit"> <input type="submit" class="delete" name="d-<%= session.sys[i].id %>" value="Delete"></form></li> -->
+                <!-- <li><%= session.sys[i] %> <button name="edit-<%= session.sys[i] %>">Edit</button> <button name="del-<%= session.sys[i] %>">Delete</button></li> -->
             <% } %>
         </ui>
             <p>Lighthouse supports having multiple systems for polyfragmented DID, or anyone who might need it.</p>
@@ -23,12 +23,33 @@
             <form method="post" class="toggle" style="display: none;" aria-hidden="true" id="toggle">
                 <label for="sysname">System Alias</label>
                 <input name="sysname" type="text" autocomplete="off" placeholder="Alias">
-                <input type="submit" value="Create System">
+                <input type="submit" name="create" value="Create System">
             </form>
             <!-- <a href="/system-findpk">Import Public members from PluralKit</a> -->
             <hr/>
             <section>
                 <h2>Communal Journal</h2>
+                <form method="post">
+                    <label for="cTitle">Post Title</label><br/>
+                    <input type="text" name="cTitle" autocomplete="off" required><br/>
+                    <textarea name="cBody" autocomplete="off" cols="60" rows="15" required></textarea><br/>
+                    <input type="submit" name="post" value="Write post">
+                    <input type="reset" name="reset" value="Start Over">
+                </form>
+                <hr>
+                <% for (i in session.cPosts) { %>
+                    <article>
+                    <h2><%= session.cPosts[i].title %></h2>
+                    <p><sub>Posted <%= (session.cPosts[i].date).toLocaleString(lang, { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }) %></sub></p>
+                    <% var bodyArr= (session.cPosts[i].body).replace(/\r/gi, '').split("\n").filter(function() { return true; });
+                        for (j in bodyArr){
+                            if (bodyArr[j] !== ''){ %>
+                                <p><%- bodyArr[j] %></p>
+                            <% }
+                         }%>
+                         <p><a href="/comm/<%- session.cPosts[i].id %>/edit">Edit</a> <a href="/comm/<%- session.cPosts[i].id %>/delete">Delete</a></p>
+                </article>
+                <% } %>
             </section>
         </div>
         <%- include ("../partials/footer.ejs") %>

@@ -191,13 +191,28 @@ var sysArr;
 	              console.log("Oops.")
 	          } else {
 	              req.session.sys = [];
+
 	              for (i in (result.rows)){
 	                  // (req.session.sys).push(Buffer.from(result.rows[i].sys_alias, 'base64').toString())
 	                  (req.session.sys).push({name: Buffer.from(result.rows[i].sys_alias, 'base64').toString(), id: result.rows[i].sys_id})
 	              }
 	          }
-			  // console.table(req.session.sys);
-	          res.render(`pages/system`, { session: req.session, splash:splash, sysArr: req.session.sys });
+				  client.query({text: "SELECT * FROM comm_posts WHERE u_id=$1 ORDER BY created_on DESC;",values: [`${req.session.u_id}`]}, (err, cresult) => {
+	  	            if (err) {
+	  	              console.log(err.stack);
+	  	              console.log("Oops.")
+	  	          } else {
+	  	              req.session.cPosts = [];
+	  	              for (i in (cresult.rows)){
+	  	                  // (req.session.cPosts).push({name: Buffer.from(cresult.rows[i].sys_alias, 'base64').toString(), id: cresult.rows[i].sys_id})
+						  (req.session.cPosts).push({date: cresult.rows[i].created_on, title: decryptWithAES(cresult.rows[i].title), body: decryptWithAES(cresult.rows[i].body), id: cresult.rows[i].id});
+	  	              }
+					  res.render(`pages/system`, { session: req.session, splash:splash, sysArr: req.session.sys, lang:req.acceptsLanguages()[0] });
+	  	          }
+	  			  // console.table(req.session.sys);
+
+	  	        });
+
 	        });
 
     } else {
@@ -337,6 +352,49 @@ var sysArr;
 
   });
 
+  app.get('/comm/:id/edit', (req, res)=>{
+	if (isLoggedIn(req)){
+		client.query({text: "SELECT * FROM comm_posts WHERE id=$1;",values: [`${req.params.id}`]}, (err, result) => {
+		   if (err) {
+			  console.log(err.stack);
+			  console.log("Oops.")
+		  } else {
+			  // console.log(result.rows[0]);
+			  req.session.jPost= result.rows[0];
+			  req.session.jPost.body= decryptWithAES(req.session.jPost.body);
+			  req.session.jPost.title= decryptWithAES(req.session.jPost.title);
+			  // console.log(req.session.jPost);
+			  res.render(`pages/edit_cpost`, { session: req.session, splash:splash });
+		  }
+	  });
+	} else {
+		res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash });
+	}
+
+
+  });
+
+  app.get('/comm/:id/delete', (req, res)=>{
+	if (isLoggedIn(req)){
+		client.query({text: "SELECT * FROM comm_posts WHERE id=$1;",values: [`${req.params.id}`]}, (err, result) => {
+		   if (err) {
+			  console.log(err.stack);
+			  console.log("Oops.")
+		  } else {
+			  // console.log(result.rows[0]);
+			  req.session.jPost= result.rows[0];
+			  req.session.jPost.body= decryptWithAES(req.session.jPost.body);
+			  req.session.jPost.title= decryptWithAES(req.session.jPost.title);
+			  // console.log(req.session.jPost);
+			  res.render(`pages/delete_cpost`, { session: req.session, splash:splash });
+		  }
+	  });
+	} else {
+		res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash });
+	}
+
+  });
+
 	/*
 
 
@@ -346,6 +404,39 @@ var sysArr;
 
 
 	*/
+
+	app.post('/comm/:id/delete', (req, res)=>{
+		if (isLoggedIn(req)){
+			client.query({text: "DELETE FROM comm_posts WHERE id=$1; ",values: [`${req.params.id}`]}, (err, result) => {
+			   if (err) {
+				  console.log(err.stack);
+				  console.log("Oops.")
+			  } else {
+				  req.session.jPost= null;
+				  res.redirect(`/system`);
+			  }
+		  });
+		} else {
+			res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash });
+		}
+	});
+
+	app.post('/comm/:id/edit', (req, res)=>{
+		if (isLoggedIn(req)){
+			client.query({text: "UPDATE comm_posts SET title=$1, body=$2 WHERE id=$3; ",values: [`${encryptWithAES(req.body.jTitle)}`, `${encryptWithAES(req.body.jBody)}`, `${req.params.id}`]}, (err, result) => {
+			   if (err) {
+				  console.log(err.stack);
+				  console.log("Oops.")
+			  } else {
+				  req.session.jPost= null;
+				  res.redirect(`/system`);
+			  }
+
+		  });
+		} else {
+			res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash });
+		}
+	});
 
 	app.post('/journal/:id/delete', (req, res)=>{
 		if (isLoggedIn(req)){
@@ -488,6 +579,17 @@ var sysArr;
 				  }
 			  }
 		  });
+	  } else {
+		  // Comm journal.
+		  // id | u_id | created_on | title | body
+		  client.query({text: "INSERT INTO comm_posts (u_id, created_on, title, body) VALUES ($1, $2, $3, $4)",values: [`${req.session.u_id}`, `${new Date().toLocaleString("en-US", { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone })}`, `${encryptWithAES(req.body.cTitle)}`, `${encryptWithAES(req.body.cBody)}`]}, (err, result) => {
+			  if (err) {
+				console.log(err.stack);
+				console.log("Oops.")
+			} else {
+				res.redirect("/system");
+			}
+		});
 	  }
   });
 
