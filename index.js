@@ -364,7 +364,7 @@ var sysArr;
 			  req.session.jPost.body= decryptWithAES(req.session.jPost.body);
 			  req.session.jPost.title= decryptWithAES(req.session.jPost.title);
 			  // console.log(req.session.jPost);
-			  res.render(`pages/edit_cpost`, { session: req.session, splash:splash });
+			  res.render(`pages/edit_post`, { session: req.session, splash:splash });
 		  }
 	  });
 	} else {
@@ -386,7 +386,7 @@ var sysArr;
 			  req.session.jPost.body= decryptWithAES(req.session.jPost.body);
 			  req.session.jPost.title= decryptWithAES(req.session.jPost.title);
 			  // console.log(req.session.jPost);
-			  res.render(`pages/delete_cpost`, { session: req.session, splash:splash });
+			  res.render(`pages/delete_post`, { session: req.session, splash:splash });
 		  }
 	  });
 	} else {
