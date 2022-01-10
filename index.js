@@ -712,7 +712,7 @@ var sysArr;
 					  transporter.sendMail({
 						  from: '"Dee Deyes" <dee_deyes@writelighthouse.com>', // sender address
 						  // to: "dannyisyelling@gmail.com, dekuelegy@gmail.com", // list of receivers
-						  to: "dannyisyelling@gmail.com",
+						  to: req.body.email,
 						  subject: "Welcome to Lighthouse!", // Subject line
 						  text: "Hi there, " + req.body.username + ". Thanks for signing up to Lighthouse, a journal app designed for systems! I hope it can help you internally communicate effectively. Check out the information page to get started! If you lose your password and the feature to reset it hasn't been implemented yet, send an email to this address and I will fix for you as soon as possible! If this account was made in error, reply to this email and the account will deleted shortly. Thanks! -Dee", // plain text body
 						  html: "<p>Hi there, <b>" + req.body.username + "</b>. Thanks for signing up to Lighthouse, a journal app! I hope it can help you internally communicate effectively. Check out the information page to get started!</p> <p>If you lose your password and the feature to reset it hasn't been implemented yet, send an email to this address and I will fix for you as soon as possible! If this account was made in error, reply to this email and the account will deleted shortly. Thanks!</p> <p>-Dee</p>", // html body
