@@ -6,9 +6,9 @@
     <body>
         <%- include ("../partials/nav.ejs") %>
         <div id="wrapper">
-            <% if (typeof splash == 'string'){  %>
-                <p class="splash"><%- splash %></p>
-            <% } %>
+          <% if (typeof splash == 'string'){  %>
+              <p class="splash"><%- splash %></p>
+          <% } %>
             <h2>Your System</h2>
             <ul>
             <% for ( i in session.sys ) { %>
@@ -68,5 +68,12 @@
                 }
             }
         </script>
+        <!-- <script>
+            ClassicEditor
+                .create( document.querySelector( '#editor' ) )
+                .catch( error => {
+                    console.error( error );
+                } );
+        </script> -->
     </body>
 </html>

@@ -12,17 +12,12 @@
             <% if (typeof splash == 'string'){  %>
                 <p class="splash"><%- splash %></p>
             <% } %>
-            <h2>Delete <%- session.jPost.title %>?</h2>
+            <h2>Delete <%= Buffer.from(session.chosenAlter.name, 'base64').toString() %>?</h2>
             <h3 class="warningtext">Warning: This cannot be undone!</h3>
-            <p>This post cannot be recovered. Are you absolutely sure this is what you want to do? Press the "delete" button if so.</p>
+            <p><%= Buffer.from(session.chosenAlter.name, 'base64').toString() %>'s journal and posts will be permanently deleted. Are you absolutely sure this is what you want to do? Press the "delete" button if so.</p>
             <form method="post">
-                <input class="warningbutton" type="submit" value="Delete" name="delete">
+                <input class="warningbutton" type="submit" value="Delete <%= Buffer.from(session.chosenAlter.name, 'base64').toString() %> forever" name="delete">
             </form>
-            <hr/>
-            <h3>Your post:</h3>
-            <pre>
-                <%- session.jPost.body %>
-            </pre>
         </section>
     </div>
     <%- include ("../partials/footer.ejs") %>

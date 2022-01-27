@@ -13,7 +13,18 @@
         <% } %>
         <section>
             <h2><%= Buffer.from(session.chosenAlter.name, 'base64').toString() %>'s page</h2>
-            <p><%= Buffer.from(session.chosenAlter.name, 'base64').toString() %> is a part of <%= Buffer.from(session.chosenAlter.sys_alias, 'base64').toString() %>.</p>
+            <!-- <p><%= Buffer.from(session.chosenAlter.name, 'base64').toString() %> is a part of <%= Buffer.from(session.chosenAlter.sys_alias, 'base64').toString() %>.</p> -->
+            <form method="post">
+              <input type="text" name="altname" value="<%= Buffer.from(session.chosenAlter.name, 'base64').toString() %>" style="text-align:center;"> is a part of <select name="alterSys" style="text-align:center;"><% for (i in session.sysList){ %>
+                <% if (session.chosenAlter.sys_alias == session.sysList[i].sys_alias){ %>
+                  <option value="<%= session.sysList[i].sys_id %>" selected><%= Buffer.from(session.sysList[i].sys_alias, 'base64').toString() %></option>
+                <% } else { %>
+                  <option value="<%= session.sysList[i].sys_id %>"><%= Buffer.from(session.sysList[i].sys_alias, 'base64').toString() %></option>
+                <% } %>
+                <% } %>
+              </select>.
+              <input type="submit" name="modify" value="Update">
+            </form>
             <% if (session.altJournal.length > 0){ %>
                 <!-- <p><%= session.altJournal[0].is_private %></p> -->
                 <div id="blogpopup" style="display:none;">
@@ -56,6 +67,7 @@
                     <p id="passhint" style="display: none;"><strong>Keep your password somewhere safe.</strong> If you forget, it won't be able to be reset until a future date.</p>
                 </form>
             <% } %>
+            <a href="/alter/<%= session.chosenAlter.alt_id %>/delete" class="deletebtn">Delete</a>
         </section>
     </div>
     <%- include ("../partials/footer.ejs") %>

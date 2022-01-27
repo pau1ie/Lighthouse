@@ -288,8 +288,16 @@ var sysArr;
 			  } else {
 				  req.session.altJournal = nresult.rows;
 			  }
-			 // console.log(req.session.altJournal[0].j_id);
-		   res.render(`pages/alter`, { session: req.session, splash:splash });
+
+				client.query({text: "SELECT * FROM systems WHERE user_id=$1;",values: [`${req.session.u_id}`]}, (err, result) => {
+	 			 if (err) {
+	 			   console.log(err.stack);
+	 			   console.log("Oops.")
+	 		   } else {
+	 			   req.session.sysList = result.rows;
+	 		   }
+				  res.render(`pages/alter`, { session: req.session, splash:splash });
+			 });
 		   });
 		 });
 	 } else {
@@ -412,6 +420,25 @@ var sysArr;
 
   });
 
+	app.get('/alter/:id/delete', (req, res)=>{
+		req.session.chosenAlter= null;
+		if (isLoggedIn(req)){
+			client.query({text: "SELECT * FROM alters WHERE alt_id=$1;",values: [`${req.params.id}`]}, (err, result) => {
+				 if (err) {
+					console.log(err.stack);
+					console.log("Oops.")
+				} else {
+					req.session.chosenAlter= result.rows[0];
+				}
+				// console.table(req.session.chosenAlter);
+				res.render(`pages/delete_alter`, { session: req.session, splash:splash});
+			});
+		} else {
+			res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash });
+		}
+
+	});
+
 	/*
 
 
@@ -421,6 +448,37 @@ var sysArr;
 
 
 	*/
+
+	app.post('/alter/:id/delete', (req, res)=>{
+		if (isLoggedIn(req)){
+			client.query({text: "DELETE FROM posts WHERE p_id=$1; ",values: [`${req.params.id}`]}, (err, result) => {
+				 if (err) {
+					console.log(err.stack);
+					console.log("Oops.")
+				} else {
+					client.query({text: "DELETE FROM journals WHERE alt_id=$1; ",values: [`${req.params.id}`]}, (err, result) => {
+						 if (err) {
+							console.log(err.stack);
+							console.log("Oops.")
+						} else {
+							client.query({text: "DELETE FROM alters WHERE alt_id=$1; ",values: [`${req.params.id}`]}, (err, result) => {
+								 if (err) {
+									console.log(err.stack);
+									console.log("Oops.")
+								} else {
+									splash=`${Buffer.from(req.session.chosenAlter.name, 'base64').toString()} deleted.`;
+									req.session.chosenAlter= null;
+									res.redirect(`/system`);
+								}
+							});
+						}
+					});
+				}
+			});
+		} else {
+			res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash });
+		}
+	});
 
 	app.post('/comm/:id/delete', (req, res)=>{
 		if (isLoggedIn(req)){
@@ -527,7 +585,18 @@ var sysArr;
 						  res.redirect(`/alter/${req.params.id}`);
 					  }
 				  });
-			  } else {
+			  } else if (req.body.modify){
+					// Edit alter.
+						client.query({text: "UPDATE alters SET sys_id=$1, name=$2 WHERE alt_id=$3;",values: [req.body.alterSys, `'${Buffer.from(req.body.altname).toString('base64')}'`, req.params.id]}, (err, result) => {
+							if (err) {
+							  console.log(err.stack);
+							  console.log("Oops.")
+						  } else {
+							  splash=`<strong>All set!</strong> ${req.body.altname} has been moved.`;
+							  res.redirect(`/alter/${req.params.id}`);
+						  }
+					  });
+				} else {
 				  // Login
 				  client.query({text: "SELECT password FROM journals WHERE alt_id=$1",values: [`${req.params.id}`]}, (err, result) => {
 					  if (err) {
