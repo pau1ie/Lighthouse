@@ -36,17 +36,30 @@
                 <form method="post">
                     <label for="cTitle">Post Title</label><br/>
                     <input type="text" name="cTitle" autocomplete="off" required><br/>
-                    <textarea name="cBody"id="example" autocomplete="off" cols="60" rows="15" required></textarea><br/>
+                    <textarea name="cBody" id="editor" autocomplete="off" cols="60" rows="15" ></textarea><br/>
+                    <!-- <input type="text" name="cBody" id="editor"><br/> -->
                     <input type="submit" name="post" value="Write post">
                     <input type="reset" name="reset" value="Start Over">
                     <!-- <textarea id="example"></textarea> -->
 
-            <script>
-              var editor = new FroalaEditor('#example', {
-                charCounterCount: false,
-                pluginsEnabled: ['align', 'colors', 'emoticons', 'fontAwesome', 'link', 'lists', 'fontFamily']
-              });
-            </script>
+                    <script src="../build/ckeditor.js"></script>
+                    <script>ClassicEditor
+                        .create( document.querySelector( '#editor' ), {
+                        } )
+                        .then( editor => {
+                          window.editor = editor;
+
+
+
+
+                        } )
+                        .catch( error => {
+                          console.error( 'Oops, something went wrong!' );
+                          console.error( 'Please, report the following error on https://github.com/ckeditor/ckeditor5/issues with the build id and the error stack trace:' );
+                          console.warn( 'Build id: c0gefhhqxz8y-2hxzvv2htugp' );
+                          console.error( error );
+                        } );
+                    </script>
                 </form>
                 <hr>
                 <% for (i in session.cPosts) { %>

@@ -798,7 +798,7 @@ var sysArr;
 	});
 
   app.post('/system', function (req, res){
-	  // console.log(req.body);
+	  console.log(req.body);
 	  // console.log(Object.keys(req.body)[0]);
 	  if (req.body.sysname){
 		  client.query({text: "SELECT * FROM systems WHERE sys_alias=$1 AND user_id=$2",values: [`'${Buffer.from(req.body.sysname).toString('base64')}'`, `${req.session.u_id}`]}, (err, result) => {
