@@ -1011,9 +1011,17 @@ var sysArr;
 		   } else {
 			   req.session.loggedin = true;
 			   req.session.username = Buffer.from(result.rows[0].username, 'base64').toString();
-         getCookies(req)['u_id']= result.rows[0].id;
+         // getCookies(req)['u_id']= result.rows[0].id;
 				 // Add to cookies
-				 res.cookie('loggedin', true).cookie('username',  Buffer.from(result.rows[0].username, 'base64').toString()).cookie('u_id', result.rows[0].id);
+         if (req.body.remember){
+           // console.log("Remembering the user.");
+           res.cookie('loggedin', true, { maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('username',  Buffer.from(result.rows[0].username, 'base64').toString(),{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('u_id', result.rows[0].id,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true });
+         } else {
+           // console.log("Let cookies expire at end of session.");
+           res.cookie('loggedin', true, {httpOnly: true }).cookie('username',  Buffer.from(result.rows[0].username, 'base64').toString(),{httpOnly: true }).cookie('u_id', result.rows[0].id,{httpOnly: true });
+         }
+
+         // req.session.cookie.maxAge = (1000 * 60 * 60 * 24 * 7 * 2); //2 weeks
 				// console.log(typeof(getCookies(req)['loggedin']));
 				 // Redirect to index.
 					res.redirect(302, '/');

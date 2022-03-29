@@ -27,9 +27,8 @@
             <section>
               <h2>Inner World Information</h2>
               <% for (i in session.innerWorld){ %>
-                <dt><%= Buffer.from(session.innerWorld[i].key, 'base64').toString() %></dt>
+                <dt><%= Buffer.from(session.innerWorld[i].key, 'base64').toString() %> <a title="Delete entry for <%= Buffer.from(session.innerWorld[i].key, 'base64').toString() %>" href="/inner-world/delete/<%= session.innerWorld[i].id %>" ><i class="fas fa-trash-alt"></i></a></dt>
                 <dd><%= Buffer.from(session.innerWorld[i].value, 'base64').toString() %></dd>
-                <a href="/inner-world/delete/<%= session.innerWorld[i].id %>" ><i class="fas fa-trash-alt"></i></a>
               <% } %>
             </section>
         </div>

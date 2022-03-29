@@ -54,6 +54,7 @@ nav{
 
 nav a{
   font-size: calc(1em);
+  vertical-align: middle;
 }
 
 article{
@@ -273,6 +274,17 @@ footer{
 
 .deletebtn {
     background: rgb(190, 110, 110);
+}
+
+.fa-trash-alt, .fa-pencil{
+  color: grey;
+  transition: .5s;
+}
+.fa-trash-alt:hover{
+  color: red;
+}
+.fa-pencil:hover{
+  color: green;
 }
 
 @media only screen and (max-width: 600px) {
