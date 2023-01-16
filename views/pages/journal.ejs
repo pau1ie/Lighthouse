@@ -57,7 +57,7 @@
                             <p><%- bodyArr[j] %></p>
                         <% }
                      }%>
-            <p><a href="/journal/<%- session.journalPosts[i].p_id %>/edit">Edit</a> <a href="/journal/<%- session.journalPosts[i].p_id %>/delete">Delete</a></p>
+            <p><a href="/journal/<%- session.journalPosts[i].p_id %>/edit" class="editbtn">Edit</a> <a href="/journal/<%- session.journalPosts[i].p_id %>/delete" class="deletebtn">Delete</a></p>
             </article>
             <% } %>
         </section>

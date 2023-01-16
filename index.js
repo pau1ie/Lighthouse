@@ -548,6 +548,24 @@ var sysArr;
 		}
 
 	});
+	
+		app.get('/profile', (req, res, next) => {
+		/* if (isLoggedIn(req)){
+			client.query({text: "SELECT * FROM users WHERE id=$1;", values:[getCookies(req)['u_id']]}, (err, result)=>{
+				if (err){
+					console.log(err.stack);
+					res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+				} else {
+					req.session.sys_rules=result.rows;
+				}
+				res.render(`pages/sys_rules`, { session: req.session, splash:splash,cookies:req.cookies });
+				splash=null;
+			});
+		} else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });} */
+		// console.log(req.cookies);
+		res.render(`pages/profile`, { session: req.session, splash:splash,cookies:req.cookies });
+				splash=null;
+	});
 
 	/*
 
@@ -558,6 +576,70 @@ var sysArr;
 
 
 	*/
+	
+		app.post('/profile', function(req, res){
+		// console.table(req.body);
+		client.query({text: "SELECT * FROM users WHERE id=$1",values: [getCookies(req)['u_id']]}, (err, result) => {
+			if (err) {
+              console.log(err.stack);
+              res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+		  } else {
+			  // console.table(result.rows[0]);
+			  if (getCookies(req)['u_id'] == result.rows[0].id){
+				  // Logged account matches searched account.
+				  console.log("Found a match.");
+				  if (req.body.deleteAcc){
+					 console.log("User is deleting."); 
+					 transporter.sendMail({
+								from: '"Lighthouse" <dee_deyes@writelighthouse.com>', // sender
+								to: Buffer.from(result.rows[0].email, 'base64').toString(),
+								subject: "Account Deletion on Lighthouse", // Subject line
+								text: "Hey, " + Buffer.from(result.rows[0].username, 'base64').toString() + ". This is just a heads up email that you opted to delete your account from Lighthouse. This is an irreversible action. Sorry to see you go! -Dee", // plain text body
+								html: "<p>Hey, <b>" + Buffer.from(result.rows[0].username, 'base64').toString() + "</b>. This is just a heads up email that you opted to delete your account from Lighthouse. This is an <strong>irreversible</strong> action. Sorry to see you go! -Dee", // html body
+							}).then(info => {
+								// console.log({info});
+							}).catch(console.error);
+					 client.query({text: "DELETE FROM inner_worlds WHERE u_id=$1;",values: [getCookies(req)['u_id']]}, (err, result) => {
+					  if (err){
+						  console.log(err.stack);
+						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+					  }
+						  client.query({text: "DELETE FROM sys_rules WHERE u_id=$1;",values: [getCookies(req)['u_id']]}, (err, result) => {
+						  if (err){
+							  console.log(err.stack);
+							  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+						  }
+						  
+						  // Deleting from users will cascade to systems will cascade to alters will cascade to journals will cascade to posts. Hopefully.
+						  client.query({text: "DELETE FROM users WHERE id=$1;",values: [getCookies(req)['u_id']]}, (err, result) => {
+						  if (err){
+							  console.log(err.stack);
+							  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+						  }
+						  // Clear all cookies/session data.
+						     
+						     splash= `Sorry to see you go, ${req.session.username || randomise(['friend', 'buddy'])}. You can remake your account at any time.`;
+							 req.session.destroy();
+							 res.clearCookie('loggedin');
+							 res.clearCookie('username');
+							 res.clearCookie('u_id');
+							 res.clearCookie('cookie1');
+							 res.clearCookie('cookie2');
+							 res.redirect("/");
+							 
+					  });
+						  
+					  });
+				  });
+				  }
+				  
+				  
+			  } else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
+
+		  }
+		});
+	});
+	
 	app.post('/reset/:id', (req, res)=>{
 		// Reset password
 		client.query({text: 'SELECT * FROM users WHERE email_link=$1', values: [`'${req.params.id}'`]}, (err, result)=>{
@@ -602,7 +684,7 @@ var sysArr;
 					client.query({text: 'UPDATE users set email_pin=$1 WHERE email=$2 ', values:[`${req.session.user.email_pin}`,`'${Buffer.from(req.body.email).toString('base64')}'`]}, (err, result)=>{
 						res.render(`pages/forgot_pass2`, { session: req.session, splash:splash,cookies:req.cookies});
 						transporter.sendMail({
-							from: '"Dee Deyes" <dee_deyes@writelighthouse.com>', // sender
+							from: '"Lighthouse" <dee_deyes@writelighthouse.com>', // sender
 							to: Buffer.from(req.session.user.email, 'base64').toString(),
 							subject: "Forgot your password?", // Subject line
 							text: "Hey, " + Buffer.from(req.session.user.username, 'base64').toString() + ". Did you forget your password to Lighthouse? No worries. Follow the link provided and don't forget the PIN in this email! www.writelighthouse.com/reset/" + (req.session.user.email_link).replace(/'/gi, '') + " . PIN: " + req.session.user.email_pin + ". If you didn't request this password change, disregard this email. The PIN will be required to change the password. Thanks! -Dee", // plain text body
@@ -962,7 +1044,7 @@ var sysArr;
             // console.log(res.rows)
             if (result.rows.length > 0){
                 console.log("Already exists.");
-                splash="<strong>Uh oh!</strong> That username or password is already in use. <a href='/login'>Do you need to log in instead?</a>";
+                splash="<strong>Uh oh!</strong> That username or email is already in use. <a href='/login'>Do you need to log in instead?</a>";
                 res.render(`pages/signup`, { session: req.session, splash:splash,cookies:req.cookies });
             } else {
                 // Write to the db
@@ -977,7 +1059,7 @@ var sysArr;
                       res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
                   } else {
 					  transporter.sendMail({
-						  from: '"Dee Deyes" <dee_deyes@writelighthouse.com>', // sender address
+						  from: '"Lighthouse" <dee_deyes@writelighthouse.com>', // sender address
 						  // to: "dannyisyelling@gmail.com, dekuelegy@gmail.com", // list of receivers
 						  to: req.body.email,
 						  subject: "Welcome to Lighthouse!", // Subject line

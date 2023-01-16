@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <%- include ("../partials/header.ejs") %>
+		
+    </head>
+    <body>
+	<div id="pseudofade" style="z-index:-9999998; background: rgba(0,0,0,.75); position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition:0.7s;"></div>
+        <%- include ("../partials/nav.ejs") %>
+        <div id="wrapper">
+			<h1>Edit Your Account</h1>
+				<form method="post" style="margin-top:calc(.5em);">
+				</form>
+			<p>Only account deletion is currently implemented.</p>
+			<h2><span class="material-symbols-outlined">dangerous</span> Danger Zone <span class="material-symbols-outlined">dangerous</span></h2>
+			<h3>Delete Your Account</h3>
+			<p>This is an <strong>irreversible action</strong>. All alters, journals, inner world entries and rules will be deleted with this account.</p>
+			<div id="popup" style="border: 1px solid black; background: ghostwhite; width: 40vw; padding: 1em; z-index:9999998; position: absolute; top: 20vh; display: none;">
+				<h2>Are you sure you want to delete your account?</h2>
+				<p>This cannot be undone, not even by the developer. Everything will be permanently deleted. Are you <em>sure</em> this is what you want to do?</p>
+				<button id="cancelDelete" onclick="warningPopUp()">No, Go Back</button>
+				<form method="post" style="margin-top:calc(.5em);">
+				<input type="submit" id="finalwarning" name="deleteAcc" value="Yes, Delete My Account"></input>
+				</form>
+				
+			</div>
+			<button id="firstwarning" class="warningbutton" onclick="warningPopUp()">Delete Account</button>
+		</div>
+<%- include ("../partials/footer.ejs") %>
+	<script>
+		function warningPopUp(){
+			if (document.querySelector("#popup").style.display == "none"){
+				// Show the popup and background.
+				document.querySelector("#popup").style.display = "block";
+				document.querySelector("#pseudofade").style.zIndex = "9999998";
+				document.querySelector("#pseudofade").style.opacity = 1;
+			} else {
+				// Hide the popup and background.
+				document.querySelector("#popup").style.display = "none";
+				document.querySelector("#pseudofade").style.zIndex = "-9999998";
+				document.querySelector("#pseudofade").style.opacity = 0;
+			}
+		}
+	</script>
+    </body>
+</html>

@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Lobster+Two:wght@700&family=Roboto+Slab:wght@500&display=swap');
 :root{
     --col1: #123859;
     --col2: #9CD9D3;
@@ -15,7 +16,7 @@ body{
 }
 
 *{
-    font-family: sans-serif;
+    font-family: Verdana, Arial,sans-serif;
 }
 
 input{
@@ -37,7 +38,6 @@ form{
     height: auto;
     /* border: 1px solid black; */
     margin: 0 auto;
-    text-align: center;
 }
 
 nav{
@@ -53,8 +53,9 @@ nav{
     z-index: 200;
 }
 
-nav a{
+nav a, nav button{
   font-size: calc(1em);
+  font-weight: 400;
   vertical-align: middle;
 }
 
@@ -98,6 +99,7 @@ p{
 }
 
 h1, h2, h3, h4{
+	font-family: 'Roboto Slab', serif;
     color: var(--col5);
 }
 
@@ -161,27 +163,31 @@ footer{
     text-decoration: none;
 }
 
+#logoname{
+	font-family: 'Lobster Two', cursive;
+}
 
 /* Classes */
 
 .warningtext{
-    font-style: italic;
-    font-weight: bold;
-    color: var(--col4);
+    
 }
 
 .warningbutton{
+	font-style: italic;
+    font-weight: bold;
+    color: var(--col4);
     background: var(--col4);
     color: white;
     border:0;
     padding: calc(1em);
     text-transform: uppercase;
     font-weight: bold;
-    transition: .5s;
+    transition: .25s;
 }
 .warningbutton:hover{
-    padding: calc(1em) calc(2em);
     background: red;
+	color: white;
 }
 
 
@@ -287,23 +293,43 @@ footer{
 .fa-pencil:hover{
   color: green;
 }
+form > label{
+text-align: center;
+}
 
 @media only screen and (max-width: 600px) {
   nav a, nav button {
       font-size: 60%;
   }
+  
   nav{
-      padding: 1%;
+	  width: 100%;
+	  position: fixed;
+	  top: 0;
+	  left: 0;
   }
   #wrapper{
       top: 7vh;
       /* background: lightblue; */
       overflow-wrap: break-word;
+	  width: 85vw;
   }
   #logoname{
       display: none;
   }
   #logo img{
       width:10vw;
+	  margin-bottom: 1vh;
+  }
+  footer{
+	  width: 95%;
+	  position: fixed;
+	  bottom:0;
+	  left: 0;
+	  padding: calc(.5em);
+	  border-radius: 0;
+  }
+  #blogpopup{
+	  min-width: 75vw;
   }
 }
