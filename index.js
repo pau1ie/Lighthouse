@@ -863,6 +863,17 @@ var sysArr;
 							  res.redirect(`/alter/${req.params.id}`);
 						  }
 					  });
+				} else if (req.body.changePass){
+					// Change alter password.
+					client.query({text: "UPDATE journals SET password=$1 WHERE alt_id=$2;",values: [`'${CryptoJS.SHA3(req.body.jPassNew)}'`, req.params.id]}, (err, result) => {
+						if (err) {
+						  console.log(err.stack);
+						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+					  } else {
+						  splash=`<strong>All set!</strong> This journal's password has been reset.`;
+						  res.redirect(`/alter/${req.params.id}`);
+					  }
+				  });
 				} else {
 				  // Login
 				  client.query({text: "SELECT password FROM journals WHERE alt_id=$1",values: [`${req.params.id}`]}, (err, result) => {

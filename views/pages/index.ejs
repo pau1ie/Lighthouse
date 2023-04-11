@@ -14,11 +14,14 @@
         <img src="/img/<%= Math.floor(Math.random() * (10 - 1 + 1)) + 1  %>.png" alt="a journal book" style="display:inline; height: 128px; width: auto;">
             <p>Create private journals for dissociated parts.</p>
             <p>Lighthouse is an app designed specifically for people who are plural to have private and a singular "communal" journal to keep track of day to day life.</p>
-            <p>We're helping around <%= (Math.ceil(userCount / 5) * 5).toLocaleString() %> systems.</p>
+            <!-- <p>We're helping around <%= (Math.ceil(userCount / 5) * 5).toLocaleString() %> systems.</p> -->
+            <p>We're helping  <%= (userCount).toLocaleString() %> systems.</p>
 
         </section>
         <section>
-        <p>Lighthouse was not developed by a medical professional, and is not intended to be a substitute for professional advice, diagnosis, or treatment. Always seek the advice of your mental health professional or other qualified health provider with any questions you may have regarding your condition.</p>
+        <p><span class="material-symbols-outlined">
+            anchor
+            </span> Lighthouse was not developed by a medical professional, and is not intended to be a substitute for professional advice, diagnosis, or treatment. Always seek the advice of your mental health professional or other qualified health provider with any questions you may have regarding your condition.</p>
         </section>
     </div>
     <%- include ("../partials/footer.ejs") %>
