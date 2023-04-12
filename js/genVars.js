@@ -1,2 +1,3 @@
 // See you soon, ...
 var undefinedUser = ['friend.', 'buddy.', "okay?", "now. Don't be a stranger."]
+console.log("General Vars loaded.")
