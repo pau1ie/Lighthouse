@@ -154,6 +154,20 @@ var app = express();
   //   res.send("tagId is set to " + req.params.tagId);
   // });
 
+  app.get('/changelog', (req, res, next) => {
+	
+	client.query({text: "SELECT * FROM changelog ORDER BY log_id DESC LIMIT 50",values: []}, (err, result) => {
+		if (err) {
+		  console.log(err.stack);
+		  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash, cookies:req.cookies });
+	  } else {
+		res.render(`pages/changelog`, { session: req.session, splash:splash, cookies:req.cookies, changes:result.rows, lang:req.acceptsLanguages()[0] });
+		splash=null; 
+	  }
+  });
+
+});
+
   app.get('/about', (req, res, next) => {
       res.render(`pages/about`, { session: req.session, splash:splash, cookies:req.cookies });
       splash=null;
