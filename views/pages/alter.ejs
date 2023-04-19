@@ -35,6 +35,22 @@
 
 <body>
     <%- include ("../partials/nav.ejs") %>
+    <% var journalArr= [
+        {val: '1', c: "Red"}, 
+        {val: '2', c: "Orange"}, 
+        {val: '3', c: "Yellow"}, 
+        {val: '4', c: "Green"}, 
+        {val: '5', c: "Teal"}, 
+        {val: '6', c: "Blue"}, 
+        {val: '7', c: "Purple"}, 
+        {val: '8', c: "Pink"}, 
+        {val: '9', c: "White"}, 
+        {val: '10', c: "Black"}, 
+        {val: '11', c: "Rainbow"}, 
+        {val: '12', c: "Ocean"}, 
+        {val: '13', c: "Space"}, 
+    ]
+    %>
     <div id="wrapper">
         <% if (typeof splash == 'string'){  %>
             <p class="splash"><%- splash %></p>
@@ -75,6 +91,22 @@
                 <% } else { %>
                     <a href="/journal/<%- (session.altJournal[0].alt_id) %>"><img class="pixelart" src="/img/<%- (session.altJournal[0].skin).replace(/'/gi, '') %>.png" width="400px" id="login" alt="<%= Buffer.from(session.chosenAlter.name, 'base64').toString() %>'s Journal."></a>
                 <% } %>
+                <section>
+            <form method="post" name="changejournal">
+                <label for="skin">Change Journal skin:</label>
+                <select name="skin" id="skin">
+                 <% for (i in journalArr) { %>
+                    <% if (parseInt(session.altJournal[0].skin) == parseInt(journalArr[i].val)){ %>
+                        <option value="<%- journalArr[i].val %>"><%- journalArr[i].c %></option>
+                    <% } else { %>
+                        <option value="<%- journalArr[i].val %>"><%- journalArr[i].c %></option>
+                    <% } %>
+                    <% } %>
+                    
+                </select> 
+                <input type="submit" name="newjournalSkin" value="Update Journal Skin">
+                </form>
+        </section>
             <% } else { %>
                 <h2>Uh oh!</h2> <p><%= Buffer.from(session.chosenAlter.name, 'base64').toString() %> has no journal. Make one down below.</p>
                 <form method="post" autocomplete="off">
@@ -104,6 +136,7 @@
             <% } %>
             <a style="margin-top: calc(1em)" href="/alter/<%= session.chosenAlter.alt_id %>/delete" class="deletebtn">Delete</a>
         </section>
+
     </div>
     <%- include ("../partials/footer.ejs") %>
     <script>

@@ -862,7 +862,7 @@ var sysArr;
 						  console.log(err.stack);
 						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash });
 					  } else {
-						  splash=`<strong>All set!</strong> Journal made.`;
+						  splash=`<strong>All set!</strong> Journal created.`;
 						  res.redirect(`/alter/${req.params.id}`);
 					  }
 				  });
@@ -873,7 +873,7 @@ var sysArr;
 							  console.log(err.stack);
 							  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 						  } else {
-							  splash=`<strong>All set!</strong> ${req.body.altname} has been moved.`;
+							  splash=`<strong>All set!</strong> ${req.body.altname}'s information has been updated.`;
 							  res.redirect(`/alter/${req.params.id}`);
 						  }
 					  });
@@ -885,6 +885,17 @@ var sysArr;
 						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 					  } else {
 						  splash=`<strong>All set!</strong> This journal's password has been reset.`;
+						  res.redirect(`/alter/${req.params.id}`);
+					  }
+				  });
+				} else if (req.body.newjournalSkin){
+					// Change journal skin.
+					client.query({text: "UPDATE journals SET skin=$1 WHERE alt_id=$2;",values: [req.body.skin, req.params.id]}, (err, result) => {
+						if (err) {
+						  console.log(err.stack);
+						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+					  } else {
+						  splash=`<strong>All set!</strong> Journal skin updated.`;
 						  res.redirect(`/alter/${req.params.id}`);
 					  }
 				  });
