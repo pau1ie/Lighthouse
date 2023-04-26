@@ -640,7 +640,10 @@ var sysArr;
 						console.log(err.stack);
 					  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 					}
-					
+					req.session.chosenAlter.mood= req.body.mood;
+					req.session.chosenAlter.reason=req.body.reason;
+						splash="Mood updated!";
+						res.redirect(302,`/alter/${req.params.alt}`);
 					});
 			} else {
 				client.query({text: "UPDATE alter_moods SET mood=$2, reason=$3, timestamp=$4 WHERE alt_id=$1;",values: [`${req.params.alt}`, req.body.mood, req.body.reason, `${now.getUTCFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}+${now.getTimezoneOffset()}`]}, (err, result) => {
