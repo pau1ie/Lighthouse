@@ -214,6 +214,7 @@ var app = express();
      res.redirect("/");
   });
 
+
   app.get('/reset/:id', (req, res)=>{
      res.render("pages/new_pass", {session: req.session, splash:splash, cookies:req.cookies});
 		 splash=null;
