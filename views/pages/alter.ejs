@@ -102,7 +102,9 @@ form>span{
             </dt>
         <dd><small><% if (session.chosenAlter.mood) { %>
             Reason: <%- session.chosenAlter.reason %>
-        <% } %><a href="/mood/<%=session.chosenAlter.alt_id %>">Set mood</a></small></dd>
+        <% } %><a href="/mood/<%=session.chosenAlter.alt_id %>">Set mood</a><% if (session.chosenAlter.mood) { %>
+            | <a href="/del-mood/<%=session.chosenAlter.alt_id %>">Clear mood</a>
+        <% } %></small></dd>
             <form method="post" autocomplete="off">
               <input type="text" name="altname" value="<%= Buffer.from(session.chosenAlter.name, 'base64').toString() %>" style="text-align:center;"> is a part of <select name="alterSys" style="text-align:center;"><% for (i in session.sysList){ %>
                 <% if (session.chosenAlter.sys_alias == session.sysList[i].sys_alias){ %>

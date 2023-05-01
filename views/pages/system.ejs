@@ -16,7 +16,7 @@
             </div>
             <ul>
             <% for ( i in session.sys ) { %>
-                <li><a title="<%= session.sys[i].name %>" href="/system/<%= session.sys[i].id %>"><%= session.sys[i].name %></a> &emsp;&emsp;&emsp;&emsp;<a href="/deletesys/<%= session.sys[i].id %>" name="<%= session.sys[i].id %>" class="deletebtn">Delete</a>&emsp;<a href="/editsys/<%= session.sys[i].id %>" name="<%= session.sys[i].id %>" class="editbtn">Edit</a></li>
+                <li><a title="<%= session.sys[i].name %>" href="/system/<%= session.sys[i].id %>"><% if (session.sys[i].icon) { %> <img src="/img/<%- session.sys[i].icon %>.svg" class="vtinyimg"> <% } %><%= session.sys[i].name %></a> &emsp;&emsp;&emsp;&emsp;<a href="/deletesys/<%= session.sys[i].id %>" name="<%= session.sys[i].id %>" class="deletebtn">Delete</a>&emsp;<a href="/editsys/<%= session.sys[i].id %>" name="<%= session.sys[i].id %>" class="editbtn">Edit</a></li>
                 <!-- <li><%= session.sys[i].name %> <form method="post"><input type="submit" class="edit" name="e-<%= session.sys[i] %>" value="Edit"> <input type="submit" class="delete" name="d-<%= session.sys[i].id %>" value="Delete"></form></li> -->
                 <!-- <li><%= session.sys[i] %> <button name="edit-<%= session.sys[i] %>">Edit</button> <button name="del-<%= session.sys[i] %>">Delete</button></li> -->
             <% } %>
@@ -26,7 +26,7 @@
             <button onclick="toggleForm()" id="tbutton">Add a System</button>
             <form method="post" class="toggle" style="display: none;" aria-hidden="true" id="toggle">
                 <label for="sysname">System Alias</label>
-                <input name="sysname" type="text" autocomplete="off" placeholder="Alias">
+                <input name="sysname" type="text" autocomplete="off" placeholder="Alias" minlength="3" required>
                 <input type="submit" name="create" value="Create System">
             </form>
             <!-- <a href="/system-findpk">Import Public members from PluralKit</a> -->
@@ -81,13 +81,11 @@
                 var togg = document.getElementById('toggle');
                 var tbutton = document.getElementById('tbutton');
                 if (togg.style.display=="none"){
-                    togg.style.display= "block";
-                    togg.style.ariaHidden= "false"
-                    tbutton.innerHTML= "Hide the form";
+                    $("#toggle").show("fast");
+                    $("#tbutton").text("Hide the form");
                 } else {
-                    togg.style.display= "none";
-                    togg.style.ariaHidden= "true"
-                    tbutton.innerHTML= "Add a System";
+                    $("#toggle").hide("fast");
+                    $("#tbutton").text("Add a System");
                 }
             }
         </script>

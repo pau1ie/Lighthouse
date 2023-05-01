@@ -3,6 +3,23 @@
 
 <head>
     <%- include ("../partials/header.ejs") %>
+    <style>
+  .radio-toolbar input[type="radio"] {
+         display: none;
+}
+
+.radio-toolbar label {
+  display: block;
+  cursor: pointer;
+  width: 6em;
+  height: 6em;
+  text-align:center;
+}
+
+.radio-toolbar input[type="radio"]:checked ~ * { 
+    background:#9CD9D3 !important;
+}
+    </style>
 </head>
 
 <body>
@@ -37,6 +54,17 @@
     {name: "Tired", positive: false, emoji: "🥱"},
     {name: "Stressed", positive: false, emoji: "😖"},
 ] 
+var journSkin=[
+    {name: "Anchor", file: "anchors"},
+    {name: "Fish", file: "fish"},
+    {name: "Goldfish", file: "goldfish"},
+    {name: "Life Rings", file: "life-ring"},
+    {name: "Rudder", file: "rudder"},
+    {name: "Sailing Boat", file: "sailing"},
+    {name: "Starfish", file: "starfish"},
+    {name: "Tortoise", file: "tortoise"},
+    {name: "Whale", file: "whale"},
+]
     %>
     <div id="wrapper">
         <section>
@@ -58,6 +86,21 @@
                 <input type="text" name="altname" placeholder="New Alter Name Here" autofocus="autofocus">
                 <input type="submit" name="submit" value="Add">
             </form>
+        </section>
+        <section>
+            <h3>Set an icon for this system</h3>
+            <form method="post">
+            <div class="parent" style="height: auto;margin:auto;">
+                <% for (let i=0; i < 9; i++){ %>
+                    <div class="radio-toolbar child">
+                        <input type="radio" id="<%= journSkin[i].name %>" name="journ" value="<%= journSkin[i].file %>">
+                        <label for="<%= journSkin[i].name %>"><img src="/img/<%= journSkin[i].file %>.svg" class="tinyimg"  style="display:block; margin:0 auto;"><%= journSkin[i].name %></label>
+                    </div>
+                <% } %>
+                </div>
+                <input type="submit" name="icon" value="Set Icon">
+            </form>
+                
         </section>
     </div>
     <%- include ("../partials/footer.ejs") %>

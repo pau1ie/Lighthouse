@@ -340,7 +340,7 @@ var sysArr;
 	              req.session.sys = [];
 
 	              for (i in (result.rows)){
-	                  (req.session.sys).push({name: Buffer.from(result.rows[i].sys_alias, 'base64').toString(), id: result.rows[i].sys_id})
+	                  (req.session.sys).push({name: Buffer.from(result.rows[i].sys_alias, 'base64').toString(), id: result.rows[i].sys_id, icon: result.rows[i].icon})
 	              }
 	          }
 				  client.query({text: "SELECT * FROM comm_posts WHERE u_id=$1 ORDER BY created_on DESC;",values: [`${getCookies(req)['u_id']}`]}, (err, cresult) => {
@@ -465,6 +465,21 @@ var sysArr;
 		res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });
 	}
  });
+ app.get("/del-mood/:id", (req, res, next)=>{
+
+	if (isLoggedIn(req)){
+		client.query({text: "DELETE FROM alter_moods WHERE alt_id=$1;",values: [`${req.params.id}`]}, (err, result) => {
+			if (err) {
+			  console.log(err.stack);
+			  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+		  } else {
+			  req.session.chosenAlter = result.rows[0];
+			  // Redirect to the alter's page!
+			  res.redirect(`/alter/${req.params.id}`);
+		  }
+		});
+	}
+});
 
   app.get('/journal/:id', (req, res)=>{
 	 if (isLoggedIn(req)){
@@ -734,7 +749,6 @@ var sysArr;
 		    res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 		  } else {
 		     // Does the PIN match the one in the DB?
-				 console.log(result.rows[0].email_pin, req.body.pin);
 				 if (result.rows[0].email_pin == req.body.pin){
 					 client.query({text: 'UPDATE users SET pass=$1 WHERE email_link=$2', values: [`'${CryptoJS.SHA3(req.body.newpass)}'`,`'${req.params.id}'`]}, (err, result)=>{
 					   if (err) {
@@ -1095,14 +1109,24 @@ var sysArr;
 
 	app.post("/system/:alt", function(req, res){
 			if (isLoggedIn(req)){
-				client.query({text: "INSERT INTO alters (sys_id, name) VALUES ($1, $2)",values: [`${req.session.chosenSys.sys_id}`, `'${Buffer.from(req.body.altname).toString('base64')}'`]}, (err, result) => {
-					if (err) {
-					  console.log(err.stack);
-					  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-				  } else {
-					  res.redirect(`/system/${req.session.chosenSys.sys_id}`);
-				  }
-			  });
+				if (req.body.journ){
+					client.query({text: "UPDATE systems SET icon=$2 WHERE sys_id=$1",values: [`${req.session.chosenSys.sys_id}`, `${req.body.journ}`]}, (err, result) => {
+						if (err) {
+						  console.log(err.stack);
+						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+					  }
+				  });
+				}
+				if (req.body.submit){
+					client.query({text: "INSERT INTO alters (sys_id, name) VALUES ($1, $2)",values: [`${req.session.chosenSys.sys_id}`, `'${Buffer.from(req.body.altname).toString('base64')}'`]}, (err, result) => {
+						if (err) {
+						  console.log(err.stack);
+						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+					  }
+				  });
+				}
+				res.redirect(`/system/${req.session.chosenSys.sys_id}`);
+				
 
 			} else {
 				res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });
@@ -1124,7 +1148,6 @@ var sysArr;
 	});
 
   app.post('/system', function (req, res){
-	  console.log(req.body);
 	  // console.log(Object.keys(req.body)[0]);
 	  if (req.body.sysname){
 		  client.query({text: "SELECT * FROM systems WHERE sys_alias=$1 AND user_id=$2",values: [`'${Buffer.from(req.body.sysname).toString('base64')}'`, `${req.cookies.u_id}`]}, (err, result) => {
@@ -1269,10 +1292,10 @@ var sysArr;
 						  // to: "dannyisyelling@gmail.com, dekuelegy@gmail.com", // list of receivers
 						  to: req.body.email,
 						  subject: "Welcome to Lighthouse!", // Subject line
-						  text: "Hi there, " + req.body.username + ". Thanks for signing up to Lighthouse, a journal app designed for systems! I hope it can help you internally communicate effectively. Check out the information page to get started! If you lose your password and the feature to reset it hasn't been implemented yet, send an email to this address and I will fix for you as soon as possible! If this account was made in error, reply to this email and the account will be deleted shortly. Thanks! -Dee", // plain text body
-						  html: "<p>Hi there, <b>" + req.body.username + "</b>. Thanks for signing up to Lighthouse, a journal app! I hope it can help you internally communicate effectively. Check out the information page to get started!</p> <p>If you lose your password and the feature to reset it hasn't been implemented yet, send an email to this address and I will fix for you as soon as possible! If this account was made in error, reply to this email and the account will be deleted shortly. Thanks!</p> <p>-Dee</p>", // html body
+						  text: "Hi there, " + req.body.username + ". Thanks for signing up to Lighthouse, a journal app designed for systems! I hope it can help you internally communicate effectively. Check out the information page to get started!  If this account was made in error, reply to this email and the account will be deleted shortly. Thanks! -Dee", // plain text body
+						  html: "<p>Hi there, <b>" + req.body.username + "</b>. Thanks for signing up to Lighthouse, a journal app! I hope it can help you internally communicate effectively. Check out the information page to get started!</p> <p>If this account was made in error, reply to this email and the account will be deleted shortly. Thanks!</p> <p>-Dee</p>", // html body
 						}).then(info => {
-						  console.log({info});
+						//   console.log({info});
 						}).catch(console.error);
                       res.render(`pages/registered`, { session: req.session, splash:splash,cookies:req.cookies });
                   }
