@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <%- include ("../partials/header.ejs") %>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Berkshire+Swash&family=Roboto+Slab:wght@500&display=swap" rel="stylesheet">
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Lobster+Two:wght@700&family=Roboto+Slab:wght@500&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Berkshire+Swash&display=swap');
+            .tinyimg{
+                width: calc(4em);
+                height: auto;
+            }
+            h1, h2, h3, h4{
+                font-family: 'Roboto Slab', serif;
+                color: #911111;
+            }
+
+            #wrapper{
+                width: 50vw;
+                height: auto;
+                min-height: 10vh;
+                padding: calc(2em);
+                margin: 0 auto;
+                max-height: 80vh;
+                background: #ccebe8; 
+                border: 4px solid #123859;
+            }
+
+            #wrapper::after{
+            content: "";
+            clear: both;
+            display: table;
+            }
+            hr {
+                display:block;
+                border:0px;
+                height:calc(2em);
+                background-image:url('https://www.writelighthouse.com/img/horizontal_rule.svg');
+                background-repeat: no-repeat;
+                background-position: center; 
+            }
+            p{
+                text-indent: 1em;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="wrapper">
+           <img src="https://www.writelighthouse.com/img/logo.png" class="tinyimg" style="float:left; margin-right: calc(2vw); border-radius: 5em;"><h1>Ahoy there, <%- alias %>!</h1>
+           <hr>
+            <p>Thanks for signing up to Lighthouse, a compartmentalised journal app designed specifically for people who are plural. We're so glad to have you aboard. No worries-- This is the only time we'll email you, unless if you change your password, delete your account, or something happens that we must alert our userbase about.</p>
+            <p><strong>Don't remember making this account?</strong> No worries-- Simply reply to this email and your account will be deleted shortly.</p>
+            <p>Sincerely,</p>
+            <img src="https://www.writelighthouse.com/img/svg/Lighthouse-sig.svg" alt="The Lighthouse System" style="width:20em">
+        </section>
+    </div>
+    <%- include ("../partials/footer.ejs") %>
+    </body>
+</html>

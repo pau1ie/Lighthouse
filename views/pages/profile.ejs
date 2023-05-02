@@ -11,8 +11,9 @@
 			<h1>Edit Your Account</h1>
 				<form method="post" style="margin-top:calc(.5em);">
 				</form>
-			<p>Only account deletion is currently implemented.</p>
-			<h2><span class="material-symbols-outlined">dangerous</span> Danger Zone <span class="material-symbols-outlined">dangerous</span></h2>
+			<!-- <p>Only account deletion is currently implemented.</p> -->
+			<section style="border-top: 1px solid black; margin-top: calc(3vh);">
+				<h2><span class="material-symbols-outlined">dangerous</span> Danger Zone <span class="material-symbols-outlined">dangerous</span></h2>
 			<h3>Delete Your Account</h3>
 			<p>This is an <strong>irreversible action</strong>. All alters, journals, inner world entries and rules will be deleted with this account.</p>
 			<div id="popup" style="border: 1px solid black; background: ghostwhite; width: 40vw; padding: 1em; z-index:9999998; position: absolute; top: 20vh; display: none;">
@@ -26,6 +27,8 @@
 			</div>
 			<button id="firstwarning" class="warningbutton" onclick="warningPopUp()">Delete Account</button>
 		</div>
+			</section>
+			
 <%- include ("../partials/footer.ejs") %>
 	<script>
 		function warningPopUp(){

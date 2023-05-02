@@ -2,6 +2,33 @@
 <html lang="en" dir="ltr">
     <head>
         <%- include ("../partials/header.ejs") %>
+        <style>
+            .systemdiv{
+                display: block;
+                vertical-align: middle;
+                margin-top: calc(1em);
+                border-top: 1px solid #911111;
+                padding: 2vh 0;
+            }
+            .systembutton {
+                vertical-align: middle;
+                text-align: center;
+                display: inline-block;
+                padding: calc(1em);
+                background: powderblue;
+                word-wrap: break-word;
+                width: 10vw;
+                border-radius: 20%;
+                text-decoration: none;
+                margin-right: calc(5vw);
+            }
+            .systembutton img{
+                display: block;
+                margin: 0 auto;
+                width: calc(3em);
+            }
+            
+        </style>
     </head>
     <body>
         <%- include ("../partials/nav.ejs") %>
@@ -16,9 +43,9 @@
             </div>
             <ul>
             <% for ( i in session.sys ) { %>
-                <li><a title="<%= session.sys[i].name %>" href="/system/<%= session.sys[i].id %>"><% if (session.sys[i].icon) { %> <img src="/img/<%- session.sys[i].icon %>.svg" class="vtinyimg"> <% } %><%= session.sys[i].name %></a> &emsp;&emsp;&emsp;&emsp;<a href="/deletesys/<%= session.sys[i].id %>" name="<%= session.sys[i].id %>" class="deletebtn">Delete</a>&emsp;<a href="/editsys/<%= session.sys[i].id %>" name="<%= session.sys[i].id %>" class="editbtn">Edit</a></li>
-                <!-- <li><%= session.sys[i].name %> <form method="post"><input type="submit" class="edit" name="e-<%= session.sys[i] %>" value="Edit"> <input type="submit" class="delete" name="d-<%= session.sys[i].id %>" value="Delete"></form></li> -->
-                <!-- <li><%= session.sys[i] %> <button name="edit-<%= session.sys[i] %>">Edit</button> <button name="del-<%= session.sys[i] %>">Delete</button></li> -->
+                <div class="systemdiv">
+                <a class="systembutton" title="<%= session.sys[i].name %>" href="/system/<%= session.sys[i].id %>"><% if (session.sys[i].icon) { %> <img src="/img/svg/<%- session.sys[i].icon %>.svg" class="vtinyimg"> <% } %><%= session.sys[i].name %></a><a href="/editsys/<%= session.sys[i].id %>" name="<%= session.sys[i].id %>" class="editbtn" style="margin-right:calc(2em)">Rename</a><a href="/deletesys/<%= session.sys[i].id %>" name="<%= session.sys[i].id %>" class="deletebtn">Delete</a>
+                </div>
             <% } %>
         </ui>
             <p>Lighthouse supports having multiple systems for anyone who might need it.</p>
