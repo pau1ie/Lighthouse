@@ -1627,6 +1627,76 @@ var sysArr;
    });
  });
 
+ 	// ROBOTS.TXT
+	 app.get("/sitemap.xml", function(req, res) {
+		res.setHeader('content-type', 'text/plain');
+		res.send(`
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
+
+
+<url>
+  <loc>https://www.writelighthouse.com/</loc>
+  <lastmod>2023-05-06T00:29:06+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://www.writelighthouse.com/signup</loc>
+  <lastmod>2023-05-06T00:29:06+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.writelighthouse.com/login</loc>
+  <lastmod>2023-05-06T00:29:06+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.writelighthouse.com/about</loc>
+  <lastmod>2023-05-06T00:29:06+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.writelighthouse.com/changelog</loc>
+  <lastmod>2023-05-06T00:29:06+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+
+
+</urlset>
+		`);
+	 })
+	 app.get("/robots.txt", function(req, res) {
+		res.setHeader('content-type', 'text/plain');
+		res.send(`
+User-Agent: *
+Disallow: /system
+Disallow: /alter
+Disallow: /editsys
+Disallow: /deletesys
+Disallow: /clearalter
+Disallow: /edit-alter
+Disallow: /mood
+Disallow: /inner-world 
+Disallow: /rules
+Disallow: /reset
+Disallow: /forgot-password
+Disallow: /del-mood
+Disallow: /journal
+Disallow: /comm
+Disallow: /profile
+Allow: /
+Allow: /signup
+Allow: /login
+Allow: /about
+Crawl-delay: 10
+Sitemap: www.writelighthouse.com/sitemap.xml
+		`);
+	 });
   // ERROR ROUTES. DO NOT PUT NEW PAGES BENEATH THESE.
 	app.use(function(req,res){
 			res.status(404).render(`pages/404`, { session: req.session, code:"Not Found", splash:splash,cookies:req.cookies });
