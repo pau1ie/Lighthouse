@@ -281,6 +281,27 @@ app.locals.pluralize= pluralize;
   });
 
 });
+app.get('/glossary', (req, res, next) => {
+	
+	client.query({text: "SELECT * FROM glossary ORDER BY start_letter ASC;",values: []}, (err, result) => {
+		if (err) {
+		  console.log(err.stack);
+		  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash, cookies:req.cookies });
+	  } else {
+		var terms= result.rows;
+		client.query({text: "SELECT * FROM glossary WHERE essential= true ORDER BY start_letter ASC;",values: []}, (err, result) => {
+			if (err) {
+			  console.log(err.stack);
+			  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash, cookies:req.cookies });
+		  } else {
+			res.render(`pages/glossary`, { session: req.session, splash:splash, cookies:req.cookies, terms:terms, important:result.rows, lang:req.acceptsLanguages()[0] });
+			splash=null; 
+		  }
+	  });
+	  }
+  });
+
+});
 
   app.get('/about', (req, res, next) => {
       res.render(`pages/about`, { session: req.session, splash:splash, cookies:req.cookies });

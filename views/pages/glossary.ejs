@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <%- include ("../partials/header.ejs") %>
+        <title>Lighthouse- Glossary</title>
+        <style>
+            dt{
+                font-style: normal;
+            }
+            #important{
+                display: flex;
+                flex-wrap: wrap;
+            }
+            #important > div {
+            flex: 40%;
+            padding: .5em
+            }
+        </style>
+    </head>
+    <body>
+        <%- include ("../partials/nav.ejs") %>
+        <div id="wrapper">
+            <h2>Glossary</h2>
+            <section>
+            <h3>Important Terms</h3>
+            <p>It's best to understand these terms first before reading further.</p>
+            <dl id="important">
+                <% for (i in important) { %> 
+                    <div>
+                    <dt><%- important[i].term %></dt>
+                    <dd><%- important[i].definition %></dd>  
+                    </div>
+                <% } %>
+            </dl>
+        </section>
+        <hr>
+        <section>
+            <h3>All Terms</h3>
+            <dl>
+                <% for (i in terms) { %> 
+                    <div>
+                    <dt><%- terms[i].term %></dt>
+                    <dd><%- terms[i].definition %></dd>  
+                    </div>
+                <% } %>
+            </dl>
+        </section>
+    </div>
+    <%- include ("../partials/footer.ejs") %>
+    </body>
+</html>
