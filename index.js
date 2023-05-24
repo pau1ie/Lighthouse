@@ -283,13 +283,13 @@ app.locals.pluralize= pluralize;
 });
 app.get('/glossary', (req, res, next) => {
 	
-	client.query({text: "SELECT * FROM glossary ORDER BY start_letter ASC;",values: []}, (err, result) => {
+	client.query({text: "SELECT * FROM glossary ORDER BY term ASC;",values: []}, (err, result) => {
 		if (err) {
 		  console.log(err.stack);
 		  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash, cookies:req.cookies });
 	  } else {
 		var terms= result.rows;
-		client.query({text: "SELECT * FROM glossary WHERE essential= true ORDER BY start_letter ASC;",values: []}, (err, result) => {
+		client.query({text: "SELECT * FROM glossary WHERE essential= true ORDER BY term ASC;",values: []}, (err, result) => {
 			if (err) {
 			  console.log(err.stack);
 			  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash, cookies:req.cookies });
