@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Lobster+Two:wght@700&family=Roboto+Slab:wght@500&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Berkshire+Swash&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Berkshire+Swash&family=Lexend:wght@100;200;300;400;500;600;700;800;900&family=Roboto+Slab:wght@500&display=swap');
 :root{
     --col1: #123859;
     --col2: #9CD9D3;
@@ -20,10 +19,24 @@ hr {
 html{
     background: ghostwhite;
     overflow-y: scroll;
+    overflow-x: hidden;
+    background-image: url("../img/lighthouse-photo-bw.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
+body{
+    position: relative;
+    top: 6em;
+    scroll-margin-top: 200px;
+    padding-top:1em;
+}
 *{
-    font-family: Verdana, Arial,sans-serif;
+    font-family: 'Lexend',Verdana, Arial,sans-serif;
+}
+small{
+    font-weight: 300;
 }
 
 input{
@@ -51,7 +64,7 @@ form{
     display:none;
   }
 
-nav{
+nav {
     width: 100%;
     text-align: left;
     background: var(--col6);
@@ -60,8 +73,10 @@ nav{
     color: white;
     top:0;
     left: 0;
-    filter: drop-shadow(3px 10px 4px rgba(0,0,0, .2));
+    filter: drop-shadow(0 3px 3px rgba(0,0,0, .2));
     z-index: 200;
+    height: 6em;
+    max-height: 6em;
 }
 
 nav a, nav button{
@@ -77,6 +92,7 @@ article{
 article:last-child{
     border-bottom: 0;
 }
+
 
 
 .navel, button, input[type=submit], input[type=reset] {
@@ -97,6 +113,12 @@ article:last-child{
     border-radius: 20px;
     text-decoration: none;
     transition: .3s;
+}
+
+.infodd{
+    border: 1px solid red;
+    width: 10vw;
+    z-index: 30;
 }
 
 textarea{
@@ -144,13 +166,13 @@ footer{
 #wrapper{
     width: 50vw;
     /* border: 1px solid black; */
-    height: auto;
+    height: 100%;
     min-height: 10vh;
     padding: calc(2em);
     margin: 0 auto;
     position: relative;
-    top: 20vh;
-    max-height: 80vh;
+    /* top: 20vh; */
+    background: rgba(255,255,255,.4);
 }
 
 #wrapper::after{
@@ -176,6 +198,10 @@ footer{
 
 #logoname{
 	font-family: 'Berkshire Swash','Lobster Two', cursive;
+}
+
+#subnav ul{
+    list-style: none;
 }
 
 /* Classes */
@@ -289,10 +315,13 @@ footer{
     height: auto;
 }
 .splash{
-    width: calc(65vw);
-    background: lightyellow;
+    width: 30vw;
+    /* background: var(--col2); */
+    background: url('../img/svg/splash-fish.svg'), var(--col2);
+    background-repeat: no-repeat;
+    background-position: right;
     padding: calc(2em);
-    border: 2px solid var(--col3);
+    border: 2px solid var(--col1);
     border-radius: 15px;
 }
 
@@ -359,7 +388,18 @@ text-align: center;
     display: none;
 }
 
+input[type=submit][disabled=disabled],
+button[disabled=disabled]{
+  border: 1px solid #999999;
+  background-color: #cccccc;
+  color: #666666;
+}
+
 @media only screen and (max-width: 600px) {
+    body{
+        position: relative;
+    top: 0;
+    }
   nav a, nav button {
       font-size: 60%;
   }
@@ -391,7 +431,6 @@ text-align: center;
   }
   #wrapper{
       top: 7vh;
-      /* background: lightblue; */
       overflow-wrap: break-word;
 	  width: 85vw;
   }
@@ -440,7 +479,7 @@ text-align: center;
     width: calc(3em);
 }
 #popup{
-    border: 1px solid black; 
+    border: 3px solid var(--col1); 
     background: ghostwhite; 
     width: 70vw; 
     padding: .5em; 
@@ -448,7 +487,9 @@ text-align: center;
     position: absolute; 
     top: 5vh; 
     display: none;
+    box-shadow: 0px 0px 50px var(--col1);
 }
+
 
 /* End Mobile */
 }

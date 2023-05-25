@@ -2,29 +2,137 @@
 <html lang="en" dir="ltr">
     <head>
         <%- include ("../partials/header.ejs") %>
+        <style>
+            #features > div{
+                margin-bottom: 3em;
+            }
+            #features>div:nth-child(odd) {
+                text-align: left;
+            }
+
+            #features>div:nth-child(even) {
+                text-align: right;
+            }
+            #desktopsection{
+                    display: block;
+                    /* float: right; */
+                }
+            form{
+
+                width: 25vw;
+                padding: 1em; 
+                height: 27vh;
+                margin-left: 3em;
+                margin-bottom:2em; 
+                border-bottom: 1px solid var(--col1);
+            }
+            input{
+                margin-bottom:1em;
+            }
+            #signup{
+                color: var(--col4);
+                font-weight: 800;
+                cursor: pointer;
+                text-decoration: underline;
+            }
+            @media only screen and (max-width: 600px) {
+                form{
+                    width: 85vw;
+                    padding: .5em; 
+                    /* height: 25vh;  */
+                    border-left: 0;
+                    margin-left: auto;
+                    margin-bottom: 3em;
+                }
+            }
+
+        </style>
     </head>
     <body>
         <%- include ("../partials/nav.ejs") %>
-        <div id="wrapper">
-            <% if (splash){ %>
-                <p class="splash"><%- splash %></p>
+        <div id="wrapper">  
+            <hgroup style="text-align:center;"><h1 style="font-family: 'Berkshire Swash','Lobster Two', cursive;font-size:3em;margin-bottom:-.5em">Lighthouse</h1>
+                <h2>Journal Together</h2></hgroup>         
+            <% if ((new Date().getMonth()+1)==6) { %>
+            <img src="/img/svg/ptsd-support.svg" class="vtinyimg"  style="display:inline-block; margin:0 auto; float: left;"><p>June is PTSD awareness month. <a href="/glossary#Post-Traumatic Stress Disorder (PTSD)">Read here.</a></p>
             <% } %>
-        <section>
-        <h2>Lighthouse- Journal Together</h2>
-        <img src="/img/<%= Math.floor(Math.random() * (18 - 1 + 1)) + 1  %>.png" alt="a journal book" style="display:inline; height: 128px; width: auto;">
-            <p>Create private journals for dissociated parts.</p>
-            <p>Lighthouse is an app designed specifically for people who are plural to have private and a singular "communal" journal to keep track of day to day life.</p>
-            <!-- <p>We're helping around <%= (Math.ceil(userCount / 5) * 5).toLocaleString() %> systems.</p> -->
-            <p>We're helping  <%= (userCount).toLocaleString() %> systems.</p>
+            <% if (((new Date().getMonth()+1)== 3) && (new Date().getDate()) == 5) { %>
+                <img src="/img/svg/ptsd-support.svg" class="vtinyimg"  style="display:inline-block; margin:0 auto; float: left;"><p>Today is DID awareness day.<a href="/glossary#Dissociative Identity Disorder (DID)">Read here.</a></p>
+                <% } %>
+                <% if (splash){ %>
+                    <p class="splash"><%- splash %></p>
+                <% } %>
+                <section id="desktopsection">
+                    <%  if (!cookies.loggedin){ %>
+                        <!-- Login -->
+                        <form method="post" id="login">
+                            <h3>Log In</h3>
+                            <small>No Account? <a id="signup" href="/signup">Sign Up</a></small><br/>
+                            <label for="email">Email: </label>
+                            <input type="email" placeholder="something@mail.com" name="email"></br>
+                            <label for="password">Password: </label>
+                            <input type="password" name="password"><br/>
+                            <input type="submit" value="Log in" name="loggingin"> 
+                            <div style="margin-top: 1em"><input type="checkbox" name="remember" style="float:left;">
+                                <label for="remember">Keep me logged in (lasts 1 week)<br/><small>Not checking the box will keep you logged in until your browser closes.</small></label></div>
+                        </form>
+                        <% } %>                    
+                </section>
+                <section style="text-align:center;">
+                    <img src="/img/<%= Math.floor(Math.random() * (18 - 1 + 1)) + 1  %>.png" alt="a journal book" style="display:inline; height: 128px; width: auto;margin-bottom:-1em;">
+                </center>
+                <h4>We're helping  <span style="color:var(--col1)"><%= (userCount).toLocaleString() %></span> systems!</h4>
+               
+                </section>
 
-        </section>
+                <p><small>
+                    <span class="material-symbols-outlined">
+                    anchor
+                    </span>
+                    Lighthouse was not developed by a medical professional, and is not intended to be a substitute for professional advice, diagnosis, or treatment. Always seek the advice of your mental health professional or other qualified health provider with any questions you may have regarding your condition.</small></p>
+        <p><small>Background Photo by <a href="https://unsplash.com/@yannick_apollon?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Yannick Apollon</a> on <a href="https://unsplash.com/photos/dpViyqTgzI4?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a></small>
+        </p>
         <hr>
-        <section>
-        <p><span class="material-symbols-outlined">
-            anchor
-            </span> Lighthouse was not developed by a medical professional, and is not intended to be a substitute for professional advice, diagnosis, or treatment. Always seek the advice of your mental health professional or other qualified health provider with any questions you may have regarding your condition.</p>
+        <section id="features">
+            <div>
+                <div><h2>Create a Space for Your Alters</h2>
+                    <p>Alters get a private journal for their own thoughts and feelings that can be safe-guarded with a password.</p></div>
+                
+            </div>
+            <div>
+                <div><h2>Keep Your System Informed</h2>
+                    <p>Users get a Communal Journal that can be used by all alters to keep everyone up-to-date.</p></div>
+                
+            </div>
+            <div>
+                <div><h2>Get to the Root of Feelings</h2>
+                    <p>Each alter can set a mood with a short reason as to why they feel that way.</p></div>
+                
+            </div>
+            <div>
+                <div><h2>Understand your Alters Better</h2>
+                    <p>Alters can provide basic information on themselves, but can also address what makes them feel safe, what they would want from the system, and what they would like accommodations for.</p></div>
+                
+            </div>
         </section>
     </div>
     <%- include ("../partials/footer.ejs") %>
+    <script>
+        const button= document.querySelector("#signup");
+        const pass= document.querySelector("#pass");
+        const vPass= document.querySelector("#v-pass");
+        const passSplash= document.querySelector("#passSplash");
+        function checkPass(){
+          // console.log(pass.value);
+          // console.log(vPass.value);
+          if (pass.value !== vPass.value){
+            passSplash.innerHTML="Passwords do not match.";
+            button.disabled= true;
+          } else {
+            passSplash.innerHTML="";
+            button.disabled= false;
+          }
+        }
+    </script>
     </body>
 </html>

@@ -1,10 +1,6 @@
-<%
-// function capitalise(s)
-// {
-//     return s[0].toUpperCase() + s.slice(1);
-// } 
-%>
+
 <nav>
+
   <div id="logo" style="display: inline-block;"><a href="/"><img style="vertical-align:middle; margin-right: 10px;" src="/img/logo.png" width="48px" alt="Lighthouse logo"><br/><span id="logoname">Lighthouse<br/>
     <% if (cookies.loggedin) { %>
       <sup>Hello, <%= cookies.username %>!</sup>
@@ -17,9 +13,7 @@
   <% } else { %>
     <a class="navel" href="/signup">Sign Up</a>
     <a class="navel" href="/login">Log in</a>
-
   <% } %>
-  <!-- <a class="navel" href="/">Home</a> -->
   <a class="navel" href="/about">Information</a>
   <% if (cookies.loggedin){ %>
     <% if (session.system_term) { %> 
@@ -33,7 +27,7 @@
 	  <% if (cookies.loggedin){ %>
 	  <a class="navel" href="/profile">Settings</a>
 	  <% } %>
-    <a class="navel" href="/changelog">Changelog</a>
+    <!-- <a class="navel" href="/changelog">Changelog</a> -->
   <button class="navel" onclick="history.back()">Go Back</button>
 </nav>
 <div class="navmobile">
@@ -61,11 +55,14 @@
           <% if (cookies.loggedin){ %>
           <li><a class="navel" href="/profile">Settings</a></li>
           <% } %>
-          <li><a class="navel" href="/changelog">Changelog</a></li>
+          <!-- <li><a class="navel" href="/changelog">Changelog</a></li> -->
   </ul>
 </div>
 <script>
   $( "#hamburger" ).on( "click", function() {
    $("#mobilenav").toggle("fast");
+} );
+$( ".infowindow" ).on( "click", function() {
+   $(".infodd").toggle("fast");
 } );
 </script>

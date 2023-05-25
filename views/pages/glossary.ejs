@@ -17,8 +17,8 @@
             }
         </style>
     </head>
+    <%- include ("../partials/nav.ejs") %>
     <body>
-        <%- include ("../partials/nav.ejs") %>
         <div id="wrapper">
             <h2>Glossary</h2>
             <section>
@@ -26,7 +26,7 @@
             <p>It's best to understand these terms first before reading further.</p>
             <dl id="important">
                 <% for (i in important) { %> 
-                    <div>
+                    <div id="<%- important[i].term %>" style="scroll-margin-top: 10em;">
                     <dt><%- important[i].term %></dt>
                     <dd><%- important[i].definition %></dd>  
                     </div>
@@ -38,7 +38,7 @@
             <h3>All Terms</h3>
             <dl>
                 <% for (i in terms) { %> 
-                    <div>
+                    <div id="<%- terms[i].term %>" style="scroll-margin-top: 10em;">
                     <dt><%- terms[i].term %></dt>
                     <dd><%- terms[i].definition %></dd>  
                     </div>

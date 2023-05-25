@@ -1616,6 +1616,117 @@ var sysArr;
 
   });
 
+  app.post('/', function(req, res) {
+	if (req.body.loggingin){
+		var query = {
+			text: "SELECT * FROM users WHERE email=$1 AND pass=$2;",
+			values: [`'${Buffer.from(req.body.email).toString('base64')}'`, `'${CryptoJS.SHA3(req.body.password)}'`]
+		  }
+		  client.query(query, (err, result) => {
+			  if (err) {
+				console.log(err.stack);
+				res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+			} else {
+				if (result.rows.length == 0){
+					splash= "Wrong credentials.";
+					res.redirect(req.get('referer'));
+				} else {
+					 req.session.alter_term= result.rows[0].alter_term;
+					 req.session.system_term= result.rows[0].system_term;
+					req.session.loggedin = true;
+					req.session.username = Buffer.from(result.rows[0].username, 'base64').toString();
+			  // getCookies(req)['u_id']= result.rows[0].id;
+					  // Add to cookies
+			  if (req.body.remember){
+				res.cookie('loggedin', true, { maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('username',  Buffer.from(result.rows[0].username, 'base64').toString(),{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('u_id', result.rows[0].id,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('alter_term', result.rows[0].alter_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('system_term', result.rows[0].system_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true });
+			  } else {
+				// console.log("Let cookies expire at end of session.");
+				res.cookie('loggedin', true, {httpOnly: true }).cookie('username',  Buffer.from(result.rows[0].username, 'base64').toString(),{httpOnly: true }).cookie('u_id', result.rows[0].id,{httpOnly: true }).cookie('alter_term', result.rows[0].alter_term,{httpOnly: true }).cookie('system_term', result.rows[0].system_term,{httpOnly: true });
+			  }
+						 res.redirect(302, '/');
+				}
+			}
+		});
+	} else if (req.body.signingup) {
+		var splash;
+      var query = {
+        text: "SELECT * FROM users WHERE email=$1 OR username=$2;",
+        values: [`'${Buffer.from(req.body.email).toString('base64')}'`, `'${Buffer.from(req.body.username).toString('base64')}'`]
+      }
+      client.query(query, (err, result) => {
+          if (err) {
+            console.log(err.stack);
+            res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+          } else {
+            // console.log(res.rows)
+            if (result.rows.length > 0){
+                console.log("Already exists.");
+                splash="<strong>Uh oh!</strong> That username or email is already in use. <a href='/login'>Do you need to log in instead?</a>";
+                res.render(`pages/signup`, { session: req.session, splash:splash,cookies:req.cookies });
+            } else {
+                // Write to the db
+                console.log(`Writing...`)
+                var query = {
+                  text: "INSERT INTO users (email, username, pass, email_link) VALUES ($1, $2, $3, $4)",
+                  values: [`'${Buffer.from(req.body.email).toString('base64')}'`, `'${Buffer.from(req.body.username).toString('base64')}'`, `'${CryptoJS.SHA3(req.body.password)}'`, `'${Math.random().toString(36).substr(2, 16)}'`]
+                }
+                client.query(query, (err, result) => {
+                    if (err) {
+                      console.log(err.stack);
+                      res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+                  } else {
+					ejs.renderFile(__dirname + '/views/pages/email-welcome.ejs', { alias: req.body.username || randomise(["Buddy", "Friend", "Pal"]) }, (err, data) => {
+						if (err) {
+						  console.log(err);
+						} else {
+						  var mailOptions = {
+							from: '"Lighthouse" <dee_deyes@writelighthouse.com>',
+							to: req.body.email,
+							subject: `Welcome to Lighthouse, ${req.body.username}!`,
+							html: data
+						  };
+					
+						  transporter.sendMail(mailOptions, (error, info) => {
+							if (error) {
+							  return console.log(error);
+							}
+							// console.log('Message sent: %s', info.messageId);
+						  });
+						}
+					  });
+					/*
+					  req.session.alt_term= result.rows[0].alter_term;
+				req.session.sys_term= result.rows[0].system_term;
+			   req.session.loggedin = true;
+			   req.session.username = Buffer.from(result.rows[0].username, 'base64').toString();
+					*/
+					// splash=`Welcome, ${req.body.username}! Please log in.`;
+					// res.redirect("/");
+                    //   res.render(`pages/registered`, { session: req.session, splash:splash,cookies:req.cookies });
+					client.query({text: "SELECT * FROM users WHERE email=$1;", values: [`'${Buffer.from(req.body.email).toString('base64')}'`]}, (err, result) => {
+						if (err) {
+						  console.log(err.stack);
+						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+					  } else {
+						req.session.alter_term= result.rows[0].alter_term;
+						req.session.system_term= result.rows[0].system_term;
+						req.session.loggedin = true;
+						req.session.username = Buffer.from(result.rows[0].username, 'base64').toString();
+						
+					  }
+					});
+					splash=`Welcome to Lighthouse, ${req.body.username}! You are now logged in.`;
+						res.redirect("/");
+                  }
+              });
+            }
+          }
+        });
+
+	}
+	
+});
+
  app.post('/login', function(req, res) {
      var query = {
        text: "SELECT * FROM users WHERE email=$1 AND pass=$2;",
