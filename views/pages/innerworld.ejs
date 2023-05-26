@@ -2,6 +2,17 @@
 <html lang="en" dir="ltr">
     <head>
         <%- include ("../partials/header.ejs") %>
+        <style>
+          .textless{
+            height: 1em;
+            display: inline;
+            font-size: 1.15em;
+            padding: 0;
+            vertical-align: text-top;
+            background: transparent;
+            color: var(--col5)
+          }
+        </style>
     </head>
     <body>
         <%- include ("../partials/nav.ejs") %>
@@ -29,13 +40,31 @@
             <section>
               <h2>Inner World Information</h2>
               <% for (i in session.innerWorld){ %>
-                <dt><%= Buffer.from(session.innerWorld[i].key, 'base64').toString() %> <a title="Delete entry for <%= Buffer.from(session.innerWorld[i].key, 'base64').toString() %>" href="/inner-world/delete/<%= session.innerWorld[i].id %>" ><i class="fas fa-trash-alt"></i></a></dt>
+                <dt><%= Buffer.from(session.innerWorld[i].key, 'base64').toString() %> <form method="post" style="display: inline;"><button type="submit" name="<%= session.innerWorld[i].id %>" value="Remove" class="textless" onclick="deleteWarn('<%= Buffer.from(session.innerWorld[i].key, 'base64').toString() %>')"><span class="material-symbols-outlined textless"> delete</span></button></form></dt>
                 <dd><%= Buffer.from(session.innerWorld[i].value, 'base64').toString() %></dd>
               <% } %>
+
             </section>
         </div>
         <%- include ("../partials/scripts.ejs") %>
         <%- include ("../partials/footer.ejs") %>
 
     </body>
+    <script>
+      const controller = new AbortController();
+    const { signal } = controller;
+    
+        function deleteWarn(title){
+          if (confirm(`You're about to delete ${title}.\nAre you sure?`)){
+            console.log("Deleting.")
+          } else {
+            event.preventDefault();
+          }
+        }
+    
+        signal.addEventListener("abort", () => {
+      console.log(signal.aborted);
+    });
+    
+    </script>
 </html>

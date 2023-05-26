@@ -1047,7 +1047,6 @@ var sysArr;
 		if (isLoggedIn(req)){
 			if (req.body.create){
 				// Create rule.
-				console.log("Create rule.");
 				client.query({text:`INSERT INTO sys_rules (u_id, rule) VALUES ($1, $2)`, values:[getCookies(req)['u_id'], `'${Buffer.from(req.body.rule).toString('base64')}'`]}, (err, result)=>{
 					if (err){
 						console.log(err.stack);
@@ -1169,6 +1168,7 @@ var sysArr;
 
 	app.post("/journal/:id", (req, res)=>{
 		if (isLoggedIn(req)){
+			if (req.body.submit){
 			// session.altJournal[0].j_id
 			client.query({text: "INSERT INTO posts (j_id, created_on, body, title) VALUES ($1, to_timestamp($2 / 1000.0), $3, $4);",values: [`${req.session.altJournal[0].j_id}`, `${Date.now()}`, `${encryptWithAES(req.body.j_body)}`, `${encryptWithAES(req.body.j_title)}`]}, (err, result) => {
  			   if (err) {
@@ -1178,7 +1178,19 @@ var sysArr;
 				  res.redirect(`/journal/${req.params.id}`);
  			  }
 
+		  });	
+			} else {
+			client.query({text: "DELETE FROM posts WHERE p_id=$1; ",values: [getKeyByValue(req.body,"Remove")]}, (err, result) => {
+ 			   if (err) {
+ 				  console.log(err.stack);
+ 				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+ 			  } else {
+				  req.session.jPost= null;
+				  res.redirect(`/journal/${req.session.chosenAlter.alt_id}`);
+			  }
 		  });
+			}
+			
 		} else {
 			res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });
 		}
@@ -1389,13 +1401,25 @@ var sysArr;
 
 	app.post('/inner-world', (req, res)=>{
 		if (isLoggedIn(req)){
-			client.query({text:'INSERT INTO inner_worlds (u_id, key, value) VALUES ($1,$2,$3);', values: [`${getCookies(req)['u_id']}`, `${Buffer.from(req.body.key).toString('base64')}`,`${Buffer.from(req.body.value).toString('base64')}`]}, (err, result)=>{
-				if (err){
+			if (req.body.create){
+				client.query({text:'INSERT INTO inner_worlds (u_id, key, value) VALUES ($1,$2,$3);', values: [`${getCookies(req)['u_id']}`, `${Buffer.from(req.body.key).toString('base64')}`,`${Buffer.from(req.body.value).toString('base64')}`]}, (err, result)=>{
+					if (err){
+						console.log(err.stack);
+						res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+					}
+				});
+			} else {
+				// Deleting.
+				client.query({text: "DELETE FROM inner_worlds WHERE id=$1;",values: [getKeyByValue(req.body,"Remove")]}, (err, result) => {
+					if (err) {
 					console.log(err.stack);
-					res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+					res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+				} else {
+					req.session.sys_rules= null;
 				}
-				res.redirect('/inner-world');
-			});
+				});
+			}
+			res.redirect(req.get('referrer'));
 		} else {
 			res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });
 		}
@@ -1428,7 +1452,7 @@ var sysArr;
 				  }
 			  }
 		  });
-	  } else {
+	  } else if (req.body.post) {
 		  // Comm journal.
 		  // id | u_id | created_on | title | body
 		  client.query({text: "INSERT INTO comm_posts (u_id, created_on, title, body) VALUES ($1, to_timestamp($2 / 1000.0), $3, $4)",values: [`${getCookies(req)['u_id']}`, `${Date.now()}`, `${encryptWithAES(req.body.cTitle)}`, `${encryptWithAES(req.body.cBody)}`]}, (err, result) => {
@@ -1439,6 +1463,18 @@ var sysArr;
 				res.redirect("/system");
 			}
 		});
+	  } else {
+		// Deleting.
+		console.log("Deleting.")
+		client.query({text: "DELETE FROM comm_posts WHERE id=$1; ",values: [getKeyByValue(req.body,"Remove")]}, (err, result) => {
+			if (err) {
+			   console.log(err.stack);
+			   res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+		   } else {
+			   req.session.jPost= null;
+			   res.redirect(`/system`);
+		   }
+	   });
 	  }
   });
 
@@ -1790,6 +1826,11 @@ var sysArr;
   <lastmod>2023-05-06T00:29:06+00:00</lastmod>
   <priority>0.80</priority>
 </url>
+<url>
+  <loc>https://www.writelighthouse.com/glossary</loc>
+  <lastmod>2023-05-06T00:29:06+00:00</lastmod>
+  <priority>0.90</priority>
+</url>
 
 
 </urlset>
@@ -1818,6 +1859,7 @@ Allow: /
 Allow: /signup
 Allow: /login
 Allow: /about
+Allow: /glossary
 Crawl-delay: 10
 Sitemap: www.writelighthouse.com/sitemap.xml
 		`);

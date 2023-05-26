@@ -33,12 +33,12 @@
             <p>To delete a rule, press the <span class="material-symbols-outlined textless"> delete</span> button.</p>
             <form method="post">
               <label for="rule">New Rule: </label>
-              <input type="text" name="rule"><br/>
+              <input type="text" name="rule" required minlength="8"><br/>
               <input type="submit" value="Add New Rule" name="create">
             </form>
             <ol>
               <% for (i in session.sys_rules){ %>
-                <li><%= Buffer.from(session.sys_rules[i].rule, 'base64').toString() %> <form method="post" style="display: inline;"><button type="submit" name="<%= session.sys_rules[i].id %>" value="Remove" class="textless"><span class="material-symbols-outlined textless"> delete</span></button></form></li>
+                <li><%= Buffer.from(session.sys_rules[i].rule, 'base64').toString() %> <form method="post" style="display: inline;"><button type="submit" name="<%= session.sys_rules[i].id %>" value="Remove" class="textless" onclick="deleteWarn('<%= Buffer.from(session.sys_rules[i].rule, 'base64').toString() %>')"><span class="material-symbols-outlined textless"> delete</span></button></form></li>
                 
               <% } %>
             </ol>
@@ -46,5 +46,23 @@
     </div>
     <%- include ("../partials/footer.ejs") %>
 </body>
+
+<script>
+  const controller = new AbortController();
+const { signal } = controller;
+
+    function deleteWarn(title){
+      if (confirm(`This rule is about to be deleted:\n${title}\nAre you sure?`)){
+        console.log("Delete Rule.");
+      } else {
+        event.preventDefault();
+      }
+    }
+
+    signal.addEventListener("abort", () => {
+  console.log(signal.aborted);
+});
+
+</script>
 
 </html>

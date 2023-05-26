@@ -3,6 +3,17 @@
 
 <head>
     <%- include ("../partials/header.ejs") %>
+    <style>
+        .textless{
+          height: 1em;
+          display: inline;
+          font-size: 1.15em;
+          padding: 0;
+          vertical-align: text-top;
+          background: transparent;
+          color: var(--col5)
+        }
+      </style>
 </head>
 
 <body>
@@ -41,14 +52,13 @@
                     } );
                 </script>
             </form>
-            <p>HTML works in this field, so feel free to style your journal as you see fit. Pressing enter will render a new paragraph.</p>
         </section>
         <hr/>
         <section>
             <section>
             <% for (i in session.journalPosts) { %>
                 <article>
-                <h2><%= session.journalPosts[i].title %></h2>
+                <h2><%= session.journalPosts[i].title %></h2><a title="Edit <%= session.journalPosts[i].title %>" href="/journal/<%- session.journalPosts[i].p_id %>/edit"><i class="fa fa-pencil" aria-hidden="true"></i></a><form method="post" style="display: inline;"><button type="submit" name="<%- session.journalPosts[i].p_id %>" value="Remove" class="textless" onclick="deleteWarn('<%= session.journalPosts[i].title %>')"><span class="material-symbols-outlined textless"> delete</span></button></form>
                 <p><sub>Posted <%= (session.journalPosts[i].created_on).toLocaleString(lang, { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }) %></sub></p>
                 <% var bodyArr= (session.journalPosts[i].body).replace(/\r/gi, '').split("\n").filter(function() { return true; });
                     for (j in bodyArr){
@@ -56,7 +66,7 @@
                             <p><%- bodyArr[j] %></p>
                         <% }
                      }%>
-            <p><a href="/journal/<%- session.journalPosts[i].p_id %>/edit" class="editbtn">Edit</a> <a href="/journal/<%- session.journalPosts[i].p_id %>/delete" class="deletebtn">Delete</a></p>
+            <!-- <p><a href="/journal/<%- session.journalPosts[i].p_id %>/edit" class="editbtn">Edit</a> <a href="/journal/<%- session.journalPosts[i].p_id %>/delete" class="deletebtn">Delete</a></p> -->
             </article>
             <% } %>
         </section>
@@ -71,5 +81,22 @@
             } );
     </script> -->
 </body>
+<script>
+  const controller = new AbortController();
+const { signal } = controller;
+
+    function deleteWarn(title){
+      if (confirm(`You're about to delete ${title}.\nAre you sure?`)){
+        console.log("Delete Rule.");
+      } else {
+        event.preventDefault();
+      }
+    }
+
+    signal.addEventListener("abort", () => {
+  console.log(signal.aborted);
+});
+
+</script>
 
 </html>

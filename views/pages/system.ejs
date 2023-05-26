@@ -3,9 +3,16 @@
     <head>
         <%- include ("../partials/header.ejs") %>
         <style>
-            
-            
-        </style>
+            .textless{
+              height: 1em;
+              display: inline;
+              font-size: 1.15em;
+              padding: 0;
+              vertical-align: text-top;
+              background: transparent;
+              color: var(--col5)
+            }
+          </style>
     </head>
     <body>
         <%- include ("../partials/nav.ejs") %>
@@ -66,7 +73,7 @@
                 </form>
                 <% for (i in session.cPosts) { %>
                     <article>
-                    <h2><%= session.cPosts[i].title %></h2>
+                    <h2><%= session.cPosts[i].title %></h2> <a title="Edit <%= session.cPosts[i].title %>" href="/comm/<%- session.cPosts[i].id %>/edit"><i class="fa fa-pencil" aria-hidden="true"></i></a><form method="post" style="display: inline;"><button type="submit" name="<%= session.cPosts[i].id %>" value="Remove" class="textless" onclick="deleteWarn('<%= session.cPosts[i].title %>')"><span class="material-symbols-outlined textless"> delete</span></button></form>
                     <p><sub>Posted <%= (session.cPosts[i].date).toLocaleString(lang, { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }) %></sub></p>
                     <% var bodyArr= (session.cPosts[i].body).replace(/\r/gi, '').split("\n").filter(function() { return true; });
                         for (j in bodyArr){
@@ -74,7 +81,7 @@
                                 <p><%- bodyArr[j] %></p>
                             <% }
                          }%>
-                         <p><a title="Edit <%= session.cPosts[i].title %>" href="/comm/<%- session.cPosts[i].id %>/edit"><i class="fa fa-pencil" aria-hidden="true"></i></a> <a title="Delete <%= session.cPosts[i].title %>" href="/comm/<%- session.cPosts[i].id %>/delete"><i class="fas fa-trash-alt"></i></a></p>
+                         
                 </article>
                 <% } %>
             </section>
@@ -93,12 +100,22 @@
                 }
             }
         </script>
-        <!-- <script>
-            ClassicEditor
-                .create( document.querySelector( '#editor' ) )
-                .catch( error => {
-                    console.error( error );
-                } );
-        </script> -->
+        <script>
+  const controller = new AbortController();
+const { signal } = controller;
+
+    function deleteWarn(title){
+      if (confirm(`You're about to delete ${title}. Is this ok?`)){
+        console.log("Delete Rule.");
+      } else {
+        event.preventDefault();
+      }
+    }
+
+    signal.addEventListener("abort", () => {
+  console.log(signal.aborted);
+});
+
+</script>
     </body>
 </html>
