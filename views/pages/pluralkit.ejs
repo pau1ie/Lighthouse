@@ -10,7 +10,7 @@
             <p>Use Pluralkit? We can fetch your <strong>publicly available <%- pluralize(session.alter_term) %></strong> and add them to your account. Importing will create a new <%- session.system_term %> that can be renamed on the <a href="/system">My <%- capitalise(session.system_term) %></a> page</a>.</p>
             <form>
                 <label for="pid">Pluralkit system ID</label>
-                <input type="text" minlength="5" maxlength="5" id="pid">
+                <input type="text" minlength="5" maxlength="5" id="pid" required>
                 <button onclick="getPK()">Fetch from Pluralkit</button>
             </form>
             <span id="Wait"></span>
@@ -30,21 +30,37 @@
             event.preventDefault();
             $("#Wait").html("<em>Hang on...</em>");
             var pkID= $("#pid").val();
+            if (pkID.length==0){
+                // Blank.
+                $("#Wait").html("Please type the <%- session.system_term %> ID.")
+            } else {
+                console.log(pkID);
             $("#roster").html("");
             // console.log(pkID);
             // Go grab pluralkit
             let response = await fetch(`https://api.pluralkit.me/v2/systems/${pkID}/members`);
             let body = await response.text();
             let sysInfo = JSON.parse(body);
-            console.log(sysInfo);
+            console.log(sysInfo.message);
             $("#Wait").html("From Pluralkit:");
             let systemArray = new Array();
-            for (i in sysInfo){
+            if (!sysInfo.message){
+                // System found.
+                for (i in sysInfo){
                 $("#roster").append(`<li>${sysInfo[i].name}</li>`);
                 systemArray.push(sysInfo[i].name);
                 $("#altField").val(`${systemArray.join("--,--")}`);
             }
             $("#submitAlt").show("fast");
+                
+            } else if (sysInfo.code== 0){
+                $("#Wait").html(`<strong>Sorry!</strong> Either Pluralkit's API is down, or we had trouble sending a request. Try again later!`);
+            } else {
+               // Not found.
+               $("#Wait").html(`<strong>Hmmm... are you sure?</strong> Pluralkit couldn't find a <%- session.system_term %> with that ID. Try again.`);
+            }
+            }
+           
         }
     </script>
 </html>

@@ -106,7 +106,7 @@ article:last-child{
 
 
 
-.navel, button, input[type=submit], input[type=reset] {
+.navel, button, input[type=submit], input[type=reset], .linkbutton {
     display: inline-block;
     margin: auto calc(1em);
     text-decoration: none;
