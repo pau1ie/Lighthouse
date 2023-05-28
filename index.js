@@ -296,6 +296,10 @@ app.get('/glossary', (req, res, next) => {
   });
 
 });
+app.get('/thank-you', (req, res, next) => {
+	res.render(`pages/thankyou`, { session: req.session, splash:splash, cookies:req.cookies });
+	splash=null;
+});
 
   app.get('/about', (req, res, next) => {
       res.render(`pages/about`, { session: req.session, splash:splash, cookies:req.cookies });
