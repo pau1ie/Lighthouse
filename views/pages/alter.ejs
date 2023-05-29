@@ -46,56 +46,6 @@ td{
 
 <body>
     <%- include ("../partials/nav.ejs") %>
-    <% var journalArr= [
-        {val: '1', c: "Red"}, 
-        {val: '2', c: "Orange"}, 
-        {val: '3', c: "Yellow"}, 
-        {val: '4', c: "Green"}, 
-        {val: '5', c: "Teal"}, 
-        {val: '6', c: "Blue"}, 
-        {val: '7', c: "Purple"}, 
-        {val: '8', c: "Pink"}, 
-        {val: '9', c: "White"}, 
-        {val: '10', c: "Black"}, 
-        {val: '11', c: "Rainbow"}, 
-        {val: '12', c: "Ocean"}, 
-        {val: '13', c: "Space"}, 
-        {val: '14', c: "Winter"}, 
-        {val: '15', c: "Autumn"}, 
-        {val: '16', c: "Spring"}, 
-        {val: '17', c: "Summer"}, 
-        {val: '18', c: "Flowers"}, 
-    ]
-    var moods=[
-    // Positive
-    {name: "Joyous", positive: true, emoji: "😄"},
-    {name: "Loved", positive: true, emoji: "🤗"},
-    {name: "Satisfied", positive: true, emoji: "🙂"},
-    {name: "Content", positive: true, emoji: "😌"},
-    {name: "Interested", positive: true, emoji: "😮"},
-    {name: "Amused", positive: true, emoji: "😆"},
-    {name: "Happy", positive: true, emoji: "😀"},
-    {name: "Serene", positive: true, emoji: "☺"},
-    {name: "Awestruck", positive: true, emoji: "🤩"},
-    {name: "Sleepy", positive: true, emoji: "😴"},
-    // Negative
-    {name: "Afraid", positive: false, emoji: "😨"},
-    {name: "Frustrated", positive: false, emoji: "😖"},
-    {name: "Overwhelmed", positive: false, emoji: "😖"},
-    {name: "Dazed", positive: false, emoji: "😵"},
-    {name: "Confused", positive: false, emoji: "😵"},
-    {name: "Angry", positive: false, emoji: "😡"},
-    {name: "Enraged", positive: false, emoji: "🤬"},
-    {name: "Disgusted", positive: false, emoji: "🤢"},
-    {name: "Sad", positive: false, emoji: "🙁"},
-    {name: "Lonely", positive: false, emoji: "😢"},
-    {name: "Upset", positive: false, emoji: "😭"},
-    {name: "Melancholy", positive: false, emoji: "😔"},
-    {name: "Annoyed", positive: false, emoji: "😒"},
-    {name: "Tired", positive: false, emoji: "🥱"},
-    {name: "Stressed", positive: false, emoji: "😖"},
-] 
-    %>
     <div id="wrapper">
         <% if (typeof splash == 'string'){  %>
             <p class="splash"><%- splash %></p>
@@ -156,6 +106,9 @@ td{
                         <option value="<%- journalArr[i].val %>"><%- journalArr[i].c %></option>
                     <% } %>
                     <% } %>
+                    <% if (session.is_legacy){ %>
+                        <option value="19">Old Journal</option>
+                    <% } %>
                     
                 </select> 
                 <input type="submit" name="newjournalSkin" value="Update Journal Skin">
@@ -170,6 +123,11 @@ td{
                             <input type="radio" id="<%= i+1 %>" name="journ" value="<%= i+1 %>">
                             <label for="<%= i+1 %>"><img src="/img/<%= i+1 %>.png" class="tinyimg"  style="display:block; margin:0 auto;"><%= ['Red', 'Orange', 'Yellow', 'Green', 'Teal', 'Blue', 'Purple', 'Pink', 'White', 'Black', 'Rainbow', 'Ocean', 'Space'][i] %></label>
                         </div>
+                    <% } %>
+                    <% if (session.is_legacy){ %>
+                        <div class="radio-toolbar child">
+                        <input type="radio" id="19" name="journ" value="19">
+                            <label for="19"><img src="/img/19.png" class="tinyimg"  style="display:block; margin:0 auto;" alt="A gift skin for being here since the beginning. A leather book with gold trimming and blue and green gemstones.">Old Journal</label></div>
                     <% } %>
                     </div>
                     <p>Password Protect this journal?</p>
