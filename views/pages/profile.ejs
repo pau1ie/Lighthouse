@@ -18,21 +18,44 @@
 				content:"";
 				display:none;
 						}
+			section{
+				border-top: 1px solid black; 
+				margin-top: calc(3vh);
+			}
 		</style>
     </head>
     <body>
         <%- include ("../partials/nav.ejs") %>
 		<!-- <div id="pseudofade" style="z-index:-9999998; background: rgba(0,0,0,.75); position: absolute; top: -30vh; left: -30vw; width: 0; height: 0; opacity: 0; transition:0.7s;"></div> -->
         <div id="wrapper">
+			<% if (splash){ %>
+				<p class="splash"><%- splash %></p>
+			<% } %>
 			<h1>Edit Your Account</h1>
 				<form method="post" style="margin-top:calc(.5em);">
 					<label for="altTerm">Term preferred for "alter": </label>
 					<input type="text" name="altTerm" placeholder="<%- session.alter_term %>"><br>
 					<label for="sysTerm">Term preferred for "system": </label>
-					<input type="text" name="sysTerm" placeholder="<%- session.system_term %>">
+					<input type="text" name="sysTerm" placeholder="<%- session.system_term %>"><br>
 					<input type="submit" value="Set Terms">
 				</form>
-			<section style="border-top: 1px solid black; margin-top: calc(3vh);">
+			<section>
+				<!-- Change email, username, password. Fetch from our DB as they type -->
+				<form method="post" style="margin-top:1em">
+					<label for="newEmail">Email address</label>
+					<input type="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" name="newEmail" id="newEmail" placeholder="<%- theirEmail %>"> <button id="checkEmail">Check Availability</button> <br>
+					<label for="newName">Username</label>
+					<input type="text" name="newName" id="newUser" placeholder="<%- theirName %>"> <button id="checkUser">Check Availability</button><br>
+					<input type="submit" name="updateUser" value="Update Account" disabled id="updateAccount">
+				</form>
+				<form method="post" style="margin-top:1em;">
+				<label for="newPass1">New Password </label><input type="password" id="newPass1" name="newPass1" minlength="8" autocomplete="new-password">
+					<div id="newPass3" style="display:none;"><br><label for="newPass2">Verify Password </label><input type="password" id="newPass2" name="newPass2" minlength="8" autocomplete="new-password"><span id="passFail"></span></div><br>
+					<input type="submit" name="changePass" id="changePass" value="Update Password" disabled>
+				</form>
+			</section>
+		
+			<section>
 				<h2><span class="material-symbols-outlined">dangerous</span> Danger Zone <span class="material-symbols-outlined">dangerous</span></h2>
 			<h3>Delete Your Account</h3>
 			<p>This is an <strong>irreversible action</strong>. All alters, journals, inner world entries and rules will be deleted with this account.</p>
@@ -67,6 +90,82 @@
 			$("#popup").fadeToggle("fast");
 			$('#fadein').fadeToggle(200);
 		}
+		$('#newPass1').keyup(function(){
+			$('#newPass3').show();
+			if ($('#newPass1').val() == $('#newPass2').val() && $('#newPass1').val().length >= 8 && $('#newPass2').val().length >= 8){
+				// enable the submit button
+				$("#passFail").html(`✅`);
+				$("#changePass").prop('disabled', false);
+			} else {
+				//disable submit.
+				$("#passFail").html(`❌ <small>Passwords must match and be at least 8 characters long.</small>`);
+				$("#changePass").prop('disabled', true);
+			}
+			});
+
+		$('#newPass2').keyup(function(){
+
+			if ($('#newPass1').val() == $('#newPass2').val() && $('#newPass1').val().length >= 8 && $('#newPass2').val().length >= 8){
+				// enable the submit button
+				$("#passFail").html(`✅`);
+				$("#changePass").prop('disabled', false);
+			} else {
+				//disable submit.
+				$("#passFail").html(`❌ <small>Passwords must match and be at least 8 characters long.</small>`);
+				$("#changePass").prop('disabled', true);
+			}
+
+			if ($('#newPass2').val().length == 0){
+				// Hide it.
+				$("#newPass3").hide();
+				$("#newPass1").val("");
+			}
+		});
+
+		$("#checkEmail").click(async function(){
+			event.preventDefault();
+			// We need to fetch from our database to see if the email they're asking for already exists.
+			$("#checkEmail").html(`Checking...`);
+			let response = await fetch(`/users`, {
+				headers: {
+				"api-lh-call": "api-lh-call",
+				"email": $("#newEmail").val()
+				}
+			});
+            let body = await response.text();
+            let bodyInfo = JSON.parse(body);
+            if (bodyInfo.taken== false){
+				// Not taken and received HTTP code 200. Do it!
+				$("#checkEmail").html(`✅ Available email.`);
+				$("#updateAccount").prop('disabled', false);
+			} else {
+				// Either taken or the database didn't like that.
+				$("#checkEmail").html(`This email is in use. ❌`);
+				$("#updateAccount").prop('disabled', true);
+			}
+		});
+		$("#checkUser").click(async function(){
+			event.preventDefault();
+			// We need to fetch from our database to see if the email they're asking for already exists.
+			$("#checkUser").html(`Checking...`);
+			let response = await fetch(`/users`, {
+				headers: {
+				"api-lh-call": "api-lh-call",
+				"username": $("#newUser").val()
+				}
+			});
+            let body = await response.text();
+            let bodyInfo = JSON.parse(body);
+            if (bodyInfo.taken== false){
+				// Not taken and received HTTP code 200. Do it!
+				$("#checkUser").html(`✅ Available username.`);
+				$("#updateAccount").prop('disabled', false);
+			} else {
+				// Either taken or the database didn't like that.
+				$("#checkUser").html(`This username is in use. ❌`);
+				$("#updateAccount").prop('disabled', true);
+			}
+		});
 	</script>
     </body>
 </html>

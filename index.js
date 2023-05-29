@@ -151,6 +151,16 @@ const decryptWithAES = (ciphertext) => {
   return originalText;
 };
 
+function apiEyesOnly(req) {
+	if (req.headers['api-lh-call']) {
+	   // custom header exists, then call next() to pass to the next function
+	//    console.log("This is the API.")
+	   return true;
+	} else {
+	  return false;     
+	}
+  }
+
 const client = new Client({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
@@ -304,7 +314,6 @@ app.locals.pluralize= pluralize;
 	        splash=null;
 		}
 	});
-	// console.log(req.cookies.u_id);
   });
 
   app.get("/pluralkit", (req, res)=> {
@@ -482,7 +491,7 @@ app.get('/wish-d/:id', (req, res) => {
 			client.query({text: "SELECT * FROM sys_rules WHERE u_id=$1;", values:[getCookies(req)['u_id']]}, (err, result)=>{
 				if (err){
 					console.log(err.stack);
-					res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+					res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 				} else {
 					req.session.sys_rules=result.rows;
 				}
@@ -850,18 +859,58 @@ var sysArr;
 		}
 
 	});
-	
-		app.get('/profile', (req, res, next) => {
+	app.get('/users', (req, res, next) => {
+		if (apiEyesOnly(req)){
+			// No browser peeking!! Only Lighthouse's API can see this!
+			// ${Buffer.from(req.body.email).toString('base64')}
+			if (req.headers.email){
+				// Look for an email.
+				client.query({text: "SELECT * FROM users WHERE email=$1;", values:[`'${Buffer.from(req.headers.email).toString("base64")}'`]}, (err, result)=>{
+					if (err){
+						console.log(err.stack);
+						res.status(400);
+					} else {
+						if (result.rows.length==0){
+							return res.json({code:200, taken: false});
+						} else {
+							return res.json({code:200, taken: true});
+						}
+					}
+				});
+			} else if (req.headers.username) {
+				// Look for username
+				client.query({text: "SELECT * FROM users WHERE username=$1;", values:[`'${Buffer.from(req.headers.username).toString("base64")}'`]}, (err, result)=>{
+					if (err){
+						console.log(err.stack);
+						res.status(400);
+					} else {
+						if (result.rows.length==0){
+							return res.json({code:200, taken: false});
+						} else {
+							return res.json({code:200, taken: true});
+						}
+					}
+				});
+			} else {
+				return res.json({code:422});
+			}
+			
+
+		} else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
+	});
+		app.get('/profile', (req, res) => {
 		if (isLoggedIn(req)){
 			client.query({text: "SELECT * FROM users WHERE id=$1;", values:[getCookies(req)['u_id']]}, (err, result)=>{
 				if (err){
 					console.log(err.stack);
-					res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+					res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 				} else {
 					req.session.alter_term=result.rows[0].alter_term;
 					req.session.system_term=result.rows[0].system_term;
+					var theirEmail = Buffer.from(result.rows[0].email, "base64").toString();
+					var theirName = Buffer.from(result.rows[0].username, "base64").toString();
 				}
-				res.render(`pages/profile`, { session: req.session, splash:splash,cookies:req.cookies });
+				res.render(`pages/profile`, { session: req.session, splash:splash,cookies:req.cookies, theirEmail: theirEmail, theirName: theirName });
 				splash=null;
 			});
 		} else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
@@ -961,19 +1010,19 @@ var sysArr;
 					   client.query({text: "DELETE FROM inner_worlds WHERE u_id=$1;",values: [getCookies(req)['u_id']]}, (err, result) => {
 						if (err){
 							console.log(err.stack);
-							res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+							res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 						}
 							client.query({text: "DELETE FROM sys_rules WHERE u_id=$1;",values: [getCookies(req)['u_id']]}, (err, result) => {
 							if (err){
 								console.log(err.stack);
-								res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+								res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 							}
 							
 							// Deleting from users will cascade to systems will cascade to alters will cascade to journals will cascade to posts. Hopefully.
 							client.query({text: "DELETE FROM users WHERE id=$1;",values: [getCookies(req)['u_id']]}, (err, result) => {
 							if (err){
 								console.log(err.stack);
-								res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+								res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 							}
 							// Clear all cookies/session data.
 							   
@@ -1017,7 +1066,44 @@ var sysArr;
 					}
 				});
 			}
-			res.status(200).redirect(req.get('referer'));;
+			if (req.body.newEmail){
+				// Updating email
+				client.query({text: 'UPDATE users SET email=$1 WHERE id=$2', values: [`'${Buffer.from(req.body.newEmail).toString('base64')}'`, getCookies(req)['u_id']]}, (err, result)=>{
+					if (err) {
+					  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+					} else {
+						// req.session.email= req.body.newEmail;
+						splash="Profile Updated!";
+						req.session.email= req.body.newEmail;
+						res.status(200).cookie('email',  req.body.newEmail,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).render(`pages/profile`, { session: req.session, splash:splash,cookies:req.cookies, theirEmail: req.body.newEmail, theirName: req.session.username });
+					}
+				});
+			}
+			if (req.body.newName){
+				// Updating username
+				client.query({text: 'UPDATE users SET username=$1 WHERE id=$2', values: [`'${Buffer.from(req.body.newName).toString('base64')}'`, getCookies(req)['u_id']]}, (err, result)=>{
+					if (err) {
+					  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+					} else {
+						splash="Profile Updated!";
+						req.session.username= req.body.newName;
+						res.status(200).cookie('username',  req.body.newName,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).render(`pages/profile`, { session: req.session, splash:splash,cookies:req.cookies, theirEmail: req.session.email, theirName: req.body.newName });
+					}
+				});
+			}
+			if (req.body.changePass){
+				// Updating password
+				// client.query({text: 'UPDATE users SET pass=$1 WHERE email_link=$2', values: [`'${CryptoJS.SHA3(req.body.newpass)}'`,`'${req.params.id}'`]}, (err, result)=>{
+				client.query({text: 'UPDATE users SET pass=$1 WHERE id=$2', values: [`'${CryptoJS.SHA3(req.body.newPass1)}'`, getCookies(req)['u_id']]}, (err, result)=>{
+					if (err) {
+					  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+					} else {
+						splash="Password Updated!";
+						res.status(200).render(`pages/profile`, { session: req.session, splash:splash,cookies:req.cookies, theirEmail: req.session.email, theirName: req.session.username });
+					}
+				});
+			}
+			// res.status(200).redirect(req.get('referer'));
 		  }
 		});
 	});
@@ -1052,7 +1138,7 @@ var sysArr;
 		client.query({text: 'SELECT username, email, email_link, email_pin FROM users WHERE email=$1 ', values:[`'${Buffer.from(req.body.email).toString('base64')}'`]}, (err, result)=>{
 			if (err) {
 				console.log(err.stack);
-				res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+				res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 			} else {
 				if ((result.rows).length == 0){
 					// User doesn't exist.
@@ -1106,7 +1192,7 @@ var sysArr;
 				client.query({text:`INSERT INTO sys_rules (u_id, rule) VALUES ($1, $2)`, values:[getCookies(req)['u_id'], `'${Buffer.from(req.body.rule).toString('base64')}'`]}, (err, result)=>{
 					if (err){
 						console.log(err.stack);
-						res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash, cookies:req.cookies });;
+						res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash, cookies:req.cookies });
 					}
 				});
 			} else {
@@ -1114,7 +1200,7 @@ var sysArr;
 				client.query({text:`DELETE FROM sys_rules WHERE id=$1;`, values:[getKeyByValue(req.body,"Remove")]}, (err, result)=>{
 					if (err){
 						console.log(err.stack);
-						res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash, cookies:req.cookies });;
+						res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash, cookies:req.cookies });
 					}
 				});
 			}
@@ -1461,7 +1547,7 @@ var sysArr;
 				client.query({text:'INSERT INTO inner_worlds (u_id, key, value) VALUES ($1,$2,$3);', values: [`${getCookies(req)['u_id']}`, `${Buffer.from(req.body.key).toString('base64')}`,`${Buffer.from(req.body.value).toString('base64')}`]}, (err, result)=>{
 					if (err){
 						console.log(err.stack);
-						res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+						res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 					}
 				});
 			} else {
@@ -1548,17 +1634,17 @@ var sysArr;
 				  client.query({text: "DELETE FROM journals WHERE sys_id=$1;",values: [`${req.params.alt}`]}, (err, result) => {
 					  if (err){
 						  console.log(err.stack);
-						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 					  } else {
 							  client.query({text: "DELETE FROM alters WHERE sys_id=$1;",values: [`${req.params.alt}`]}, (err, result) => {
 								  if (err){
 									  console.log(err.stack);
-									  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+									  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 								  }
 								  client.query({text: "DELETE FROM systems WHERE sys_id=$1;",values: [`${req.params.alt}`]}, (err, result) => {
 									  if (err){
 										  console.log(err.stack);
-										  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+										  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 									  }
 									  splash=`${Buffer.from(req.session.chosenSys.sys_alias, 'base64').toString()} has been permanently deleted.`;
 									  req.session.chosenSys= null;
@@ -1588,7 +1674,7 @@ var sysArr;
 				  client.query({text: "UPDATE systems SET sys_alias=$1 WHERE sys_id=$2;",values: [`'${Buffer.from(req.body.sysname).toString('base64')}'`, `${req.session.chosenSys.sys_id}`]}, (err, result) => {
 					  if (err){
 						  console.log(err.stack);
-						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 					  } else {
 						  splash=`${Buffer.from(req.session.chosenSys.sys_alias, 'base64').toString()} has been permanently deleted.`;
 						  req.session.chosenSys= null;
@@ -1720,7 +1806,7 @@ var sysArr;
 					client.query({text: "SELECT * FROM users WHERE email=$1;", values: [`'${Buffer.from(req.body.email).toString('base64')}'`]}, (err, result) => {
 						if (err) {
 						  console.log(err.stack);
-						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 					  } else {
 						req.session.alter_term= result.rows[0].alter_term;
 						req.session.system_term= result.rows[0].system_term;
@@ -1748,7 +1834,7 @@ var sysArr;
 		  client.query(query, (err, result) => {
 			  if (err) {
 				console.log(err.stack);
-				res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+				res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 			} else {
 				if (result.rows.length == 0){
 					splash= "Wrong credentials.";
@@ -1830,7 +1916,7 @@ var sysArr;
 					client.query({text: "SELECT * FROM users WHERE email=$1;", values: [`'${Buffer.from(req.body.email).toString('base64')}'`]}, (err, result) => {
 						if (err) {
 						  console.log(err.stack);
-						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 					  } else {
 						req.session.alter_term= result.rows[0].alter_term;
 						req.session.system_term= result.rows[0].system_term;
@@ -1859,7 +1945,7 @@ var sysArr;
      client.query(query, (err, result) => {
          if (err) {
            console.log(err.stack);
-           res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });;
+           res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
        } else {
 		   if (result.rows.length == 0){
 			   splash= "Wrong credentials.";
@@ -1947,6 +2033,7 @@ Disallow: /del-mood
 Disallow: /journal
 Disallow: /comm
 Disallow: /profile
+Disallow: /users
 Allow: /
 Allow: /signup
 Allow: /login

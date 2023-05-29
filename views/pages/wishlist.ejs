@@ -13,8 +13,8 @@
                 delete_forever
                 </span> button to delete the wish.</p>
             <h3>Make a Wish</h3>
-            <form method="post">
-                <input name="wish">
+            <form method="post" autocomplete="off">
+                <input name="wish" type="text">
                 <input type="submit" name="createWish" value="Submit Wish">
             </form>
             <% if (wishArr.length > 0) { %> 

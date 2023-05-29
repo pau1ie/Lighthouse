@@ -119,6 +119,11 @@ article:last-child{
     border: 0;
 }
 
+button:disabled, input[type=submit]:disabled{
+    background: silver;
+    color: grey;
+}
+
 .navel:hover {
     background: var(--col3);
     border-radius: 20px;
