@@ -302,6 +302,13 @@ app.locals.pluralize= pluralize;
 	req.next();
   });
 
+ if (process.env.maintenance== "true"){
+	// Maintenance mode on.
+	app.use(function(req,res){
+		return res.render(`pages/maintenance`, { session: req.session, splash:splash, cookies:req.cookies });
+});
+	
+ }
   // PAGES- GET REQUEST
   app.get('/', (req, res) => {
 	  client.query({text: "SELECT COUNT(id) FROM users;",values: []}, (err, result) => {
