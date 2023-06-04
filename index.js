@@ -457,7 +457,7 @@ app.get('/thank-you', (req, res, next) => {
   });
 
   app.get('/logout', (req, res)=>{
-     splash= `See you soon, ${req.session.username || randomise(['friend.', 'buddy.', "okay?", "now. Don't be a stranger."])}`;
+     splash= `See you soon, ${req.session.username || "friend"}`;
 	 req.session.destroy();
 	 res.clearCookie('loggedin');
 	 res.clearCookie('username');
@@ -681,7 +681,7 @@ var sysArr;
 			  // chosenSys.sys_id, chosenSys.user_id, chosenSys.sys_alias
 		  }
 		});
-			client.query({text: "SELECT alters.alt_id, alters.sys_id, alters.name, alter_moods.mood FROM alters LEFT JOIN alter_moods ON alters.alt_id = alter_moods.alt_id WHERE alters.sys_id=$1;",values: [`${req.params.id}`]}, (err, result) => {
+			client.query({text: "SELECT alters.alt_id, alters.sys_id, alters.name, alters.pronouns, alter_moods.mood FROM alters LEFT JOIN alter_moods ON alters.alt_id = alter_moods.alt_id WHERE alters.sys_id=$1;",values: [`${req.params.id}`]}, (err, result) => {
 	            if (err) {
 	              console.log(err.stack);
 	              res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
@@ -689,7 +689,7 @@ var sysArr;
 	              req.session.alters = [];
 	              for (i in (result.rows)){
 	                //   console.table(result.rows[i]);
-	                  (req.session.alters).push({name: Buffer.from(result.rows[i].name, 'base64').toString(), id: result.rows[i].sys_id, a_id: result.rows[i].alt_id, mood: result.rows[i].mood})
+	                  (req.session.alters).push({name: Buffer.from(result.rows[i].name, 'base64').toString(), id: result.rows[i].sys_id, a_id: result.rows[i].alt_id, mood: result.rows[i].mood, pronouns: result.rows[i].pronouns})
 	              }
 	          }
 			  // console.table(req.session.sys);
@@ -742,7 +742,7 @@ var sysArr;
   app.get("/edit-alter/:id", (req, res, next)=>{
 
 	if (isLoggedIn(req)){
-		client.query({text: "SELECT alters.name, alters.alt_id, alters.sys_id, systems.sys_alias,alters.triggers_pos, alters.triggers_neg, alters.age,alters.likes,alters.dislikes,alters.job,alters.safe_place,alters.wants,alters.acc,alters.notes,alters.type,alters.img_url FROM alters INNER JOIN systems ON systems.sys_id = alters.sys_id WHERE alters.alt_id=$1",values: [`${req.params.id}`]}, (err, result) => {
+		client.query({text: "SELECT alters.pronouns, alters.name, alters.alt_id, alters.sys_id, systems.sys_alias,alters.triggers_pos, alters.triggers_neg, alters.age,alters.likes,alters.dislikes,alters.job,alters.safe_place,alters.wants,alters.acc,alters.notes,alters.type,alters.img_url FROM alters INNER JOIN systems ON systems.sys_id = alters.sys_id WHERE alters.alt_id=$1",values: [`${req.params.id}`]}, (err, result) => {
 			if (err) {
 			  console.log(err.stack);
 			  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
@@ -1497,6 +1497,14 @@ var sysArr;
 
 		// Awful execution but oh well.
 		// res.render('pages/loading');
+		if (req.body.pronouns){
+			client.query({text: "UPDATE alters SET pronouns=$1 WHERE alt_id=$2",values: [`'${Buffer.from(req.body.pronouns).toString('base64')}'`,`${req.params.id}`]}, (err, result) => {
+				if (err) {
+				  console.log(err.stack);
+				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+			  }
+			});
+		}
 		if (req.body.age){
 			client.query({text: "UPDATE alters SET age=$1 WHERE alt_id=$2",values: [req.body.age,`${req.params.id}`]}, (err, result) => {
 				if (err) {

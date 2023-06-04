@@ -150,7 +150,7 @@ td{
         <hr>
         <section>
             <!-- For adding alter info. -->
-            <h2>About <%= Buffer.from(session.chosenAlter.name, 'base64').toString() %></h2>
+            <h2>About <%= Buffer.from(session.chosenAlter.name, 'base64').toString() %> <% if (session.chosenAlter.pronouns){ %> (<%- Buffer.from(session.chosenAlter.pronouns, "base64").toString() %>) <% } %></h2>
             <% if (session.chosenAlter.img_url) { %>
             <img src="<%= Buffer.from(session.chosenAlter.img_url, 'base64').toString() %>" class="medimg" style="float:left; margin-right:calc(1em);">
             <% } else { %> 

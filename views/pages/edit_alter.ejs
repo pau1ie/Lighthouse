@@ -38,6 +38,8 @@
             <h2>Edit <%= Buffer.from(session.chosenAlter.name, 'base64').toString() %></h2>
             <form method="post">
                 <div class="column">
+                <label for="pronouns" >Pronouns</label>
+                <input type="text" name="pronouns" <% if (session.chosenAlter.pronouns){ %> placeholder="<%= Buffer.from(session.chosenAlter.pronouns, "base64").toString() %>" <% } %>>
                 <label for="age" >Perceived Age</label>
                 <input type="number" name="age" value="<%= session.chosenAlter.age %>">
                 <label for="type" id="typeinfo"><%= capitalise(session.alter_term) %> Type</label>
