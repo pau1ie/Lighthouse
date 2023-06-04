@@ -7,11 +7,14 @@
         <%- include ("../partials/nav.ejs") %>
         <div id="wrapper">
             <h2>Import from Pluralkit</h2>
-            <p>Use Pluralkit? We can fetch your <strong>publicly available <%- pluralize(session.alter_term) %></strong> and add them to your account. Importing will create a new <%- session.system_term %> that can be renamed on the <a href="/system">My <%- capitalise(session.system_term) %></a> page</a>.</p>
+            <p>Use Pluralkit? We can fetch your <%- pluralize(session.alter_term) %> and add them to your account. Importing will create a new <%- session.system_term %> that can be renamed on the <a href="/system">My <%- capitalise(session.system_term) %></a> page</a>.</p>
             <p><em>Don't know your system ID?</em> Direct message "pk;s" to Pluralkit, or type "pk;s" in a channel that Pluralkit can view.</p>
+            <p>Adding your Pluralkit token is completely optional. Adding your token allows Lighthouse to fetch your private alters as well. We do not store this token. <strong>Do not share your token with anyone you do not trust.</strong></p>
             <form>
                 <label for="pid">Pluralkit system ID</label>
-                <input type="text" minlength="5" maxlength="5" id="pid" required>
+                
+                <input type="text" minlength="5" maxlength="5" id="pid" required autocomplete="off"><br>
+                <label for="pktoken">Optional: Pluralkit token </label><input type="text" id="pktoken" autocomplete="off"><br>
                 <button onclick="getPK()">Fetch from Pluralkit</button>
             </form>
             <span id="Wait"></span>
@@ -39,16 +42,29 @@
             $("#roster").html("");
             // console.log(pkID);
             // Go grab pluralkit
-            let response = await fetch(`https://api.pluralkit.me/v2/systems/${pkID}/members`);
+
+            // Conditional for if they provided a token or not!
+            let response = await fetch(`https://api.pluralkit.me/v2/systems/${pkID}/members`, { 
+                headers: { 
+                    "Authorization": $("#pktoken").val() 
+                } 
+            });
             let body = await response.text();
             let sysInfo = JSON.parse(body);
             console.log(sysInfo.message);
-            $("#Wait").html("From Pluralkit:");
+            $("#Wait").html("<h3>Lighthouse will import:</h3>");
+            $("#pid").val("")
+            $("#pktoken").val("")
             let systemArray = new Array();
             if (!sysInfo.message){
                 // System found.
                 for (i in sysInfo){
-                $("#roster").append(`<li>${sysInfo[i].display_name || sysInfo[i].name} <img src="${sysInfo[i].avatar_url}" class="vtinyimg"></li>`);
+                // $("#roster").append(`<li>${sysInfo[i].display_name || sysInfo[i].name} <img src="${sysInfo[i].avatar_url}" class="vtinyimg"></li>`).fadeIn("slow");
+                $('#roster')
+                    .append($(`<li>${sysInfo[i].display_name || sysInfo[i].name} <img src="${sysInfo[i].avatar_url}" class="vtinyimg"></li>`)
+                        .hide()
+                        .fadeIn(500)
+                    );
                 systemArray.push({name: sysInfo[i].display_name || sysInfo[i].name, img: sysInfo[i].avatar_url});
                 $("#altField").val(`${JSON.stringify(systemArray)}`);
             }

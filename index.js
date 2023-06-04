@@ -12,7 +12,9 @@ const PKAPI = require("pkapi.js");
 const fs = require('fs');
 const nodemailer = require('nodemailer');
 const ejs = require('ejs');
-var pluralize = require('pluralize')
+var pluralize = require('pluralize');
+var pjson = require('./package.json');
+console.log( `Lighthouse v${pjson.version}`);
 
 const tuning= require('./js/genVars.js');
 
@@ -340,7 +342,7 @@ app.locals.pluralize= pluralize;
 			res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash, cookies:req.cookies });
 		} else {
 			var userCount= result.rows[0].count;
-			res.render(`pages/index`, { session: req.session, splash:splash, userCount:userCount, cookies:req.cookies });
+			res.render(`pages/index`, { session: req.session, splash:splash, userCount:userCount, cookies:req.cookies, version: pjson.version });
 	        splash=null;
 		}
 	});
@@ -1717,7 +1719,7 @@ var sysArr;
               console.log(err.stack);
               res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 		  } else {
-			  console.table(result.rows[0]);
+			//   console.table(result.rows[0]);
 			  if (getCookies(req)['u_id']= result.rows[0].user_id){
 				  // DELETE FROM alters WHERE sys_id=$1;
 				  // posts, journals, alters, system
