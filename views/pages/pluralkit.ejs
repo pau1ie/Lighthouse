@@ -49,7 +49,8 @@
             // Conditional for if they provided a token or not!
             let response = await fetch(`https://api.pluralkit.me/v2/systems/${pkID}/members`, { 
                 headers: { 
-                    "Authorization": $("#pktoken").val() 
+                    "Authorization": $("#pktoken").val(),
+                    "User-Agent": "Lighthouse/Web App (www.writelighthouse.com, dee_deyes@writelighthouse.com, put here for contact if PK devs need to)" 
                 } 
             });
             let body = await response.text();
