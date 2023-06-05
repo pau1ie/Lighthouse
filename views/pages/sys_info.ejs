@@ -70,6 +70,11 @@ var journSkin=[
     {name: "Scallop", file: "scallop"},
     {name: "Seahorse", file: "seahorse"},
     {name: "Snail Shell", file: "snail-shell"},
+    {name: "Compass", file: "compass"},
+    {name: "Ship", file: "ship-icon"},
+    {name: "Trident", file: "trident"},
+    {name: "Message in a Bottle", file: "bottle"},
+    {name: "Beach", file: "island"},
 ]
     %>
     <div id="wrapper">
@@ -80,9 +85,9 @@ var journSkin=[
             <h2><% if (session.chosenSys.icon) { %> <img src="/img/svg/<%- session.chosenSys.icon %>.svg" class="vtinyimg"> <% } %>About <%= Buffer.from(session.chosenSys.sys_alias, 'base64').toString() %></h2>
             <p>This <%= session.system_term %> has <%= alterArr.length %> <% if (alterArr.length == 1){ %><%= session.alter_term %><% } else { %><%= pluralize(session.alter_term)%><% } %>.</p>
             <% if (alterArr.length > 0){ %>
-            <div class="grid" style="grid-gap:1em;">
+            <div class="grid">
                 <% for ( i in alterArr) {  %>
-                    <a href="/alter/<%= alterArr[i].a_id %>" ><%= alterArr[i].name %> <% if (alterArr[i].mood) { %><%- moods[alterArr[i].mood].emoji %><% } %><% if (alterArr[i].pronouns){ %><br><small>(<%- Buffer.from(alterArr[i].pronouns, "base64").toString() %>)</small><% } %></a>
+                    <a href="/alter/<%= alterArr[i].a_id %>"><%= alterArr[i].name %> <% if (alterArr[i].mood) { %><%- moods[alterArr[i].mood].emoji %><% } %><% if (alterArr[i].pronouns){ %><br><small>(<%- Buffer.from(alterArr[i].pronouns, "base64").toString() %>)</small><% } %></a>
                 <% } %>
             </div>
             <% } %>
