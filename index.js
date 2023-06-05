@@ -1709,7 +1709,7 @@ var sysArr;
 						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 					  } else {
 						//   splash= req.flash("flash",`${Buffer.from(req.session.chosenSys.sys_alias, 'base64').toString()} has been permanently deleted.`);
-						  req.flash("flash", message.system.deleted);
+						  req.flash("flash", strings.system.updated);
 						  req.session.chosenSys= null;
 						  res.redirect("/system");
 					  }
@@ -1896,7 +1896,8 @@ var sysArr;
 				// console.log("Let cookies expire at end of session.");
 				res.cookie('loggedin', true, {httpOnly: true }).cookie('username',  Buffer.from(result.rows[0].username, 'base64').toString(),{httpOnly: true }).cookie('u_id', result.rows[0].id,{httpOnly: true }).cookie('alter_term', result.rows[0].alter_term,{httpOnly: true }).cookie('system_term', result.rows[0].system_term,{httpOnly: true }).cookie('is_legacy', result.rows[0].is_legacy,{httpOnly: true });
 			  }
-						 res.redirect(302, '/');
+			  	req.flash("flash", strings.account.loggedin);
+				 res.redirect(302, '/');
 				}
 			}
 		});
