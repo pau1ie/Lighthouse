@@ -1,0 +1,23 @@
+{
+    "test": "Hola Mundo",
+    "alter": {
+        "created": "¡Personalidad añadida con éxito!",
+        "updated": "¡Personalidad actualizada con éxito!",
+        "deleted": "Personalidad eliminada con éxito."
+    },
+    "mood":{
+        "updated": "¡Estado de ánimo actualizado!",
+        "deleted": "Estado de ánimo despejado."
+    },
+    "system": {
+        "created": "System created!",
+        "updated": "System updated!",
+        "deleted": "Deleted system.",
+        "imported": "Imported from Pluralkit successfully."
+    },
+    "account":{
+        "created": "Thank you for signing up to Lighthouse! You are now logged in.",
+        "updated": "Settings updated!",
+        "deleted": "So sorry to see you go. You can sign up again at any time."
+    }
+}

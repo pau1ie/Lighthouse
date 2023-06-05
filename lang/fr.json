@@ -1,0 +1,23 @@
+{
+    "test": "Bonjour le monde",
+    "alter": {
+        "created": "Persona ajouté avec succès !",
+        "updated": "Persona mis à jour avec succès !",
+        "deleted": "Persona supprimé."
+    },
+    "mood":{
+        "updated": "L'humeur de Persona mise à jour !",
+        "deleted": "L'humeur de Persona a été supprimée."
+    },
+    "system": {
+        "created": "Système créé !",
+        "updated": "Système mis à jour !",
+        "deleted": "Système supprimé.",
+        "imported": "Importé depuis Pluralkit avec succès."
+    },
+    "account":{
+        "created": "Merci de vous être inscrit à Lighthouse ! Vous êtes maintenant inscrit.",
+        "updated": "Paramètres mis à jour!",
+        "deleted": "Désolé de te voir partir. Vous pouvez vous réinscrire à tout moment."
+    }
+}

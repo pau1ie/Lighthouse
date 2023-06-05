@@ -18,6 +18,7 @@ var flash = require('express-flash');
 console.log( `Lighthouse v${pjson.version}`);
 
 const tuning= require('./js/genVars.js');
+const strings= require("./lang/en.json")
 
 require('dotenv').config();
 
@@ -57,48 +58,6 @@ const transporter = nodemailer.createTransport({
     pass: process.env.gmail_pass,
   },
 });
-
-// // sendEmail(res, receiver, subject, content, webpage, username)
-// const sendEmail = (res, receiver, subject, content, webpage, username) => {
-// 	res.render(`pages/email-goodbye`, { session: req.session, splash:splash, cookies:req.cookies, alias: username || randomise(["Buddy", "Friend", "Pal"]) }, (err, data) => {
-// 		if (err) {
-// 		  console.log(err);
-// 		} else {
-// 		  var mailOptions = {
-// 			from: '"Lighthouse" <dee_deyes@writelighthouse.com>',
-// 			to: receiver,
-// 			subject: subject,
-// 			html: data
-// 		  };
-	
-// 		  transporter.sendMail(mailOptions, (error, info) => {
-// 			if (error) {
-// 			  return console.log(error);
-// 			}
-// 			// console.log('Message sent: %s', info.messageId);
-// 		  });
-// 		}
-// 	  });
-// 	// ejs.renderFile(__dirname + '/' + webpage +'.ejs', { receiver, content }, (err, data) => {
-// 	//   if (err) {
-// 	// 	console.log(err);
-// 	//   } else {
-// 	// 	var mailOptions = {
-// 	// 	  from: 'email_username',
-// 	// 	  to: receiver,
-// 	// 	  subject: subject,
-// 	// 	  html: data
-// 	// 	};
-  
-// 	// 	transport.sendMail(mailOptions, (error, info) => {
-// 	// 	  if (error) {
-// 	// 		return console.log(error);
-// 	// 	  }
-// 	// 	  console.log('Message sent: %s', info.messageId);
-// 	// 	});
-// 	//   }
-// 	// });
-//   };
 
 function getRandomInt(min, max){
 	min = Math.ceil(min);
@@ -211,6 +170,7 @@ app.locals.journalArr= [
 	{val: '17', c: "Summer"}, 
 	{val: '18', c: "Flowers"}, 
 ]
+app.locals.strings=strings;
 
 app.locals.legacyJournal= {val: '19', c: "Legacy"};
 app.locals.moods=[
@@ -444,7 +404,7 @@ app.get('/thank-you', (req, res, next) => {
   });
 
   app.get('/logout', (req, res)=>{
-     splash= req.flash("flash",`See you soon, ${req.session.username || "friend"}`);
+     req.flash("flash", strings.account.loggedout);
 	 req.session.destroy();
 	 res.clearCookie('loggedin');
 	 res.clearCookie('username');
@@ -500,7 +460,7 @@ app.get('/wish/:id', (req, res) => {
 				console.log(err.stack);
 					res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 			}
-			splash=req.flash("flash","Wish granted!");
+			req.flash("flash", strings.wish.granted);
 			res.redirect("/wish");
 		});
 		
@@ -514,7 +474,7 @@ app.get('/wish-d/:id', (req, res) => {
 				console.log(err.stack);
 					res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 			}
-			splash=req.flash("flash","Wish deleted!");
+			splash=req.flash("flash", strings.wish.deleted);
 			
 		});
 		res.redirect("/wish");
@@ -678,8 +638,10 @@ var sysArr;
 	                //   console.table(result.rows[i]);
 	                  (req.session.alters).push({name: Buffer.from(result.rows[i].name, 'base64').toString(), id: result.rows[i].sys_id, a_id: result.rows[i].alt_id, mood: result.rows[i].mood, pronouns: result.rows[i].pronouns})
 	              }
+				  (req.session.alters).sort((a, b) => a.name.localeCompare(b.name))
 	          }
 			  // console.table(req.session.sys);
+			  (req.session.alters).sort((a, b) => a.distance - b.distance)
 	          res.render(`pages/sys_info`, { session: req.session, splash:splash, alterArr: req.session.alters,cookies:req.cookies});
 	        });
 
@@ -1014,7 +976,7 @@ var sysArr;
 					}
 					req.session.chosenAlter.mood= req.body.mood;
 					req.session.chosenAlter.reason=req.body.reason;
-						splash=req.flash("flash","Mood updated!");
+						req.flash("flash",(strings.mood.updated));
 						res.redirect(302,`/alter/${req.params.alt}`);
 					});
 			} else {
@@ -1026,7 +988,7 @@ var sysArr;
 					// Might as well change session vars here??? idk
 					req.session.chosenAlter.mood= req.body.mood;
 					req.session.chosenAlter.reason=req.body.reason;
-						res.locals.messages=req.flash("flash","Mood updated!");
+						req.flash("flash",strings.mood.updated);
 						res.redirect(302,`/alter/${req.params.alt}`);
 					});
 			}
@@ -1067,15 +1029,6 @@ var sysArr;
 						  });
 						}
 					  });
-					//    transporter.sendMail({
-					// 			  from: '"Lighthouse" <dee_deyes@writelighthouse.com>', // sender
-					// 			  to: Buffer.from(result.rows[0].email, 'base64').toString(),
-					// 			  subject: "Account Deletion on Lighthouse", // Subject line
-					// 			  text: "Hey, " + Buffer.from(result.rows[0].username, 'base64').toString() + ". This is just a heads up email that you opted to delete your account from Lighthouse. This is an irreversible action. Sorry to see you go! -Dee", // plain text body
-					// 			  html: "<p>Hey, <b>" + Buffer.from(result.rows[0].username, 'base64').toString() + "</b>. This is just a heads up email that you opted to delete your account from Lighthouse. This is an <strong>irreversible</strong> action. Sorry to see you go! -Dee", // html body
-					// 		  }).then(info => {
-					// 			  // console.log({info});
-					// 		  }).catch(console.error);
 					   client.query({text: "DELETE FROM inner_worlds WHERE u_id=$1;",values: [getCookies(req)['u_id']]}, (err, result) => {
 						if (err){
 							console.log(err.stack);
@@ -1095,7 +1048,7 @@ var sysArr;
 							}
 							// Clear all cookies/session data.
 							   
-							   splash= req.flash("flash",`Sorry to see you go. You can remake your account at any time.`);
+							   req.flash("flash", strings.account.deleted);
 							   req.session.destroy();
 							   res.clearCookie('loggedin');
 							   res.clearCookie('username');
@@ -1142,7 +1095,7 @@ var sysArr;
 					  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 					} else {
 						// req.session.email= req.body.newEmail;
-						splash=req.flash("flash","Profile Updated!");
+						req.flash("flash", strings.account.updated);
 						req.session.email= req.body.newEmail;
 						res.status(200).cookie('email',  req.body.newEmail,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).render(`pages/profile`, { session: req.session, splash:splash,cookies:req.cookies, theirEmail: req.body.newEmail, theirName: req.session.username });
 					}
@@ -1154,7 +1107,7 @@ var sysArr;
 					if (err) {
 					  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 					} else {
-						splash=req.flash("flash","Profile Updated!");
+						req.flash("flash", strings.account.updated);
 						req.session.username= req.body.newName;
 						res.status(200).cookie('username',  req.body.newName,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).render(`pages/profile`, { session: req.session, splash:splash,cookies:req.cookies, theirEmail: req.session.email, theirName: req.body.newName });
 					}
@@ -1599,7 +1552,9 @@ var sysArr;
 						  console.log(err.stack);
 						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 					  }
+					  
 				  });
+				  req.flash("flash",strings.system.updated);
 				}
 				if (req.body.submit){
 					client.query({text: "INSERT INTO alters (sys_id, name) VALUES ($1, $2)",values: [`${req.session.chosenSys.sys_id}`, `'${Buffer.from(req.body.altname).toString('base64')}'`]}, (err, result) => {
@@ -1608,6 +1563,7 @@ var sysArr;
 						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 					  }
 				  });
+				  req.flash("flash",strings.alter.created);
 				}
 				res.redirect(`/system/${req.session.chosenSys.sys_id}`);
 				
@@ -1722,7 +1678,7 @@ var sysArr;
 										  console.log(err.stack);
 										  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 									  }
-									  splash= req.flash("flash",`${Buffer.from(req.session.chosenSys.sys_alias, 'base64').toString()} has been permanently deleted.`);
+									  
 									  req.session.chosenSys= null;
 									  res.redirect("/system");
 								  });
@@ -1752,7 +1708,8 @@ var sysArr;
 						  console.log(err.stack);
 						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 					  } else {
-						  splash= req.flash("flash",`${Buffer.from(req.session.chosenSys.sys_alias, 'base64').toString()} has been permanently deleted.`);
+						//   splash= req.flash("flash",`${Buffer.from(req.session.chosenSys.sys_alias, 'base64').toString()} has been permanently deleted.`);
+						  req.flash("flash", message.system.deleted);
 						  req.session.chosenSys= null;
 						  res.redirect("/system");
 					  }
@@ -1774,7 +1731,7 @@ var sysArr;
 					  console.log(err.stack);
 					  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 				  } else {
-					splash= req.flash("flash","Added your wish to the list!");
+					splash= req.flash("flash", strings.wish.created);
 					res.redirect(req.get('referer'));
 						splash=null;
 				  }
@@ -1821,7 +1778,7 @@ var sysArr;
 								}
 								
 							}
-							splash= req.flash("flash","System Added.");
+							req.flash("flash", strings.system.created);
 							res.redirect("/system");
 						}
 					});
@@ -1847,7 +1804,7 @@ var sysArr;
             // console.log(res.rows)
             if (result.rows.length > 0){
                 console.log("Already exists.");
-                splash= req.flash("flash","<strong>Uh oh!</strong> That username or email is already in use. <a href='/login'>Do you need to log in instead?</a>");
+                req.flash("flash", strings.account.alreadyExists);
                 res.render(`pages/signup`, { session: req.session, splash:splash,cookies:req.cookies });
             } else {
                 // Write to the db
@@ -1900,7 +1857,8 @@ var sysArr;
 						
 					  }
 					});
-					splash= req.flash("flash",`Welcome to Lighthouse, ${req.body.username}! You are now logged in.`);
+					// req.flash("flash",`Welcome to Lighthouse, ${req.body.username}! You are now logged in.`);
+					req.flash("flash", strings.account.created)
 						res.redirect("/");
                   }
               });
@@ -1922,7 +1880,7 @@ var sysArr;
 				res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 			} else {
 				if (result.rows.length == 0){
-					splash= req.flash("flash","Wrong credentials.");
+					req.flash("flash", strings.account.incorrect);
 					res.redirect(req.get('referer'));
 				} else {
 					 req.session.alter_term= result.rows[0].alter_term;
@@ -2032,7 +1990,7 @@ var sysArr;
            res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
        } else {
 		   if (result.rows.length == 0){
-			   splash= req.flash("flash","Wrong credentials.");
+			   req.flash("flash", strings.account.incorrect);
 			   res.redirect('/login');
 		   } else {
 				req.session.alter_term= result.rows[0].alter_term;
