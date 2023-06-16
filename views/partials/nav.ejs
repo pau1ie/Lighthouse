@@ -3,7 +3,7 @@
 
   <div id="logo" style="display: inline-block;"><a href="/"><img style="vertical-align:middle; margin-right: 10px;" src="/img/logo.png" width="48px" alt="Lighthouse logo"><br/><span id="logoname">Lighthouse<br/>
     <% if (cookies.loggedin) { %>
-      <sup>Hello, <%= cookies.username %>!</sup>
+      <sup>Hi, <%= truncate(cookies.username,20) %>!</sup>
     <% } else { %>
     <sup>Journal Together</sup>
       <% } %>
@@ -38,7 +38,7 @@
     </span></div>
   <ul class="menu" id="mobilenav" style="display:none;">
     <% if (cookies.loggedin) { %>
-      <sup>Hello, <%= cookies.username %>!</sup>
+      <sup>Hello, <%= capitalise(cookies.username) %>!</sup>
       <% } else { %>
       <sup>Journal Together</sup>
         <% } %>

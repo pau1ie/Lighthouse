@@ -184,6 +184,11 @@ app.locals.moods=[
 app.locals.randomise= function (arr){
 	return arr[Math.floor(Math.random()*arr.length)];
 }
+
+app.locals.truncate= function(str, n){
+  return (str.length > n) ? str.slice(0, n-1) + '...' : str;
+};
+
 function encryptWithAES(text){
 	const passphrase = process.env.cryptkey;
 	return CryptoJS.AES.encrypt(text, passphrase).toString();
@@ -1205,15 +1210,6 @@ var sysArr;
 							  });
 							}
 						  });
-						// transporter.sendMail({
-						// 	from: '"Lighthouse" <dee_deyes@writelighthouse.com>', // sender
-						// 	to: Buffer.from(req.session.user.email, 'base64').toString(),
-						// 	subject: "Forgot your password?", // Subject line
-						// 	text: "Hey, " + Buffer.from(req.session.user.username, 'base64').toString() + ". Did you forget your password to Lighthouse? No worries. Follow the link provided and don't forget the PIN in this email! www.writelighthouse.com/reset/" + (req.session.user.email_link).replace(/'/gi, '') + " . PIN: " + req.session.user.email_pin + ". If you didn't request this password change, disregard this email. The PIN will be required to change the password. Thanks! -Dee", // plain text body
-						// 	html: "<p>Hey, <b>" + Buffer.from(req.session.user.username, 'base64').toString() + "</b>. Did you forget your password to Lighthouse? No worries.</p><p>Follow the link provided and don't forget the PIN in this email!</p><p><a href= \"www.writelighthouse.com/reset/" + (req.session.user.email_link).replace(/'/gi, '') + "\">www.writelighthouse.com/reset/" + (req.session.user.email_link).replace(/'/gi, '') + "</a></p><p>PIN: <b>" + req.session.user.email_pin + "</b>.</p><p>If you didn't request this password change, disregard this email. The PIN will be required to change the password. Thanks! -Dee</p>", // html body
-						// }).then(info => {
-						// 	// console.log({info});
-						// }).catch(console.error);
 					});
 				}
 
