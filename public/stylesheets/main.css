@@ -344,6 +344,7 @@ footer{
     padding: calc(2em);
     border: 2px solid var(--col1);
     border-radius: 15px;
+    margin: calc(1em) auto auto auto;
 }
 
 .editbtn, .deletebtn {

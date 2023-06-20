@@ -42,7 +42,7 @@
             <form method="post">
                 <div class="column">
                 <label for="name" >Name</label>
-                <input type="text" name="name" <% if (session.chosenAlter.name){ %> value="<%= Buffer.from(session.chosenAlter.name, "base64").toString() %>" <% } %>>
+                <input type="text" name="name" required <% if (session.chosenAlter.name){ %> value="<%= Buffer.from(session.chosenAlter.name, "base64").toString() %>" <% } %>>
                 <label for="pronouns" >Pronouns</label>
                 <input type="text" name="pronouns" <% if (session.chosenAlter.pronouns){ %> value="<%= Buffer.from(session.chosenAlter.pronouns, "base64").toString() %>" <% } %>>
                 <label for="age" >Perceived Age</label>

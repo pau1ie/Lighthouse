@@ -25,7 +25,32 @@ require('dotenv').config();
 function getKeyByValue(object, value) {
 	return Object.keys(object).find(key => object[key] === value);
   }
-  
+
+  /**
+ * @param query- What you're fetching info on: Alters, Systems, Groups, etc.
+ * @param id- The id of the information you're fetching. Usually a system id or alter id 
+ */
+  async function getPK(query, id){
+	// Go grab pluralkit
+	var fetchURL;
+	switch (query){
+		case "alter":
+			fetchURL= `https://api.pluralkit.me/v2/members/${id}`;
+			break;
+		default:
+			// Members in a system is default.
+			fetchURL= `https://api.pluralkit.me/v2/systems/${id}/members`;
+			break;
+	}
+	let response = await fetch(fetchURL, { 
+		headers: {
+			"User-Agent": "Lighthouse/Web App (www.writelighthouse.com, dee_deyes@writelighthouse.com, put here for contact if PK devs need to)" 
+		} 
+	});
+	// return await JSON.parse(response.text());
+	return await response.text();
+}
+ 
 
 const getCookies = (req) => {
  // We extract the raw cookies from the request headers
@@ -69,10 +94,8 @@ function isLoggedIn(req){
   return req.cookies.loggedin == 'true';
 }
 
-function idCheck(req, str){
-	// does str argument match getCookies(req)['u_id']?
-	// Use this to check before POST requests that affect systems.
-	return getCookies(req)['u_id']== str;
+function idCheck(req){
+	return getCookies(req)['u_id']== req.session.u_id;
 }
 
 
@@ -228,6 +251,20 @@ app.locals.pluralize= pluralize;
   app.all('*', (req, res) => {
 	// Loads before all other routes.
 	if (isLoggedIn(req)){
+		if (!req.session.u_id){
+			// Grab their IDs real quick.
+		client.query({text: "SELECT * FROM users WHERE id=$1;",values: [getCookies(req)['u_id']]}, (err, result) => {
+			if (err) {
+			console.log(err.stack);
+			res.redirect("/");
+			req.flash("flash", strings.account.sessionExpired);
+			} else{
+				// Let's grab IDs while we're at it.
+				req.session.u_id= result.rows[0].id;
+			}
+		});
+		}
+		
 		if (!req.session.system_term){
 			// Is it in their cookies?
 			if (getCookies(req)['system_term']){
@@ -258,13 +295,17 @@ app.locals.pluralize= pluralize;
 						if (err) {
 						  console.log(err.stack);
 						  req.session.alter_term="alter";
+					  } else{
+						if (result.rows.length==0){
+							// No match.
+							req.session.alter_term= "alter";
+						} else {
+							req.session.alter_term= result.rows[0].alter_term;
+						}
+						// Let's grab IDs while we're at it.
+						req.session.id= result.rows[0].id;
 					  }
-					  if (result.rows.length==0){
-						// No match.
-						req.session.alter_term= "alter";
-					  } else {
-						req.session.alter_term= result.rows[0].alter_term;
-					  }
+
 					});
 			}
 		}
@@ -676,18 +717,24 @@ var sysArr;
 		 client.query({text: "SELECT alter_moods.*, alters.*, systems.sys_alias FROM alters INNER JOIN systems ON systems.sys_id = alters.sys_id LEFT JOIN alter_moods ON alters.alt_id = alter_moods.alt_id WHERE alters.alt_id=$1;",values: [`${req.params.id}`]}, (err, result) => {
 			 if (err) {
 			   console.log(err.stack);
-			   res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+			   console.log("Error with alter moods query.");
+			   return res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 		   } else {
-			   req.session.chosenAlter = result.rows[0];
+			try{
+				req.session.chosenAlter = result.rows[0];
 			   if (req.session.chosenAlter.reason){
 				req.session.chosenAlter.reason = `${decryptWithAES(result.rows[0].reason)}`;
 			   }
+			} catch (e){
+				console.log("No mood.")
+			}
 			   
 		   }
 		   client.query({text: "SELECT * FROM journals WHERE alt_id=$1;",values: [`${req.params.id}`]}, (err, nresult) => {
 			   if (err) {
 				  console.log(err.stack);
-				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+				  console.log("Error with alter journals query.");
+				 return res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 			  } else {
 				  req.session.altJournal = nresult.rows;
 			  }
@@ -695,7 +742,8 @@ var sysArr;
 				client.query({text: "SELECT * FROM systems WHERE user_id=$1;",values: [`${getCookies(req)['u_id']}`]}, (err, result) => {
 	 			 if (err) {
 	 			   console.log(err.stack);
-	 			   res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+				   console.log("Error with alter's system query.");
+	 			  return res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 	 		   } else {
 	 			   req.session.sysList = result.rows;
 	 		   }
@@ -1817,47 +1865,96 @@ var sysArr;
 
 	app.post('/pluralkit', (req, res)=> {
 		if (isLoggedIn(req)){
-			// req.body.altArr. Split by --,--
-			var splitList= (JSON.parse(req.body.altArr));
+			var splitList= new Array();
+			if (typeof req.body.alterChoice == "string"){
+				splitList= [JSON.parse(req.body.alterChoice)];
+				if (splitList[0].img== null) splitList[0].img = 'https://www.writelighthouse.com/img/avatar-default.jpg';
+				if (splitList[0].pronouns== null) splitList[0].pronouns = '';
+				if (splitList[0].birthday== null) splitList[0].birthday = '';
+			} else if(typeof req.body.alterChoice == "undefined"){
+				req.flash("flash", strings.import.PK.failure.noCheck);
+				return res.redirect("/pluralkit");
+			} else {
+				for (i in req.body.alterChoice){
+					splitList.push(JSON.parse(req.body.alterChoice[i]));
+					if (splitList[i].img== null) splitList[i].img = 'https://www.writelighthouse.com/img/avatar-default.jpg';
+					if (splitList[i].pronouns== null) splitList[i].pronouns = '';
+					if (splitList[i].birthday== null) splitList[i].birthday = '';
+				}	
+			}
+			var newSys= "Imported from Pluralkit";
+			/*
 
-			client.query({text: "INSERT INTO systems (sys_alias, user_id) VALUES ($1, $2)",values: [`'${Buffer.from("Imported from Pluralkit").toString('base64')}'`, `${getCookies(req)['u_id']}`]}, (err, result) => {
-				if (err) {
-				  console.log(err.stack);
-				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-				} else {
-					// Grab its ID.
-					client.query({text: "SELECT sys_id FROM systems WHERE sys_alias=$1 AND user_id=$2;",values: [`'${Buffer.from("Imported from Pluralkit").toString('base64')}'`, `${getCookies(req)['u_id']}`]}, (err, result) => {
+			    {
+				name: 'Imported from Pluralkit 194',
+				id: 'c2fcef33-3710-43fc-bc08-20776eb25cf0',
+				icon: null
+				}
+
+
+			*/
+			
+			if (req.body.sysLoc== "new"){ 
+				// Check for an existing "Imported from Pluralkit" system
+				client.query({text: "SELECT sys_id FROM systems WHERE sys_alias=$1 AND user_id=$2;",values: [`'${Buffer.from(newSys).toString('base64')}'`, `${getCookies(req)['u_id']}`]}, (err, result) => {
+					if (err) {
+					  console.log(err.stack);
+					  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+					} else {
+						if (result.rows.length > 0){
+							newSys+= ` ${getRandomInt(111,999)}`;
+						}
+						// Create a new system
+					client.query({text: "INSERT INTO systems (sys_alias, user_id) VALUES ($1, $2)",values: [`'${Buffer.from(newSys).toString('base64')}'`, `${getCookies(req)['u_id']}`]}, (err, result) => {
+						if (err) {
+						console.log(err.stack);
+						res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+						} else {
+							// Grab its ID.
+							client.query({text: "SELECT * FROM systems WHERE sys_alias=$1 AND user_id=$2;",values: [`'${Buffer.from(newSys).toString('base64')}'`, `${getCookies(req)['u_id']}`]}, (err, result) => {
+								if (err) {
+								console.log(err.stack);
+								res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+								} else {
+									// Add this system to the session.
+									req.session.sys.push({name: Buffer.from(result.rows[0].sys_alias, "base64").toString(), id: result.rows[0].sys_id, icon:null})
+									let newSysID= result.rows[0].sys_id;
+									// Insert each alter into this new system.
+									for (i in splitList){
+										// console.log(splitList[i].img);
+										client.query({text: "INSERT INTO alters (name, sys_id, pronouns, birthday, img_url) VALUES($1, $2, $3, $4, $5);",values: [`'${Buffer.from((splitList[i].name).replace(/⠀/g, " ")).toString('base64')}'`, newSysID,`'${Buffer.from(splitList[i].pronouns).toString('base64')}'`,`'${Buffer.from(splitList[i].birthday).toString('base64')}'`,`'${Buffer.from(splitList[i].img).toString('base64')}'`]}, (err, result) => {
+											if (err) {
+											console.log(err.stack);
+											res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+											}
+										});
+										
+									}
+									req.flash("flash", strings.system.created);
+									
+								}
+							});
+						}
+					});	
+					}
+				})
+							
+			} else {
+				// Add to a system.
+				for (i in splitList){
+					// console.log(splitList[i].img);
+					client.query({text: "INSERT INTO alters (name, sys_id, pronouns, birthday, img_url) VALUES($1, $2, $3, $4, $5);",values: [`'${Buffer.from((splitList[i].name).replace(/⠀/g, " ")).toString('base64') || ''}'`, req.body.sysLoc,`'${Buffer.from(splitList[i].pronouns).toString('base64') || ''}'`,`'${Buffer.from(splitList[i].birthday).toString('base64') || ''}'`,`'${Buffer.from(splitList[i].img).toString('base64') || 'aHR0cHM6Ly9pLmliYi5jby92a3dtV2pGL2F2YXRhci1kZWZhdWx0LmpwZw=='}'`]}, (err, result) => {
 						if (err) {
 						  console.log(err.stack);
 						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-						} else {
-							let newSysID= result.rows[0].sys_id;
-							// Insert each alter into this new system.
-							for (i in splitList){
-								// console.log(splitList[i].img);
-								if (splitList[i].img){
-									client.query({text: "INSERT INTO alters (name, sys_id, img_url) VALUES($1, $2, $3);",values: [`'${Buffer.from(splitList[i].name).toString('base64')}'`, result.rows[0].sys_id, `'${Buffer.from(splitList[i].img).toString('base64')}'`]}, (err, result) => {
-										if (err) {
-										  console.log(err.stack);
-										  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-										}
-									});
-								} else {
-									client.query({text: "INSERT INTO alters (name, sys_id) VALUES($1, $2);",values: [`'${Buffer.from(splitList[i].name).toString('base64')}'`, result.rows[0].sys_id]}, (err, result) => {
-										if (err) {
-										  console.log(err.stack);
-										  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-										}
-									});
-								}
-								
-							}
-							req.flash("flash", strings.system.created);
-							res.redirect("/system");
 						}
 					});
+					
 				}
-			});
+				req.flash("flash", strings.system.updated);
+			}
+			return res.redirect(307,"/system");
+
 		} else {
 			res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies })
 		}
@@ -1927,6 +2024,7 @@ var sysArr;
 						req.session.alter_term= result.rows[0].alter_term;
 						req.session.system_term= result.rows[0].system_term;
 						req.session.loggedin = true;
+						req.session.u_id= result.rows[0].id;
 						req.session.username = Buffer.from(result.rows[0].username, 'base64').toString();
 						
 					  }
@@ -1960,6 +2058,7 @@ var sysArr;
 					 req.session.alter_term= result.rows[0].alter_term;
 					 req.session.system_term= result.rows[0].system_term;
 					req.session.loggedin = true;
+					req.session.u_id= result.rows[0].id;
 					req.session.username = Buffer.from(result.rows[0].username, 'base64').toString();
 					req.session.is_legacy= result.rows[0].is_legacy;
 			  // getCookies(req)['u_id']= result.rows[0].id;
@@ -2071,6 +2170,7 @@ var sysArr;
 				req.session.alter_term= result.rows[0].alter_term;
 				req.session.system_term= result.rows[0].system_term;
 			   req.session.loggedin = true;
+			   req.session.u_id= result.rows[0].id;
 			   req.session.username = Buffer.from(result.rows[0].username, 'base64').toString();
 			   req.session.is_legacy= result.rows[0].is_legacy;
          // getCookies(req)['u_id']= result.rows[0].id;

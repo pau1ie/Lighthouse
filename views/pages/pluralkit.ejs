@@ -2,6 +2,11 @@
 <html lang="en" dir="ltr">
     <head>
         <%- include ("../partials/header.ejs") %>
+        <style>
+            #roster{
+                list-style-type: none;
+            }
+        </style>
     </head>
     <body>
         <%- include ("../partials/nav.ejs") %>
@@ -21,18 +26,28 @@
                 <button onclick="getPK()">Fetch from Pluralkit</button>
             </form>
             <span id="Wait"></span>
-            <ul id="roster">
 
-            </ul>
             <form method="post" id="submitAlt" style="display:none;">
-                <input id="altField" type="hidden" name="altArr"><br>
-                <input type="submit" name="fetch" value="Import">
+                <ul id="roster">
+
+                </ul>
+                <label for="sysLoc">These <%- pluralize(session.alter_term) %> will be imported into: </label>
+                <select name="sysLoc">
+                    <option value="new" selected>Create New <%- capitalise(session.system_term) %></option>
+                    <% for (i in session.sys){ %> 
+                        <option value="<%- session.sys[i].id %>"><%- session.sys[i].name %></option>
+                    <%}%>
+                </select>
+                <input type="submit" name="fetch" value="Import" id="import">
+                <p class="splash">"Create New <%- capitalise(session.system_term) %>" will create a new <%- session.system_term %> called "Imported from Pluralkit". If you already have a <%- session.system_term %> named that, 3 random numbers will be appended to the end to prevent confusion. Press "rename" next to these <%- pluralize(session.system_term) %>' names on the "My <%- capitalise(session.system_term) %>" page to rename them to whatever you like.</p>
             </form>
         </section>
     </div>
     <%- include ("../partials/footer.ejs") %>
     </body>
     <script>
+
+
         async function getPK(){
             event.preventDefault();
             $("#Wait").html(`<img src="/img/svg/bubbles.svg" class="tinyimg">`);
@@ -43,7 +58,6 @@
             } else {
                 console.log(pkID);
             $("#roster").html("");
-            // console.log(pkID);
             // Go grab pluralkit
 
             // Conditional for if they provided a token or not!
@@ -63,14 +77,28 @@
             if (!sysInfo.message){
                 // System found.
                 for (i in sysInfo){
-                // $("#roster").append(`<li>${sysInfo[i].display_name || sysInfo[i].name} <img src="${sysInfo[i].avatar_url}" class="vtinyimg"></li>`).fadeIn("slow");
-                $('#roster')
-                    .append($(`<li>${sysInfo[i].display_name || sysInfo[i].name} <img src="${sysInfo[i].avatar_url}" class="vtinyimg"></li>`)
+
+                // $('#roster')
+                //     .append($(`<li>${sysInfo[i].display_name || sysInfo[i].name} <img src="${sysInfo[i].avatar_url}" class="vtinyimg"></li>`)
+                //         .hide()
+                //         .fadeIn(500)
+                //     );
+                
+                var alterName= sysInfo[i].display_name == null ? sysInfo[i].name : sysInfo[i].display_name;
+                var alterInfo=  JSON.stringify({
+                    name: alterName.replace(/ /g, "⠀"), 
+                    id: sysInfo[i].id, 
+                    img:sysInfo[i].avatar_url,
+                    pronouns: sysInfo[i].pronouns,
+                    birthday: sysInfo[i].birthday
+                });
+                    $('#roster')
+                    .append($(`<li> <input type="checkbox" name="alterChoice" value=${alterInfo.replace(/,(?!["{}[\]])/g, "")}><label for="alterChoice"><img src="${sysInfo[i].avatar_url}" class="vtinyimg"> ${sysInfo[i].display_name || sysInfo[i].name}</label></li>`)
                         .hide()
                         .fadeIn(500)
                     );
-                systemArray.push({name: sysInfo[i].display_name || sysInfo[i].name, img: sysInfo[i].avatar_url});
-                $("#altField").val(`${JSON.stringify(systemArray)}`);
+                // systemArray.push({name: sysInfo[i].display_name || sysInfo[i].name, img: sysInfo[i].avatar_url});
+                // $("#altField").val(`${JSON.stringify(systemArray)}`);
             }
             $("#submitAlt").show("fast");
                 
@@ -83,5 +111,8 @@
             }
            
         }
+
+
+
     </script>
 </html>

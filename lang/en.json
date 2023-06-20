@@ -22,11 +22,21 @@
         "alreadyExists": "<strong>Uh oh!</strong> That username or email is already in use. <a href='/login'>Do you need to log in instead?</a>",
         "incorrect": "Your email or password is incorrect. <a href='/forgot-password'>Do you need to reset your password?</a>",
         "loggedout": "You're now logged out.",
-        "loggedin": "You're now logged in!"
+        "loggedin": "You're now logged in!",
+        "sessionExpired": "Your session might have expired. Please log in again."
     },
     "wish":{
         "created": "Wish created!",
         "granted": "Wish granted!",
         "deleted": "Wish deleted."
+    },
+    "import":{
+        "PK":{
+          "success": "Import from Pluralkit successful!",
+          "failure":{
+            "noCheck": "No alters were selected to import."
+          }
+        }
+        
     }
 }
