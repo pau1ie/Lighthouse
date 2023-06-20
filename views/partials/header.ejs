@@ -2,6 +2,16 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 <link rel="stylesheet" type="text/css" href="/stylesheets/main.css" />
+
+<% if (cookies.skin) { %>
+    <!-- No skin -->
+    <link rel="stylesheet" type="text/css" href="/stylesheets/<%- cookies.skin %>.css" />
+<% } else { %>
+    <!-- No skin -->
+    <link rel="stylesheet" type="text/css" href="/stylesheets/lighthouse.css" />
+<% } %>
+
+
 <link rel="icon" type="image/x-icon" href="/img/logo.png">
 <!-- <script src="https://cdn.ckeditor.com/ckeditor5/11.0.1/classic/ckeditor.js"></script> -->
 <script src="../../build/ckeditor.js"></script>

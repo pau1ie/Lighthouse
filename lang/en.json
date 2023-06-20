@@ -23,7 +23,8 @@
         "incorrect": "Your email or password is incorrect. <a href='/forgot-password'>Do you need to reset your password?</a>",
         "loggedout": "You're now logged out.",
         "loggedin": "You're now logged in!",
-        "sessionExpired": "Your session might have expired. Please log in again."
+        "sessionExpired": "Your session might have expired. Please log in again.",
+        "skin": "Website skin changed successfully!"
     },
     "wish":{
         "created": "Wish created!",

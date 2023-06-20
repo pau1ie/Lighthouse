@@ -1150,7 +1150,17 @@ var sysArr;
 			  } else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
 
 		  } else {
-			console.log("Not a deletion.");
+			if (req.body.skinSel){
+				// Changing Lighthouse's skin.
+				client.query({text: 'UPDATE users SET skin=$1 WHERE id=$2', values: [req.body.skinSel, getCookies(req)['u_id']]}, (err, result)=>{
+					if (err) {
+					  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+					} else {
+						req.flash("flash", strings.account.skin);
+						res.status(200).cookie('skin',  req.body.skinSel,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).redirect(`/profile`);
+					}
+				});
+			}
 			if (req.body.altTerm){
 				// Updating alter term
 				client.query({text: 'UPDATE users SET alter_term=$1 WHERE id=$2', values: [req.body.altTerm, getCookies(req)['u_id']]}, (err, result)=>{
