@@ -1528,7 +1528,6 @@ var sysArr;
 	});
 	app.post("/edit-alter/:id", (req, res, next)=>{
 		// Make sure to base64 all information!
-		// `'${Buffer.from(req.body.altname).toString('base64')}'`
 
 		if (isLoggedIn(req)){
 			client.query({text: "UPDATE alters SET name=$2, triggers_pos=$3, triggers_neg= $4, agetext=$5, likes=$6, dislikes=$7, job=$8, safe_place=$9, wants=$10, acc=$11, notes=$12, img_url=$13, type=$14, pronouns=$15, birthday=$16, first_noted=$17 WHERE alt_id=$1",values: [
@@ -1562,128 +1561,6 @@ var sysArr;
 		} else {
 			res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });
 		}
-		// Awful execution but oh well.
-		// res.render('pages/loading');
-		/* if (req.body.pronouns){
-			client.query({text: "UPDATE alters SET pronouns=$1 WHERE alt_id=$2",values: [`'${Buffer.from(req.body.pronouns).toString('base64')}'`,`${req.params.id}`]}, (err, result) => {
-				if (err) {
-				  console.log(err.stack);
-				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-			  }
-			});
-		}
-		if (req.body.age){
-			client.query({text: "UPDATE alters SET agetext=$1 WHERE alt_id=$2",values: [`'${Buffer.from(req.body.age).toString('base64')}'`,`${req.params.id}`]}, (err, result) => {
-				if (err) {
-				  console.log(err.stack);
-				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-			  }
-			});
-		}
-		if (req.body.birthday){
-			client.query({text: "UPDATE alters SET birthday=$1 WHERE alt_id=$2",values: [`'${Buffer.from(req.body.birthday).toString('base64')}'`,`${req.params.id}`]}, (err, result) => {
-				if (err) {
-				  console.log(err.stack);
-				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-			  }
-			});
-		}
-		if (req.body.firstnoted){
-			client.query({text: "UPDATE alters SET first_noted=$1 WHERE alt_id=$2",values: [`'${Buffer.from(req.body.firstnoted).toString('base64')}'`,`${req.params.id}`]}, (err, result) => {
-				if (err) {
-				  console.log(err.stack);
-				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-			  }
-			});
-		}
-		if (req.body.type){
-			client.query({text: "UPDATE alters SET type=$1 WHERE alt_id=$2",values: [req.body.type,`${req.params.id}`]}, (err, result) => {
-				if (err) {
-				  console.log(err.stack);
-				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-			  }
-			});
-		}
-		if (req.body.postr){
-			client.query({text: "UPDATE alters SET triggers_pos=$1 WHERE alt_id=$2",values: [`'${Buffer.from(req.body.postr).toString('base64')}'`,`${req.params.id}`]}, (err, result) => {
-				if (err) {
-				  console.log(err.stack);
-				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-			  }
-			});
-		}
-		if (req.body.negtr){
-			client.query({text: "UPDATE alters SET triggers_neg=$1 WHERE alt_id=$2",values: [`'${Buffer.from(req.body.negtr).toString('base64')}'`,`${req.params.id}`]}, (err, result) => {
-				if (err) {
-				  console.log(err.stack);
-				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-			  }
-			});
-		}
-		if (req.body.likes){
-			client.query({text: "UPDATE alters SET likes=$1 WHERE alt_id=$2",values: [`'${Buffer.from(req.body.likes).toString('base64')}'`,`${req.params.id}`]}, (err, result) => {
-				if (err) {
-				  console.log(err.stack);
-				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-			  }
-			});
-		}
-		if (req.body.dislikes){
-			client.query({text: "UPDATE alters SET dislikes=$1 WHERE alt_id=$2",values: [`'${Buffer.from(req.body.dislikes).toString('base64')}'`,`${req.params.id}`]}, (err, result) => {
-				if (err) {
-				  console.log(err.stack);
-				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-			  }
-			});
-		}
-		if (req.body.internalJob){
-			client.query({text: "UPDATE alters SET job=$1 WHERE alt_id=$2",values: [`'${Buffer.from(req.body.internalJob).toString('base64')}'`,`${req.params.id}`]}, (err, result) => {
-				if (err) {
-				  console.log(err.stack);
-				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-			  }
-			});
-		}
-		if (req.body.safety){
-			client.query({text: "UPDATE alters SET safe_place=$1 WHERE alt_id=$2",values: [`'${Buffer.from(req.body.safety).toString('base64')}'`,`${req.params.id}`]}, (err, result) => {
-				if (err) {
-				  console.log(err.stack);
-				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-			  }
-			});
-		}
-		if (req.body.wish){
-			client.query({text: "UPDATE alters SET wants=$1 WHERE alt_id=$2",values: [`'${Buffer.from(req.body.wish).toString('base64')}'`,`${req.params.id}`]}, (err, result) => {
-				if (err) {
-				  console.log(err.stack);
-				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-			  }
-			});
-		}
-		if (req.body.acc){
-			client.query({text: "UPDATE alters SET acc=$1 WHERE alt_id=$2",values: [`'${Buffer.from(req.body.acc).toString('base64')}'`,`${req.params.id}`]}, (err, result) => {
-				if (err) {
-				  console.log(err.stack);
-				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-			  }
-			});
-		}
-		if (req.body.notes){
-			client.query({text: "UPDATE alters SET notes=$1 WHERE alt_id=$2",values: [`'${Buffer.from(req.body.notes).toString('base64')}'`,`${req.params.id}`]}, (err, result) => {
-				if (err) {
-				  console.log(err.stack);
-				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-			  }
-			});
-		}
-		if (req.body.imgurl){
-			client.query({text: "UPDATE alters SET img_url=$1 WHERE alt_id=$2",values: [`'${Buffer.from(req.body.imgurl).toString('base64')}'`,`${req.params.id}`]}, (err, result) => {
-				if (err) {
-				  console.log(err.stack);
-				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-			  }
-			});
-		} */
 
 		
 	});

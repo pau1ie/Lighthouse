@@ -31,6 +31,7 @@
                 <ul id="roster">
 
                 </ul>
+                <span class="linkbutton" id="checkall">Select All</span><br>
                 <label for="sysLoc">These <%- pluralize(session.alter_term) %> will be imported into: </label>
                 <select name="sysLoc">
                     <option value="new" selected>Create New <%- capitalise(session.system_term) %></option>
@@ -38,6 +39,7 @@
                         <option value="<%- session.sys[i].id %>"><%- session.sys[i].name %></option>
                     <%}%>
                 </select>
+                
                 <input type="submit" name="fetch" value="Import" id="import">
                 <p class="splash">"Create New <%- capitalise(session.system_term) %>" will create a new <%- session.system_term %> called "Imported from Pluralkit". If you already have a <%- session.system_term %> named that, 3 random numbers will be appended to the end to prevent confusion. Press "rename" next to these <%- pluralize(session.system_term) %>' names on the "My <%- capitalise(session.system_term) %>" page to rename them to whatever you like.</p>
             </form>
@@ -46,7 +48,13 @@
     <%- include ("../partials/footer.ejs") %>
     </body>
     <script>
-
+        $(document).ready(function(){
+            $("#checkall").click(function() {
+                    var cblist = $("input[name=alterChoice]");
+                    // cblist.attr("checked", !cblist.attr("checked"));\
+                    cblist.click()
+                }); 
+            });
 
         async function getPK(){
             event.preventDefault();

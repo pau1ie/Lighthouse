@@ -119,6 +119,13 @@ article:last-child{
     color: var(--col1);
     border: 0;
     font-size: 1em;
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
 }
 
 button:disabled, input[type=submit]:disabled{
@@ -355,15 +362,14 @@ footer{
 }
 .splash{
     width: 30vw;
-    /* background: var(--col2); */
-    background: url('../img/svg/splash-fish.svg'), var(--col4);
+    background: url('../img/svg/splash-fish.svg'), var(--col2);
     background-repeat: no-repeat;
     background-position: right;
     padding: calc(2em);
-    border: 2px solid var(--col1);
+    border: 2px solid var(--col8);
     border-radius: 15px;
     margin: calc(1em) auto auto auto;
-    color: var(--col2);
+    color: var(--col1);
 }
 
 .editbtn, .deletebtn {
