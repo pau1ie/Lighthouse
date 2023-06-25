@@ -400,6 +400,11 @@ app.locals.pluralize= pluralize;
 						  return res.json({code: 404, msg: `Render File: ${err}`});
 					} else {
 						let options = {
+							childProcessOptions: {
+								env: {
+								  OPENSSL_CONF: '/dev/null',
+								},
+							  },
 							"height": "11in",
 							"width": "8.5in",
 							"header": {
