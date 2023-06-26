@@ -138,7 +138,9 @@
       <a href="/profile">Settings</a>
       <% } %>
     
-        
+      <% if (session.is_dev){ %>
+        <a href="/mod">Mod Panel</a>
+        <% } %>
       <div class="dropdown">
       <button  class="dropbtn" onclick='$("#drop").toggle()'>Information <span style="vertical-align: middle;" class="material-symbols-outlined">
         expand_more

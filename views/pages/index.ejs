@@ -125,6 +125,19 @@
                 
             </div>
         </section>
+        
+        <% if (donators.length > 0){ %>
+            <hr>
+            <section>
+            <h2>Thank You to Our Supporters</h2>
+            <div style="display:grid;grid-template-columns: 1fr 1fr 1fr 1fr;line-height: 2;">
+                <% for (i in donators) { %> 
+                    <div><%- donators[i].nickname %></div>
+                    <%} %>
+            </div>
+        </section>
+        <% } %>
+        
     </div>
     <%- include ("../partials/footer.ejs") %>
     <script>

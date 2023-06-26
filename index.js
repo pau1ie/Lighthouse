@@ -306,6 +306,10 @@ app.locals.pluralize= pluralize;
 			}
 		});
 		}
+		// Is this a developer account?
+		if (req.session.u_id == process.env.dev1 || req.session.u_id == process.env.dev2){
+			req.session.is_dev=true;
+		}
 		
 		if (!req.session.system_term){
 			// Is it in their cookies?
@@ -371,8 +375,17 @@ app.locals.pluralize= pluralize;
 			res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash, cookies:req.cookies });
 		} else {
 			var userCount= result.rows[0].count;
-			res.render(`pages/index`, { session: req.session, splash:splash, userCount:userCount, cookies:req.cookies, version: pjson.version });
+			client.query({text: "SELECT * FROM donators;",values: []}, (err, result) => {
+				if (err) {
+				  console.log(err.stack);
+				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash, cookies:req.cookies });
+			  } else {
+				var donators= result.rows;
+				res.render(`pages/index`, { session: req.session, splash:splash, userCount:userCount, cookies:req.cookies, version: pjson.version, donators:donators });
 	        splash=null;
+			  }
+			});
+			
 		}
 	});
   });
@@ -549,6 +562,15 @@ app.get('/safety-plan/edit', (req, res) => {
 	if (isLoggedIn(req)){
 		res.render(`pages/worksheets`, { session: req.session, splash:splash, cookies:req.cookies });
 	splash=null;
+	} else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
+	
+  });
+  app.get('/mod', (req, res) => {
+	if (isLoggedIn(req)){
+		if (req.session.is_dev){
+			res.render(`pages/mod-panel`, { session: req.session, splash:splash, cookies:req.cookies });
+		}else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
+		
 	} else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
 	
   });
@@ -1220,6 +1242,27 @@ var sysArr;
 
 
 	*/
+	app.post('/mod', (req, res) => {
+		if (isLoggedIn(req)){
+			if (req.session.is_dev){
+				
+				if (req.body.donor){
+					// Add a donor!
+					client.query({text: "INSERT INTO donators (nickname) VALUES ($1)",values: [req.body.donor]}, (err, result) => {
+						if (err) {
+						  console.log(err.stack);
+						  res.status(400).json({code: 400, message: err.stack});
+					  } else {
+						return res.status(200).render(`pages/mod-panel`, { session: req.session, splash:splash, cookies:req.cookies });
+					  }
+					  });
+				}
+
+			}else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
+			
+		} else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
+	});
+	
 	app.post('/safety-plan/edit', (req, res) => {
 		if (isLoggedIn(req)){
 			var plans= {
