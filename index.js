@@ -873,42 +873,56 @@ app.get('/wish-d/:id', (req, res) => {
 		res.redirect('/system');
   });
 
-var sysArr;
-  app.get('/system', (req, res, next) => {
-    if (isLoggedIn(req)){
-			client.query({text: "SELECT * FROM systems WHERE user_id=$1",values: [`${req.cookies.u_id}`]}, (err, result) => {
+  app.get('/system-data', (req, res, next) => {
+	if (isLoggedIn(req)){
+		if (apiEyesOnly(req)){
+			client.query({text: "SELECT * FROM systems WHERE user_id=$1",values: [`${getCookies(req)['u_id']}`]}, (err, result) => {
 	            if (err) {
 	              console.log(err.stack);
-	              res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+				  req.flash("Our database hit an error.");
+	              res.status(400).json({code: 400});
 	          } else {
-	              req.session.sys = [];
-
-	              for (i in (result.rows)){
-	                  (req.session.sys).push({name: Buffer.from(result.rows[i].sys_alias, 'base64').toString(), id: result.rows[i].sys_id, icon: result.rows[i].icon})
-	              }
-	          }
-				  client.query({text: "SELECT * FROM comm_posts WHERE u_id=$1 ORDER BY created_on DESC;",values: [`${getCookies(req)['u_id']}`]}, (err, cresult) => {
-	  	            if (err) {
-	  	              console.log(err.stack);
-	  	              res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-	  	          } else {
-	  	              req.session.cPosts = [];
-	  	              for (i in (cresult.rows)){
-	  	                  // (req.session.cPosts).push({name: Buffer.from(cresult.rows[i].sys_alias, 'base64').toString(), id: cresult.rows[i].sys_id})
-						  (req.session.cPosts).push({date: cresult.rows[i].created_on, title: decryptWithAES(cresult.rows[i].title), body: decryptWithAES(cresult.rows[i].body), id: cresult.rows[i].id});
-	  	              }
-					  res.render(`pages/system`, { session: req.session, splash:splash, sysArr: req.session.sys, lang:req.acceptsLanguages()[0],cookies:req.cookies });
-	  	          }
-	  			  // console.table(req.session.sys);
-
-	  	        });
-
-	        });
-
+				var sysArr = new Array();
+				for (i in result.rows){
+					sysArr.push({ sys_id: result.rows[i].sys_id, alias: Buffer.from(result.rows[i].sys_alias, "base64").toString(), icon:result.rows[i].icon})
+				}
+				client.query({text: "SELECT * FROM comm_posts WHERE u_id=$1 AND is_pinned=false ORDER BY created_on DESC;",values: [`${getCookies(req)['u_id']}`]}, (err, cresult) => {
+					if (err) {
+					  console.log(err.stack);
+					  req.flash("Our database hit an error.");
+					  res.status(400).json({code: 400});
+				  } else {
+					var nonPinned= new Array();
+					for (i in cresult.rows){
+						nonPinned.push({ title: decryptWithAES(cresult.rows[i].title), body: decryptWithAES(cresult.rows[i].body),  created_on: cresult.rows[i].created_on, id: cresult.rows[i].id})
+					}
+					client.query({text: "SELECT * FROM comm_posts WHERE u_id=$1 AND is_pinned=true ORDER BY created_on DESC;",values: [`${getCookies(req)['u_id']}`]}, (err, dresult) => {
+						if (err) {
+						  console.log(err.stack);
+						  req.flash("Our database hit an error.");
+						  res.status(400).json({code: 400});
+					  } else {
+						var isPinned= new Array();
+					for (i in dresult.rows){
+						isPinned.push({ title: decryptWithAES(dresult.rows[i].title), body: decryptWithAES(dresult.rows[i].body),  created_on: dresult.rows[i].created_on, id: dresult.rows[i].id})
+					}
+						res.json({code: 200, sysArr: sysArr, nonPinned: nonPinned, isPinned: isPinned});
+					  }
+					});
+				  }
+				});
+			  }
+			});
+		} else return res.status(403);
+	} else return res.status(403);
+  
+});
+  app.get('/system', (req, res, next) => {
+    if (isLoggedIn(req)){
+		res.status(200).render('pages/system',{ session: req.session, splash:splash,cookies:req.cookies });
     } else {
         res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });
     }
-    splash=null;
   });
 
 	var alterArr;
@@ -1889,7 +1903,6 @@ var sysArr;
 	});
 
   app.post('/system', function (req, res){
-	  // console.log(Object.keys(req.body)[0]);
 	  if (req.body.sysname){
 		  client.query({text: "SELECT * FROM systems WHERE sys_alias=$1 AND user_id=$2",values: [`'${Buffer.from(req.body.sysname).toString('base64')}'`, `${req.cookies.u_id}`]}, (err, result) => {
 			  if (err) {
@@ -2385,6 +2398,30 @@ var sysArr;
 			var filePath = `./public/pdfs/${req.headers.user}.pdf`; 
 			fs.unlinkSync(filePath);
 			return res.json({code:200});
+		}
+	});
+
+	app.put('/system-data', (req, res)=>{
+		if (isLoggedIn(req)){
+			if (apiEyesOnly(req)){
+				let editMode= req.body.edit;
+				if (editMode="pin"){
+					let postID= req.body.postID;
+					client.query({text: "UPDATE comm_posts SET is_pinned = NOT is_pinned WHERE id=$1;",values: [req.body.postID]}, (err, result) => {
+						if (err) {
+							console.log(err.stack);
+							res.status(400).json({code: 400, message: err.stack});
+						} else {
+						 res.status(200).json({code:200});
+						}
+						});
+				}
+
+			} else {
+				return res.status(403).json({code:403})
+			}
+		} else {
+			return res.status(403).json({code:403})
 		}
 	})
 

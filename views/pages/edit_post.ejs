@@ -17,7 +17,7 @@
                 <label for="jTitle">Post title</label><br/>
                 <input type="text" name="jTitle" value="<%- session.jPost.title %>"><br/>
                 <label for="jBody">Post Body</label><br/>
-                <textarea name="jBody" autocomplete="off" cols="60" rows="15" id="editor" ><%- session.jPost.body %></textarea><br/>
+                <textarea name="jBody" autocomplete="off" cols="60" rows="15" id="editor" required ><%- session.jPost.body %></textarea><br/>
                 <input type="submit" value="Edit Post"> <input type="reset" value="Revert changes">
                 <script src="../build/ckeditor.js"></script>
                 <script>ClassicEditor
