@@ -319,6 +319,7 @@ app.locals.pluralize= pluralize;
 			} else{
 				// Let's grab IDs while we're at it.
 				req.session.u_id= result.rows[0].id;
+				req.session.is_legacy= result.rows[0].is_legacy;
 			}
 		});
 		}
