@@ -651,3 +651,12 @@ img.emoji {
     border:none;
     padding: .25em;
   }
+
+  p, span, h1,h2,h3,h4{
+    cursor: default;
+  }
+
+  .hoverhint{
+    color: var(--col6);
+    cursor: help;
+  }

@@ -318,8 +318,13 @@ app.locals.pluralize= pluralize;
 			req.flash("flash", strings.account.sessionExpired);
 			} else{
 				// Let's grab IDs while we're at it.
-				req.session.u_id= result.rows[0].id;
-				req.session.is_legacy= result.rows[0].is_legacy;
+				try{
+					req.session.u_id= result.rows[0].id;
+					req.session.is_legacy= result.rows[0].is_legacy;
+				} catch (e){
+
+				}
+
 			}
 		});
 		}
@@ -393,6 +398,10 @@ app.locals.pluralize= pluralize;
 					});
 			}
 		}
+	} else {
+		req.session.alter_term= "alter";
+		req.session.system_term= "system";
+		req.session.subsystem_term="subsystem";
 	}
 
 	req.next();
@@ -594,6 +603,11 @@ app.get('/safety-plan/edit', (req, res) => {
 		res.render(`pages/des`, { session: req.session, splash:splash, cookies:req.cookies});
 	splash=null;
 	} else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
+	
+});
+
+app.get('/tutorial', (req, res) => {
+		res.render(`pages/tutorial`, { session: req.session, splash:splash, cookies:req.cookies});
 	
 });
 
@@ -2440,15 +2454,17 @@ app.get('/wish-d/:id', (req, res) => {
 					  } else {
 						req.session.alter_term= result.rows[0].alter_term;
 						req.session.system_term= result.rows[0].system_term;
-						req.session.loggedin = true;
-						req.session.u_id= result.rows[0].id;
-						req.session.username = Buffer.from(result.rows[0].username, 'base64').toString();
-						
+						req.session.subsystem_term= result.rows[0].subsystem_term;
+					   req.session.loggedin = true;
+					   req.session.u_id= result.rows[0].id;
+					   req.session.username = Buffer.from(result.rows[0].username, 'base64').toString();
+					   req.session.is_legacy= result.rows[0].is_legacy;
+					   req.flash("flash", strings.account.created);
+					   res.cookie('loggedin', true, {httpOnly: true }).cookie('username',  Buffer.from(result.rows[0].username, 'base64').toString(),{httpOnly: true }).cookie('u_id', result.rows[0].id,{httpOnly: true }).cookie('alter_term', result.rows[0].alter_term,{httpOnly: true }).cookie('system_term', result.rows[0].system_term,{httpOnly: true }).cookie('subsystem_term', result.rows[0].subsystem_term,{httpOnly: true }).cookie('is_legacy', result.rows[0].is_legacy,{httpOnly: true }).cookie('skin', result.rows[0].skin,{httpOnly: true }).redirect("/tutorial");
+					   
 					  }
 					});
-					// req.flash("flash",`Welcome to Lighthouse, ${req.body.username}! You are now logged in.`);
-					req.flash("flash", strings.account.created)
-						res.redirect("/");
+
                   }
               });
             }
