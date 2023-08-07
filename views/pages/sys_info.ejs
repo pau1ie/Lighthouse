@@ -11,8 +11,6 @@
 .radio-toolbar label {
   display: block;
   cursor: pointer;
-  width: 6em;
-  height: 6em;
   text-align:center;
 }
 
@@ -87,7 +85,7 @@ var journSkin=[
         <section>
             <h3>Set an icon for this <%= capitalise(cookies.system_term) %></h3>
             <form method="post">
-            <div class="parent" style="height: auto;margin:auto;">
+            <div class="parent">
                 <% for (let i=0; i < journSkin.length; i++){ %>
                     <div class="radio-toolbar child">
                         <input type="radio" id="<%= journSkin[i].name %>" name="journ" value="<%= journSkin[i].file %>">

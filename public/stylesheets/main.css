@@ -454,6 +454,22 @@ text-align: center;
     display: none;
 }
 
+.threadpost{
+    display: flex;
+    justify-content: space-between;
+    padding: 2em 1em;
+    border-bottom: 1px solid var(--col1)
+}
+.threadpost > .user{
+    width: 20%;
+    border-right: 1px solid var(--col1);
+    padding: 1em;
+}
+.threadpost > .post{
+    width: 80%;
+    padding: 1em;
+}
+
 input[type=submit][disabled=disabled],
 button[disabled=disabled]{
   border: 1px solid #999999;
@@ -561,7 +577,17 @@ button[disabled=disabled]{
     vertical-align: middle;
 }
 
-
+.threadpost{
+    display:block;
+}
+.threadpost > .user{
+    width: 100%;
+    border-right: 0;
+}
+.threadpost > .post{
+    width: 100%;
+    padding: 1em;
+}
 /* End Mobile */
 }
 
@@ -613,6 +639,8 @@ img.emoji {
     border: 2px solid var(--col6);
     border-radius: 15px;
     width: 80%;
+    overflow-y: scroll;
+    max-height: 80%;
   }
   
   /* The Close Button */

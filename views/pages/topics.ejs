@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" style="visibility: hidden;">
+    <head>
+        <%- include ("../partials/header.ejs") %>
+        <style>
+          table{
+            border-collapse: collapse; 
+          }
+          th{
+            padding-bottom: 1em !important;
+          }
+          .radio-toolbar input[type="radio"] {
+                 display: none;
+        }
+        
+        .radio-toolbar label {
+          display: block;
+          cursor: pointer;
+          height: 2em;
+          text-align:center;
+        }
+        
+        .radio-toolbar input[type="radio"]:checked ~ * { 
+            background:#9CD9D3 !important;
+        }
+            </style>
+    </head>
+    <body>
+        <%- include ("../partials/nav.ejs") %>
+        <%
+
+        var journSkin=[
+            {name: "Anchor", file: "anchors"},
+            {name: "Fish", file: "fish"},
+            {name: "Goldfish", file: "goldfish"},
+            {name: "Life Rings", file: "life-ring"},
+            {name: "Rudder", file: "rudder"},
+            {name: "Sailing Boat", file: "sailing"},
+            {name: "Starfish", file: "starfish"},
+            {name: "Tortoise", file: "tortoise"},
+            {name: "Whale", file: "whale"},
+            {name: "Whale Tail", file: "whale_tail"},
+            {name: "Fish Bowl", file: "fish_bowl"},
+            {name: "Lighthouse", file: "lighthouse-icon"},
+            {name: "Scallop", file: "scallop"},
+            {name: "Seahorse", file: "seahorse"},
+            {name: "Snail Shell", file: "snail-shell"},
+            {name: "Compass", file: "compass"},
+            {name: "Ship", file: "ship-icon"},
+            {name: "Trident", file: "trident"},
+            {name: "Message in a Bottle", file: "bottle"},
+            {name: "Beach", file: "island"},
+        ]
+            %>
+        <div id="wrapper">
+            <% if (locals.messages.flash) { %>
+                <div class="splash"><%- locals.messages.flash %></div>
+            <% } %>
+            <section>
+
+              <div id="editForum" class="modal">
+
+                <!-- Modal content -->
+                <div class="modal-content" id="editModal">
+                  <span id="closeEdit" class="material-symbols-outlined close">
+                    cancel
+                    </span>
+                    <h2>Edit Forum</h2>
+                    <form method="post">
+                      <label for="newName">New Forum Name</label>
+                      <input name="newName" id="newName" type="text"> <br>
+                      <label for="newcat">Forum Category</label>
+                      <select name="newcat" id="newCat">
+                        <% for (i in catArr){ %> 
+                            <% if (catArr[i].id == forumid){ %> 
+                              <option value="<%= catArr[i].id %>" selected><%= catArr[i].name %></option>
+                            <% } else { %>
+                              <option value="<%= catArr[i].id %>"><%= catArr[i].name %></option>
+                            <% } %>
+                        <% } %>
+                      </select>
+                      <hr>
+                      <input type="submit" name="editSubmit" value="Update Forum">
+                    </form>
+                </div>
+              </div>
+                              <!-- The Modal -->
+              <div id="myModal" class="modal">
+
+                <!-- Modal content -->
+                <div class="modal-content" id="modalContent">
+                  <span id="closetopic" class="material-symbols-outlined close">
+                    cancel
+                    </span>
+                    <h2>Add a New Topic</h2>
+                  <form autocomplete=off  method="post">
+                    <label for="author">Topic Author </label>
+                    <select name="author" id="author" required>
+                      <option value="" disabled selected>Pick One...</option>
+                    </select><br><br>
+                    <label for="fTitle">Topic Title </label>
+                    <input type="text" name="fTitle" id="fTitle" required minlength="3"><br>
+                    <label for="editor">Topic Body </label><br>
+                    <textarea name="topicBody" id="editor" autocomplete="off" cols="60" rows="15"></textarea><br/>
+                      <input type="submit" name="newtop" value="Create Topic">
+                      <script>ClassicEditor
+                        .create( document.querySelector( '#editor' ), {
+                          licenseKey: '',
+                          fontColor: {
+                                  colors: [
+                                      {color: 'red',label: 'Red'},
+                                      {color: '#ff691f',label: 'Orange'},
+                                      { color: '#ffc20a',label: 'Yellow'},
+                                      {color: 'green',label: 'Green'},
+                                      {color: 'teal',label: 'Teal'},
+                                      {color: 'blue',label: 'Blue'},
+                                      {color: 'purple',label: 'Purple'},
+                                      {color: '#ff0f83',label: 'Pink'},
+                                      {color:'#663c28', label: 'Brown'}, 
+                                      {color: 'lightgray', label: 'Silver'}, 
+                                      {color: 'gray', label: 'Stone'}, 
+                                      {color: 'black', label: 'Black'}, 
+                                      {color: 'white', label: "White"}
+                                    ]
+                                }
+                        } )
+                        .then( editor => {
+                          window.editor = editor;
+                        } )
+                        .catch( error => {
+                          console.error( 'Oops, something went wrong!' );
+                          console.error( 'Please, report the following error on https://github.com/ckeditor/ckeditor5/issues with the build id and the error stack trace:' );
+                          console.warn( 'Build id: 7x5cosrncqsm-gncdo1e4b9nh' );
+                          console.error( error );
+                        } );
+                    </script>
+                  </form>
+                </div>
+
+              </div>
+
+             
+              
+              
+              <a href="/forum">Back to Forums</a><br>
+                <h2><%- forumName %> <a title="Edit " class="editCat"><i id="ebutton" class="fa fa-pencil" aria-hidden="true"></i></a> <a title="Delete <%- forumName %>"  class="" onclick="confirmDelete('<%- forumName %>', '<%- forumid %>')"><i class="fa fa-trash textless" aria-hidden="true"></i></a></h2>
+                
+                
+                <button id="tbutton">Create Topic</button>
+                
+                <table style="width:90%; margin-top: 2em;">
+                  <thead>
+                    <tr>
+                      <th style="text-align: left;">Topics</th>
+                      <!-- <th style="text-align: right;">Last Post</th> -->
+                    </tr>
+                  </thead>
+                  
+                  <tbody>
+                    <% for (i in topics){ %> 
+                      <tr style="padding: 5em; border-bottom:1px solid black;">
+                        <td style="text-align: left;"><a href="/topic/<%- topics[i].id %>"><%- topics[i].name %></a><br><small>by: <a href="/alter/<%- topics[i].alt_id %>"><%- topics[i].alter %></a> on <%- (topics[i].created_on).toLocaleString().split(",")[0] %><br><span style="padding-left: 2em;"><%- truncate((topics[i].preview).replace(/\<.+?\>/g, ""), 80) %></span></small></td>
+                        <!-- <td style="text-align: right;">No info.</td> -->
+                      </tr>
+                    <% } %>
+                  </tbody>
+                  </table>
+            </section>
+    </div>
+    <script>
+        var modal = document.getElementById("myModal");
+        var btn = document.getElementById("tbutton");
+        var span = document.getElementById("closetopic");
+        btn.onclick = function() {
+          
+          $("#myModal").fadeIn("fast");
+        }
+        span.onclick = function() {
+          // modal.style.display = "none";
+          $("#myModal").fadeOut("fast");
+        }
+
+
+        var editmodal = document.getElementById("editForum");
+        var editbtn = document.getElementById("ebutton");
+        var editspan = document.getElementById("closeEdit");
+        editbtn.onclick = function() {
+                    console.log("<%- forumName %>")
+          $("#newName").val("<%- forumName %>");
+          $("#editForum").fadeIn("fast");
+        }
+        editspan.onclick = function() {
+          // modal.style.display = "none";
+          $("#editForum").fadeOut("fast");
+        }
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+          if (event.target == editmodal || event.target == modal) {
+            // modal.style.display = "none";
+            $("#editForum").fadeOut("fast");
+            $("#myModal").fadeOut("fast");
+          }
+        }
+
+        async function getAlters(){
+          let response = await fetch(`/system-data`, { 
+    method: "GET",
+                headers: { 
+                  "api-lh-call": "api-lh-call",
+                  'Content-Type': 'application/json',
+                  "grab": "alters"
+                } 
+            });
+            let body = await response.text();
+            let sysInfo = JSON.parse(body);
+            for (i in sysInfo.search){
+              $("#author").append(`<option value="${sysInfo.search[i].alt_id}">${sysInfo.search[i].name} (<%- capitalise(cookies.system_term) %>: ${sysInfo.search[i].sys_alias})</option>`);
+            }
+        }
+        getAlters();
+
+        async function confirmDelete(name, id){
+          if (confirm(`Do you actually want to delete ${name}? All topics under this category will also be deleted.`)){
+            // Delete.
+            let response = await fetch(`/forum-data`, { 
+                method: "DELETE",
+                headers: { 
+                  "api-lh-call": "api-lh-call",
+                  'Content-Type': 'application/json'
+                }, 
+                body: JSON.stringify({
+                  "mode": "forum",
+                  "id": id
+                })
+            });
+            let body = await response.text();
+            let sysInfo = JSON.parse(body);
+            if (sysInfo.code== 200) location.href= "/forum";
+          }
+        }
+        </script>
+    <%- include ("../partials/footer.ejs") %>
+    </body>
+</html>

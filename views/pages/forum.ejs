@@ -2,9 +2,53 @@
 <html lang="en" dir="ltr" style="visibility: hidden;">
     <head>
         <%- include ("../partials/header.ejs") %>
+        <style>
+          table{
+            border-collapse: collapse; 
+          }
+          .radio-toolbar input[type="radio"] {
+                 display: none;
+        }
+        
+        .radio-toolbar label {
+          display: block;
+          cursor: pointer;
+          height: 2em;
+          text-align:center;
+        }
+        
+        .radio-toolbar input[type="radio"]:checked ~ * { 
+            background:#9CD9D3 !important;
+        }
+            </style>
     </head>
     <body>
         <%- include ("../partials/nav.ejs") %>
+        <%
+
+        var journSkin=[
+            {name: "Anchor", file: "anchors"},
+            {name: "Fish", file: "fish"},
+            {name: "Goldfish", file: "goldfish"},
+            {name: "Life Rings", file: "life-ring"},
+            {name: "Rudder", file: "rudder"},
+            {name: "Sailing Boat", file: "sailing"},
+            {name: "Starfish", file: "starfish"},
+            {name: "Tortoise", file: "tortoise"},
+            {name: "Whale", file: "whale"},
+            {name: "Whale Tail", file: "whale_tail"},
+            {name: "Fish Bowl", file: "fish_bowl"},
+            {name: "Lighthouse", file: "lighthouse-icon"},
+            {name: "Scallop", file: "scallop"},
+            {name: "Seahorse", file: "seahorse"},
+            {name: "Snail Shell", file: "snail-shell"},
+            {name: "Compass", file: "compass"},
+            {name: "Ship", file: "ship-icon"},
+            {name: "Trident", file: "trident"},
+            {name: "Message in a Bottle", file: "bottle"},
+            {name: "Beach", file: "island"},
+        ]
+            %>
         <div id="wrapper">
             <% if (locals.messages.flash) { %>
                 <div class="splash"><%- locals.messages.flash %></div>
@@ -15,27 +59,123 @@
 
                 <!-- Modal content -->
                 <div class="modal-content" id="modalContent">
-                  <span class="material-symbols-outlined close">
+                  <span class="material-symbols-outlined close" id="closeCat">
                     cancel
                     </span>
                     <h2>Add a New Category</h2>
-                  <form method="post">
-                    
-                  </form>
+                    <form autocomplete=off  method="post">
+                      <label for="cattitle">Category Name </label>
+                      <input type="text" name="cattitle" id="cattitle" required minlength="3"><br>
+                      <!-- <label for="catdesc">Category Description </label>
+                      <input type="text" name="catdesc" id="catdesc" required minlength="3" maxlength="140"><br> -->
+                      <!-- <div class="parent" style="height: auto;margin:auto;">
+                        <% for (let i=0; i < journSkin.length; i++){ %>
+                            <div class="radio-toolbar child">
+                                <input type="radio" id="<%= journSkin[i].name %>" name="caticon" value="<%= journSkin[i].file %>">
+                                <label for="<%= journSkin[i].name %>"><img src="/img/svg/<%= journSkin[i].file %>.svg" class="vtinyimg glow"  style="display:block; margin:0 auto;"><%= journSkin[i].name %></label>
+                            </div>
+                        <% } %>
+                        </div> -->
+                        <label for="caticon">Category Icon </label>
+                        <select name="caticon" id="caticon">
+                          <option value="" selected>None</option>
+                          <% for (i in journSkin){ %> 
+                            <option value="<%= journSkin[i].file %>"><%= journSkin[i].name %></option>
+                          <% } %>
+                        </select>
+                        <hr>
+                        <br><input type="submit" name="newcat" value="Create Category">
+                    </form>
                 </div>
-
-              </div>
-              
-
-                <h2>Internal Forum</h2>
-                <button id="tbutton">Create Category</button>
+                </div>
                 
+                <div class="modal" id="forumModal">
+                  <div class="modal-content" id="forumModal">
+                    <span class="material-symbols-outlined close" id="closeForum">
+                      cancel
+                      </span>
+                      <h2>Add a New Forum</h2>
+                      <form autocomplete=off  method="post">
+                        <label for="fortitle">Forum Name </label>
+                        <input type="text" name="fortitle" id="fortitle" required minlength="3"><br>
+                        <label for="fordesc">Forum Description </label>
+                        <input type="text" name="fordesc" id="fordesc" required minlength="3" maxlength="140"><br>
+                        <label for="forumLoc">Forum Category </label>
+                        <select name="forumLoc" id="forumLoc">
+                          <% for (i in categories) { %>
+                            <option value="<%- categories[i].id %>"><%- categories[i].name %></option>
+                          <% } %>
+                        </select><br>
+                          <input type="submit" name="newfor" value="Create Forum">
+                      </form>
+                  </div>
+                  </div>
+                            <!-- Edit Category Modal -->
+                            <div id="editCat" class="modal">
+
+                              <!-- Modal content -->
+                              <div class="modal-content" id="editCatModal">
+                                <span class="material-symbols-outlined close" id="closeEdit">
+                                  cancel
+                                  </span>
+                                  <h2>Edit Category</h2>
+                                <form autocomplete=off  method="post">
+                                  <input type="hidden" name="catid" id="catid">
+                                  <label for="newCatName">New Category Name </label>
+                                  <input type="text" id="newCatName" name="newCatName">
+                                  <label for="newcaticon">Category Icon </label>
+                                    <select name="newcaticon" id="newcaticon">
+                                      <option value="" selected>None</option>
+                                      <% for (i in journSkin){ %> 
+                                        <option value="<%= journSkin[i].file %>"><%= journSkin[i].name %></option>
+                                      <% } %>
+                                    </select>
+                                  <hr>
+                                  <br><input name="editcat" type="submit" value="Edit Category">
+                                </form>
+                              </div>
+              
+                            </div>
+
+                <h2>Internal Forum <small>Beta version</small></h2>
+                
+                <p>This is an area meant for longer discussion of topics amongst <%= pluralize(cookies.alter_term) %>. This is the earliest version available-- more features to come.</p>
+                <button id="tbutton">Create Category</button>
+                <button id="fbutton" <% if (categories.length == 0) { %> disabled <% } %>>Create Forum</button>
+                <hr>
+                <table style="width:90%">
+                <% for (i in categories) { %> 
+                  <thead style="border-bottom: 1px solid black;">
+                    <tr>
+                      <th style="text-align: left; padding-top: 2em; padding-bottom:1em;" ><img src="/img/svg/<%- categories[i].icon || 'lighthouse-icon' %>.svg" class="vtinyimg" style="float:left; margin-right: 1em;">  <%- capitalise(categories[i].name) %> <a id="<%= categories[i].id %>" title="Edit <%- categories[i].name %>" name="<%- capitalise(categories[i].name) %>" class="editCat" onclick="$('#editCat').fadeIn('fast');"><i class="fa fa-pencil" aria-hidden="true"></i></a> <a title="Delete <%- categories[i].name %>" onclick="confirmDelete('<%= categories[i].name %>', '<%= categories[i].id %>')"><i class="fa fa-trash" aria-hidden="true"></i></a>
+
+                        <!-- <br><div name="description" class="desc"><small><%- categories[i].desc %></small></div> -->
+                      </th>
+                      <!-- <th style="text-align:right;">Last Posted In</th> -->
+                    </tr>
+                  </thead>
+                  <tbody >
+                      <% for (n in forums){ %>
+                        <% if (forums[n].cat_id == categories[i].id) { %>
+                          <tr>
+                            <td style="padding-left: 3em; padding-bottom: 1em;"><a href="/forum/<%- forums[n].id %>"><%- forums[n].name %></a><br><small><%- forums[n].desc %></small></td>
+                            
+                            <!-- <td style="text-align:right;">No info yet</td> -->
+                            </tr>
+                        <% } %>
+                        
+                        
+                      <% } %>
+                    
+                  </tbody>
+                <% } %>
+                  </table>
             </section>
     </div>
     <script>
         var modal = document.getElementById("myModal");
         var btn = document.getElementById("tbutton");
-        var span = document.getElementsByClassName("close")[0];
+        var span = document.getElementById("closeCat");
         btn.onclick = function() {
           // modal.style.display = "block";
           $("#myModal").fadeIn("fast");
@@ -45,10 +185,66 @@
           $("#myModal").fadeOut("fast");
         }
         // When the user clicks anywhere outside of the modal, close it
-        window.onclick = function(event) {
+        $(window).click(function(event) {
           if (event.target == modal) {
-            // modal.style.display = "none";
             $("#myModal").fadeOut("fast");
+          }
+        });
+
+        var forumModal = document.getElementById("forumModal");
+        var fbtn = document.getElementById("fbutton");
+        var fspan = document.getElementById("closeForum");
+        fbtn.onclick = function() {
+          // modal.style.display = "block";
+          $("#forumModal").fadeIn("fast");
+        }
+        fspan.onclick = function() {
+          // modal.style.display = "none";
+          $("#forumModal").fadeOut("fast");
+        }
+        // When the user clicks anywhere outside of the modal, close it
+        $(window).click(function(event) {
+          if (event.target == forumModal) {
+            $("#forumModal").fadeOut("fast");
+          }
+        });
+
+
+
+
+var catModal = document.getElementById("editCat");
+        $(".editCat").click(function(){
+          $("#catid").val($(this).attr('id'));
+          $("#newCatName").val($(this).attr('name'));
+        })
+        var espan = document.getElementById("closeEdit");
+        espan.onclick = function() {
+          // modal.style.display = "none";
+          $("#editCat").fadeOut("fast");
+        }
+                  // When the user clicks anywhere outside of the modal, close it
+          $(window).click(function(event) {
+          if (event.target == catModal) {
+            $("#editCat").fadeOut("fast");
+          }
+        });
+
+        async function confirmDelete(name, id){
+          if (confirm(`Do you actually want to delete ${name}? All forums under this category will also be deleted.`)){
+            // Delete.
+            let response = await fetch(`/forum-data`, { 
+                method: "DELETE",
+                headers: { 
+                  "api-lh-call": "api-lh-call",
+                  'Content-Type': 'application/json'
+                }, 
+                body: JSON.stringify({
+                  "mode": "category",
+                  "id": id
+                })
+            });
+            let body = await response.text();
+            let sysInfo = JSON.parse(body);
           }
         }
         </script>
