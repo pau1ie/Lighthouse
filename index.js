@@ -246,7 +246,11 @@ app.locals.moods=[
 	{name: "Distressed", positive: false, emoji: "😫"}
 ]
 app.locals.isLoggedIn = function (cookies){
-	return (typeof cookies.u_id !== undefined);
+	if (!cookies.u_id){
+		return false;
+	  } else {
+		return true;
+	  }
   }
 app.locals.randomise= function (arr){
 	return arr[Math.floor(Math.random()*arr.length)];
@@ -939,8 +943,13 @@ app.get('/thank-you', (req, res, next) => {
   });
 
   app.get('/logout', (req, res)=>{
-     req.flash("flash", strings.account.loggedout);
-	 req.session.destroy();
+     
+	 try{
+		req.flash("flash", strings.account.loggedout);
+		 req.session.destroy();
+	 } catch(e){
+	 }
+	
 		try{
 		res.clearCookie('loggedin');
 		} catch(e){
