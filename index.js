@@ -982,15 +982,16 @@ app.get('/wish-d/:id', (req, res) => {
 
 	app.get('/inner-world', (req, res, next) => {
 		if (isLoggedIn(req)){
-			client.query({text:'SELECT * FROM inner_worlds WHERE u_id=$1', values: [getCookies(req)['u_id']]}, (err, result)=>{
+			client.query({text:'SELECT inner_worlds.*, users.inner_worlds FROM inner_worlds JOIN users ON inner_worlds.u_id = users.id WHERE inner_worlds.u_id=$1', values: [getCookies(req)['u_id']]}, (err, result)=>{
 				if (err){
 					console.log(err.stack);
 					res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 				} else {
-					req.session.innerWorld= result.rows;
+					let innerWorld= result.rows;
+					let innerWorldEnabled= result.rows[0].inner_worlds;
+					res.render(`pages/innerworld`, { session: req.session, splash:splash,cookies:req.cookies, innerWorld:innerWorld, innerWorldEnabled:innerWorldEnabled });
 				}
-				res.render(`pages/innerworld`, { session: req.session, splash:splash,cookies:req.cookies });
-				splash=null;
+				
 			});
 		} else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
 	});
@@ -1235,7 +1236,16 @@ app.get('/wish-d/:id', (req, res) => {
 });
   app.get('/system', (req, res, next) => {
     if (isLoggedIn(req)){
-		res.status(200).render('pages/system',{ session: req.session, splash:splash,cookies:req.cookies });
+		client.query({text: "SELECT inner_worlds from USERS WHERE id=$1;",values: [getCookies(req)['u_id']]}, (err, result) => {
+			if (err) {
+			  console.log(err.stack);
+			  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+		  } else {
+			  let innerWorldEnabled= result.rows[0].inner_worlds;
+			  res.status(200).render('pages/system',{ session: req.session, splash:splash,cookies:req.cookies, innerWorldEnabled:innerWorldEnabled });
+		  }
+		});
+		
     } else {
         res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });
     }
