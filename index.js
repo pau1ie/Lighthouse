@@ -1247,7 +1247,6 @@ app.get('/wish-d/:id', (req, res) => {
 			  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 		  } else {
 			  req.session.chosenSys= result.rows[0];
-			  // chosenSys.sys_id, chosenSys.user_id, chosenSys.sys_alias
 		  }
 		});
 			client.query({text: "SELECT alters.alt_id, alters.sys_id, alters.name, alters.pronouns, alter_moods.mood FROM alters LEFT JOIN alter_moods ON alters.alt_id = alter_moods.alt_id WHERE alters.sys_id=$1;",values: [`${req.params.id}`]}, (err, result) => {
@@ -2330,7 +2329,7 @@ app.get('/wish-d/:id', (req, res) => {
 				if (req.body.sysid){
 					let sysId= req.body.sysid == "none" ? null : req.body.sysid;
 					// Setting this in case they want to release a subsystem into a normal system.
-					client.query({text: "UPDATE systems SET subsys_id=$2 WHERE sys_id=$1",values: [`${req.session.chosenSys.sys_id}`, sysId]}, (err, result) => {
+					client.query({text: "UPDATE systems SET subsys_id=$2 WHERE sys_id=$1",values: [`${req.params.alt}`, sysId]}, (err, result) => {
 						if (err) {
 						  console.log(err.stack);
 						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
@@ -2340,7 +2339,7 @@ app.get('/wish-d/:id', (req, res) => {
 				  req.flash("flash",strings.system.updated);
 				}
 				if (req.body.journ){
-					client.query({text: "UPDATE systems SET icon=$2 WHERE sys_id=$1",values: [`${req.session.chosenSys.sys_id}`, `${req.body.journ}`]}, (err, result) => {
+					client.query({text: "UPDATE systems SET icon=$2 WHERE sys_id=$1",values: [`${req.params.alt}`, `${req.body.journ}`]}, (err, result) => {
 						if (err) {
 						  console.log(err.stack);
 						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
@@ -2350,7 +2349,7 @@ app.get('/wish-d/:id', (req, res) => {
 				  req.flash("flash",strings.system.updated);
 				}
 				if (req.body.submit){
-					client.query({text: "INSERT INTO alters (sys_id, name) VALUES ($1, $2)",values: [`${req.session.chosenSys.sys_id}`, `'${Buffer.from(req.body.altname).toString('base64')}'`]}, (err, result) => {
+					client.query({text: "INSERT INTO alters (sys_id, name) VALUES ($1, $2)",values: [`${req.params.alt}`, `'${Buffer.from(req.body.altname).toString('base64')}'`]}, (err, result) => {
 						if (err) {
 						  console.log(err.stack);
 						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
@@ -2359,7 +2358,7 @@ app.get('/wish-d/:id', (req, res) => {
 				  });
 				  req.flash("flash",strings.alter.created);
 				}
-				res.redirect(`/system/${req.session.chosenSys.sys_id}`);
+				res.redirect(`/system/${req.params.alt}`);
 				
 
 			} else {
@@ -2489,30 +2488,14 @@ app.get('/wish-d/:id', (req, res) => {
 	});
 
 	app.post('/editsys/:alt', function(req, res){
-		// console.table(req.session.chosenSys);
-		client.query({text: "SELECT * FROM systems WHERE user_id=$1;",values: [`${req.session.chosenSys.user_id}`]}, (err, result) => {
-			if (err) {
-			  console.log(err.stack);
-			  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-		  } else {
-			  if (getCookies(req)['u_id']= result.rows[0].user_id){
-				  client.query({text: "UPDATE systems SET sys_alias=$1 WHERE sys_id=$2;",values: [`'${Buffer.from(req.body.sysname).toString('base64')}'`, `${req.session.chosenSys.sys_id}`]}, (err, result) => {
-					  if (err){
-						  console.log(err.stack);
-						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-					  } else {
-						//   splash= req.flash("flash",`${Buffer.from(req.session.chosenSys.sys_alias, 'base64').toString()} has been permanently deleted.`);
-						  req.flash("flash", strings.system.updated);
-						  req.session.chosenSys= null;
-						  res.redirect("/system");
-					  }
-				  });
-			  } else {
-					// Not their system.
-					res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });
-			  }
-
-		  }
+		client.query({text: "UPDATE systems SET sys_alias=$1 WHERE sys_id=$2;",values: [`'${Buffer.from(req.body.sysname).toString('base64')}'`, `${req.params.alt}`]}, (err, result) => {
+			if (err){
+				console.log(err.stack);
+				res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+			} else {
+				req.flash("flash", strings.system.updated);
+				res.redirect(`/system/${req.params.alt}`);
+			}
 		});
 	});
 
