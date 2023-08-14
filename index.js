@@ -834,7 +834,7 @@ app.get('/thank-you', (req, res, next) => {
 app.get('/lighthouse-system', (req, res, next) => {
 	let alterCount= new Number();
 		// Dev environment
-		client.query({text: "SELECT count(alters.alt_id) FROM alters INNER JOIN systems ON systems.sys_id = alters.sys_id INNER JOIN users ON users.id= systems.user_id WHERE users.id=$1;",values: [`${process.env.environment== "dev" ? process.env.dev3 : process.env.dev1}`]}, (err, result) => {
+		client.query({text: "SELECT count(alters.alt_id) FROM alters INNER JOIN systems ON systems.sys_id = alters.sys_id INNER JOIN users ON users.id= systems.user_id WHERE users.id=$1;",values: [`${process.env.environment== "dev" ? process.env.dev3 : process.env.dev2}`]}, (err, result) => {
 			if (err) {
 			  console.log(err.stack);
 			  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash, cookies:req.cookies });
