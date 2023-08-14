@@ -829,10 +829,18 @@ app.get('/glossary', (req, res, next) => {
 
 });
 app.get('/thank-you', (req, res, next) => {
-	res.render(`pages/thankyou`, { session: req.session, splash:splash, cookies:req.cookies });
-	splash=null;
+	res.redirect("/lighthouse-system")
 });
-
+app.get('/lighthouse-system', (req, res, next) => {
+	client.query({text: "SELECT * FROM users WHERE username=$1;",values: [`${Buffer.from("Lighthouse System").toString("base64")}`]}, (err, result) => {
+		if (err) {
+		  console.log(err.stack);
+		  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash, cookies:req.cookies });
+	  } else {
+	  }
+	})
+	res.render(`pages/lighthouse-system`, { session: req.session, splash:splash, cookies:req.cookies });
+});
   app.get('/about', (req, res, next) => {
       res.render(`pages/about`, { session: req.session, splash:splash, cookies:req.cookies });
   });
@@ -1282,7 +1290,11 @@ app.get('/wish-d/:id', (req, res) => {
 	                //   console.table(result.rows[i]);
 	                  (req.session.alters).push({name: Buffer.from(result.rows[i].name, 'base64').toString(), id: result.rows[i].sys_id, a_id: result.rows[i].alt_id, mood: result.rows[i].mood, pronouns: result.rows[i].pronouns})
 	              }
-				  (req.session.alters).sort((a, b) => a.name.localeCompare(b.name))
+				  try {
+					(req.session.alters).sort((a, b) => a.name.localeCompare(b.name))
+				  } catch (e){
+					// Weird.
+				  }
 	          }
 			  // console.table(req.session.sys);
 			  (req.session.alters).sort((a, b) => a.distance - b.distance)
