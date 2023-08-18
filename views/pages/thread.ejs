@@ -82,7 +82,7 @@
                 <!-- Time to do some alter logic. -->
                 <% for (i in alterArr){ %> 
                     <% if (alterArr[i].id == originalPost.alt_id){ %> 
-                        <h3><%= alterArr[i].name %></h3>
+                        <h3><%= alterArr[i].name %> <i class='far fa-newspaper' title="Original Author" aria-hidden="false"></i></h3>
                         <img src="<%= alterArr[i].avatar %>" class="tinyimg"><br>
                         <% if (alterArr[i].pronouns){ %><small>Pronouns: <%= alterArr[i].pronouns %><br></small><% } %>
                         <% if (alterArr[i].type){ %><small>Type: <%= alterArr[i].type %></small><% } %>
