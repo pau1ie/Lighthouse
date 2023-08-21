@@ -82,7 +82,7 @@
                 <!-- Time to do some alter logic. -->
                 <% for (i in alterArr){ %> 
                     <% if (alterArr[i].id == originalPost.alt_id){ %> 
-                        <h3><%= alterArr[i].name %> <i class='far fa-newspaper' title="Original Author" aria-hidden="false"></i></h3>
+                        <h3><a href="/alter/<%= alterArr[i].id %>"><%= alterArr[i].name %> <i class='far fa-newspaper' title="Original Author" aria-hidden="false"></i></a></h3>
                         <img src="<%= alterArr[i].avatar %>" class="tinyimg"><br>
                         <% if (alterArr[i].pronouns){ %><small>Pronouns: <%= alterArr[i].pronouns %><br></small><% } %>
                         <% if (alterArr[i].type){ %><small>Type: <%= alterArr[i].type %></small><% } %>
@@ -101,8 +101,8 @@
                     <!-- Time to do some alter logic. -->
                     <% for (i in alterArr){ %> 
                         <% if (alterArr[i].id == replyArr[r].alt_id){ %> 
-                            <h3><%= alterArr[i].name %> <% if (alterArr[i].id == originalPost.alt_id){ %> <i class='far fa-newspaper' title="Original Author" aria-hidden="false"></i> <% } %></h3>
-                            
+                            <h3 style="padding-bottom:0;"><a href="/alter/<%= alterArr[i].id %>"><%= alterArr[i].name %> <% if (alterArr[i].id == originalPost.alt_id){ %> <i class='far fa-newspaper' title="Original Author" aria-hidden="false"></i> <% } %></a></h3>
+                            <% if (alterArr[i].is_archived == true) { %><span><small>Archived</small><br/></span><% } %>
                             <img src="<%= alterArr[i].avatar %>" class="tinyimg"><br>
                             <% if (alterArr[i].pronouns){ %>Pronouns: <%= alterArr[i].pronouns %><br><% } %>
                             <% if (alterArr[i].type){ %>Type: <%= alterArr[i].type %><% } %>
@@ -123,7 +123,9 @@
                     <select name="replyauthor" id="replyauthor" required>
                         <option value="" disabled selected>Choose...</option>
                         <% for (i in alterArr){ %>
+                          <% if (!alterArr[i].is_archived){ %>
                             <option value="<%= alterArr[i].id %>"><%= alterArr[i].name %> (System: <%= alterArr[i].sys_alias %>)</option>
+                            <% } %>
                         <% } %>
                     </select><br>
                     <label for="editor">Type Reply Below</label><br>
@@ -234,11 +236,15 @@
             let body = await response.text();
             let sysInfo = JSON.parse(body);
             for (i in sysInfo.search){
-            if ('<%- originalPost.alt_id %>' == sysInfo.search[i].alt_id){
+            if (!sysInfo.search[i].is_archived){
+              // Not archived.
+              if ('<%- originalPost.alt_id %>' == sysInfo.search[i].alt_id){
                   $("#author").append(`<option value="${sysInfo.search[i].alt_id}" selected>${sysInfo.search[i].name} (<%- capitalise(cookies.system_term) %>: ${sysInfo.search[i].sys_alias})</option>`);
             } else{
                 $("#author").append(`<option value="${sysInfo.search[i].alt_id}">${sysInfo.search[i].name} (<%- capitalise(cookies.system_term) %>: ${sysInfo.search[i].sys_alias})</option>`);
             }
+            }
+            
             }
         }
         getAlters();

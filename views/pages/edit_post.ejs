@@ -63,7 +63,11 @@
             let resInfo = JSON.parse(body);
             let chosenJournal= '<%- cJourn.id %>';
             for (i in resInfo.search){
-                $("#author").append(`<option value="${resInfo.search[i].j_id}">${resInfo.search[i].name}</option>`);
+                if (!resInfo.search[i].is_archived){
+                    // Only un-archived alters may have posts moved to their journal.
+                   $("#author").append(`<option value="${resInfo.search[i].j_id}">${resInfo.search[i].name}</option>`); 
+                }
+                
                 
             }
         }

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" style="visibility: hidden;">
+    <head>
+        <%- include ("../partials/header.ejs") %>
+    </head>
+    <body>
+        <%- include ("../partials/nav.ejs") %>
+        <div id="wrapper">
+            <% if (locals.messages.flash) { %>
+                <div class="splash"><%- locals.messages.flash %></div>
+            <% } %>
+            <section>
+                <% if (chosenAlter.is_archived) { %> 
+                    <h2>Un-Archive <%= Buffer.from(chosenAlter.name, "base64").toString() %></h2>
+                    <p>This <%= cookies.alter_term %> can be taken out of your archive, and will no longer be read-only. Is this ok?</p>
+                    <form method="post">
+                        <input type="submit" name="unarchive" value="Un-Archive <%= Buffer.from(chosenAlter.name, "base64").toString() %>">
+                    </form>
+
+                <% } else{ %>
+                    <h2>Archive <%= Buffer.from(chosenAlter.name, "base64").toString() %></h2>
+                    <p>If <%= Buffer.from(chosenAlter.name, "base64").toString() %> has gone dormant or fused with another <%= cookies.alter_term %>, click the button down below. This will make <%= Buffer.from(chosenAlter.name, "base64").toString() %>'s page <strong>read-only</strong> until un-archived. This <%= cookies.alter_term %> will show up as archived, and will not be able to post in your forum or add journal posts.</p>
+                    <p>This action can be reversed.</p>
+                    <form method="post">
+                        <input class="warningbutton" type="submit" name="archive" value="Archive <%= Buffer.from(chosenAlter.name, "base64").toString() %>">
+                    </form>
+                <% } %>
+                
+            </section>
+    </div>
+    <%- include ("../partials/footer.ejs") %>
+    </body>
+</html>

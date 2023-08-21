@@ -85,6 +85,7 @@ td{
         <% } %><a href="/mood/<%=alterInfo.alt_id %>">Set mood</a><% if (alterInfo.mood) { %>
             | <a href="/del-mood/<%=alterInfo.alt_id %>">Clear mood</a>
         <% } %></small></dd>
+        
             <form method="post" autocomplete="off">
               <input type="text" name="altname" value="<%= Buffer.from(alterInfo.name, 'base64').toString() %>" style="text-align:center;"> is a part of <select name="alterSys" style="text-align:center;"><% for (i in session.sysList){ %>
                 <% if (alterInfo.sys_alias == session.sysList[i].sys_alias){ %>
@@ -365,7 +366,9 @@ td{
 
             </form>
             <!-- Delete the alter. -->
+            <p><%= capitalise(cookies.alter_term) %> deletion is permanent, but archiving is reversible.</p>
             <a style="margin-top: calc(1em)" href="/alter/<%= alterInfo.alt_id %>/delete" class="deletebtn">Delete <%= Buffer.from(alterInfo.name, 'base64').toString() %></a>
+            <a class="deletebtn" style="width:auto;" href="/archive-alter/<%= alterInfo.alt_id %>">Archive <%= Buffer.from(alterInfo.name, 'base64').toString() %></a>
         </section>
     </div>
 

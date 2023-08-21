@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" style="visibility: hidden;">
+    <head>
+        <%- include ("../partials/header.ejs") %>
+    </head>
+    <body>
+        <%- include ("../partials/nav.ejs") %>
+        <div id="wrapper">
+            <% if (locals.messages.flash) { %>
+                <div class="splash"><%- locals.messages.flash %></div>
+            <% } %>
+            <section>
+                <h2>About <%= Buffer.from(alterInfo.name, "base64").toString() %></h2>
+                <p><span class="material-symbols-outlined">archive</span> This <%= cookies.alter_term %> is <strong>archived</strong>. Everything is read-only.</p>
+                <% if (distill(alterInfo.img_url)) { %>
+                    <img src="<%= Buffer.from(alterInfo.img_url, 'base64').toString() %>" class="medimg" style="float:left; margin-right:calc(1em);">
+                    <% } else { %> 
+                        <img src="https://i.ibb.co/vkwmWjF/avatar-default.jpg" class="medimg" style="float:left; margin-right:calc(1em);" alt="<%= Buffer.from(alterInfo.name, 'base64').toString() %>'s icon">
+                    <% } %>
+                <table>
+                    <tbody>
+                        <% if (alterInfo.agetext) { %>
+                             <% if (distill(alterInfo.agetext)) { %>
+                                <tr><td>Perceived Age:</td>
+                                <td><%= Buffer.from(alterInfo.agetext, 'base64').toString() %></td></tr>
+                            <% } %>
+                            <% } %>
+                       
+                      
+                      
+                        <% if (alterInfo.birthday) { %>
+                        <% if (distill(alterInfo.birthday)) { %>
+                                                    <tr><td>Perceived Birthday:</td>
+                                                    <td><%= Buffer.from(alterInfo.birthday, 'base64').toString() %></td></tr>
+                                                <% } %>
+                            <% } %>
+                        
+                      
+                      
+                        <% if (alterInfo.gender) { %>
+                        <% if (distill(alterInfo.gender)) { %>
+                                                    <tr><td>Gender:</td>
+                                                    <td name="gender"><%= Buffer.from(alterInfo.gender, 'base64').toString() %></td></tr>
+                                                <% } %>
+                            <% } %>
+                        
+                      
+                      
+                        <% if (alterInfo.sexuality) { %>
+                        <% if (distill(alterInfo.sexuality)) { %>
+                                                    <tr><td>Sexuality:</td>
+                                                    <td name="sexuality"><%= Buffer.from(alterInfo.sexuality, 'base64').toString() %></td></tr>
+                                                <% } %>
+                            <% } %>
+                        
+                      
+                      
+                        <% if (alterInfo.first_noted) { %>
+                            <% if (distill(alterInfo.first_noted)) { %>
+                                                        <tr><td>First Noted:</td>
+                                                        <td><%= Buffer.from(alterInfo.first_noted, 'base64').toString() %></td></tr>
+                                                    <% } %>
+                            <% } %>
+                        
+                      
+                      
+                        
+                        <% if (alterInfo.type) { %>
+                        <% if (distill(alterInfo.type)) { %>
+                           <tr> <td>Type:</td>
+                            <td><%= alterInfo.type %></td></tr>
+                        <% } %>
+                            <% } %>
+                        
+                      
+                      
+                        
+                        <% if (alterInfo.source) { %>
+                        <% if (distill(alterInfo.source)) { %>
+                            <tr><td>Source:</td>
+                            <td><%= Buffer.from(alterInfo.source, 'base64').toString() %></td></tr>
+                        <% } %>
+                            <% } %>
+                        
+                      
+                      
+                        
+                        <% if (alterInfo.triggers_pos) { %>
+                        <% if (distill(alterInfo.triggers_pos)) { %>
+                            <tr><td>Positive Triggers:</td>
+                            <td><%= Buffer.from(alterInfo.triggers_pos, 'base64').toString() %></td></tr>
+                        <% } %>
+                            <% } %>
+    
+                      
+                      
+                        <% if (alterInfo.triggers_neg) { %>
+                        <% if (distill(alterInfo.triggers_neg)) { %>
+                            <tr><td>Negative Triggers:</td>
+                            <td><%= Buffer.from(alterInfo.triggers_neg, 'base64').toString() %></td></tr>
+                        <% } %>
+                            <% } %>
+    
+                      
+                      
+                        <% if (alterInfo.likes) { %>
+                        <% if (distill(alterInfo.likes)) { %>
+                            <tr><td>Likes:</td>
+                            <td><%= Buffer.from(alterInfo.likes, 'base64').toString() %></td></tr>
+                        <% } %>
+                            <% } %>
+    
+                      
+                      
+                        <% if (alterInfo.dislikes) { %>
+                        <% if (distill(alterInfo.dislikes)) { %>
+                            <tr><td>Dislikes:</td>
+                            <td><%= Buffer.from(alterInfo.dislikes, 'base64').toString() %></td></tr>
+                        <% } %>
+                            <% } %>
+    
+                      
+                      
+                        
+                        <% if (alterInfo.job) { %>
+                        <% if (distill(alterInfo.job)) { %>
+                            <tr><td>Internal Job:</td>
+                            <td><%= Buffer.from(alterInfo.job, 'base64').toString() %></td></tr>
+                        <% } %>
+                            <% } %>
+    
+                      
+                      
+                        
+                        <% if (alterInfo.safe_place) { %>
+                        <% if (distill(alterInfo.safe_place)) { %>
+                            <tr><td>Feels safest when:</td>
+                            <td><%= Buffer.from(alterInfo.safe_place, 'base64').toString() %></td></tr>
+                        <% } %>
+                            <% } %>
+    
+                      
+                      
+                        
+                        <% if (alterInfo.wants) { %>
+                        <% if (distill(alterInfo.wants)) { %>
+                            <tr><td>Wants/Wishes:</td>
+                            <td><%= Buffer.from(alterInfo.wants, 'base64').toString() %></td></tr>
+                        <% } %>
+                            <% } %>
+    
+                      
+                      
+                        <% if (alterInfo.acc) { %>
+                        <% if (distill(alterInfo.acc)) { %>
+                            <tr><td>Needs accommodated for:</td>
+                            <td><%= Buffer.from(alterInfo.acc, 'base64').toString() %></td></tr>
+                        <% } %>
+                            <% } %>
+    
+                      
+                                          
+                        <% if (alterInfo.notes) { %>
+                        <% if (distill(alterInfo.notes)) { %>
+                            <tr><td>Other Notes:</td>
+                            <td><%- (Buffer.from(alterInfo.notes, 'base64').toString()).replace(/\n/g, "<br>") %></td></tr>
+                        <% } %>
+                            <% } %>
+                        <% if (alterInfo.fronttells) { %>
+                        <% if (distill(alterInfo.fronttells)) { %>
+                            <tr><td>Might be fronting if:</td>
+                            <td><%- (Buffer.from(alterInfo.fronttells, 'base64').toString()).replace(/\n/g, "<br>") %></td></tr>
+                        <% } %>
+                            <% } %>
+                        <% if (alterInfo.relationships) { %>
+                        <% if (distill(alterInfo.relationships)) { %>
+                            <tr><td>Relationships with other <%- pluralize(cookies.alter_term) %>:</td>
+                            <td><%- (Buffer.from(alterInfo.relationships, 'base64').toString()).replace(/\n/g, "<br>") %></td></tr>
+                        <% } %>
+                            <% } %>
+    
+                      
+                    </tbody>
+                    </table>
+                    
+                    <a class="linkbutton" style="width:auto;" href="/archive-alter/<%= alterInfo.alt_id %>">Un-Archive <%= Buffer.from(alterInfo.name, 'base64').toString() %></a>
+                    <hr>
+                    <h2>Journal Archive</h2>
+                    <section>
+                        <% for (i in archivedPosts){ %> 
+                            <article style="border-bottom: 1px solid var(--col1)">
+                                <% var bodyArr= (archivedPosts[i].body).replace(/\r/gi, '').split("\n").filter(function() { return true; }); %>
+                                <h3><%= archivedPosts[i].title %></h3>
+                                <p><small>Written on: <%= archivedPosts[i].created_on.toLocaleString({timezone:(Intl.DateTimeFormat().resolvedOptions().timeZone)}) %></small></p>
+                                <% for (b in bodyArr){ %>
+                                    <p><%- bodyArr[b] %></p>
+                                <% } %>
+                            </article>
+                        <% } %>
+                    </section>
+                    
+            </section>
+    </div>
+    <%- include ("../partials/footer.ejs") %>
+    </body>
+</html>

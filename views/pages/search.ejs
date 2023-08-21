@@ -60,8 +60,9 @@
                     $("#headerRes").html(`<th>Alter</th><th>System</th><th>Pronouns</th><th>Type</th><th>Role/Job</th><th>Source</th>`);
                     (res.search).sort((a, b) => a.name.localeCompare(b.name))
                     for (i in res.search){
+                        
                         $("#searchRes").append(`<tr>
-                                    <td><a href="/alter/${res.search[i].alt_id}">${res.search[i].name}</a></td>
+                                    <td><a href="/alter/${res.search[i].alt_id}">${res.search[i].name}${res.search[i].is_archived == true ? ' (Archived)' : ''}</a></td>
                                     <td><a href="/system/${res.search[i].sys_id}">${res.search[i].sys_alias}</a></td>
                                     <td>${res.search[i].pronouns || "N/A"}</td>
                                     <td>${res.search[i].type || "N/A"}</td>
@@ -94,7 +95,7 @@
                                    if (res.search[i][n].toLowerCase().includes(query)){
                                     searchCount++;
                                 $("#searchRes").append(`<tr>
-                                    <td><a href="/alter/${res.search[i].alt_id}">${res.search[i].name}</a></td>
+                                    <td><a href="/alter/${res.search[i].alt_id}">${res.search[i].name}${res.search[i].is_archived == true ? ' (Archived)' : ''}</a></td>
                                     <td><a href="/system/${res.search[i].sys_id}">${res.search[i].sys_alias}</a></td>
                                     <td>${res.search[i].pronouns || "N/A"}</td>
                                     <td>${res.search[i].type || "N/A"}</td>
@@ -115,8 +116,8 @@
                             if ((res.search[i][options]).toLowerCase().includes(query)){
                                 searchCount++;
                                 $("#searchRes").append(`<tr>
-                                    <td><a href="/alter/${res.search[i].alt_id}" target="_blank">${res.search[i].name}</a></td>
-                                    <td><a href="/system/${res.search[i].sys_id}" target="_blank">${res.search[i].sys_alias}</a></td>
+                                    <td><a href="/alter/${res.search[i].alt_id}">${res.search[i].name}${res.search[i].is_archived == true ? ' (Archived)' : ''}</a></td>
+                                    <td><a href="/system/${res.search[i].sys_id}">${res.search[i].sys_alias}</a></td>
                                     <td>${res.search[i].pronouns || "N/A"}</td>
                                     <td>${res.search[i].type || "N/A"}</td>
                                     <td>${res.search[i].job || "N/A"}</td>

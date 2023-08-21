@@ -648,7 +648,8 @@ app.get('/tutorial', (req, res) => {
 								pronouns: bresult.rows[i].pronouns?  Buffer.from(bresult.rows[i].pronouns, "base64").toString() : null,
 								type: bresult.rows[i].type,
 								avatar: Buffer.from(bresult.rows[i].img_url, "base64").toString() || "",
-								sys_alias: Buffer.from(bresult.rows[i].sys_alias, "base64").toString() || ""
+								sys_alias: Buffer.from(bresult.rows[i].sys_alias, "base64").toString() || "",
+								is_archived: bresult.rows[i].is_archived
 							})
 					}
 					client.query({text: "SELECT * FROM forums WHERE u_id=$1;",values: [`${getCookies(req)['u_id']}`]}, (err, cresult) => {
@@ -1177,13 +1178,14 @@ app.get('/wish-d/:id', (req, res) => {
 							relationships: (result.rows[i].relationships != null ? Buffer.from(result.rows[i].relationships,"base64").toString() : null),
 							notes: (result.rows[i].notes != null ? Buffer.from(result.rows[i].notes,"base64").toString() : null),
 							safe_place: (result.rows[i].safe_place != null ? Buffer.from(result.rows[i].safe_place,"base64").toString() : null),
+							is_archived: result.rows[i].is_archived
 						});
 					}
 					res.status(200).json({code: 200, search: resArr});
 				  }
 				});
 			} else if (req.headers.grab== "journals"){
-				client.query({text: "SELECT systems.sys_id, alters.name, journals.j_id FROM alters INNER JOIN systems ON systems.sys_id= alters.sys_id INNER JOIN journals ON journals.alt_id = alters.alt_id WHERE systems.user_id=$1;",values: [`${getCookies(req)['u_id']}`]}, (err, aresult) => {
+				client.query({text: "SELECT systems.sys_id, alters.name, alters.is_archived, journals.j_id FROM alters INNER JOIN systems ON systems.sys_id= alters.sys_id INNER JOIN journals ON journals.alt_id = alters.alt_id WHERE systems.user_id=$1;",values: [`${getCookies(req)['u_id']}`]}, (err, aresult) => {
 					if (err) {
 					  console.log(err.stack);
 					  req.flash("Our database hit an error.");
@@ -1191,7 +1193,7 @@ app.get('/wish-d/:id', (req, res) => {
 				  } else {
 					let journalArr= new Array();
 					for (i in aresult.rows){
-						journalArr.push({j_id: aresult.rows[i].j_id, sys_id: aresult.rows[i].sys_id, name: Buffer.from(aresult.rows[i].name, "base64").toString()})
+						journalArr.push({j_id: aresult.rows[i].j_id, sys_id: aresult.rows[i].sys_id, name: Buffer.from(aresult.rows[i].name, "base64").toString(), is_archived: aresult.rows[i].is_archived})
 					}
 					res.status(200).json({code: 200, search: journalArr});
 				  }
@@ -1283,7 +1285,7 @@ app.get('/wish-d/:id', (req, res) => {
 			  req.session.chosenSys= result.rows[0];
 		  }
 		});
-			client.query({text: "SELECT alters.alt_id, alters.sys_id, alters.name, alters.pronouns, alter_moods.mood FROM alters LEFT JOIN alter_moods ON alters.alt_id = alter_moods.alt_id WHERE alters.sys_id=$1;",values: [`${req.params.id}`]}, (err, result) => {
+			client.query({text: "SELECT alters.alt_id, alters.sys_id, alters.name, alters.pronouns, alter_moods.mood, alters.is_archived FROM alters LEFT JOIN alter_moods ON alters.alt_id = alter_moods.alt_id WHERE alters.sys_id=$1;",values: [`${req.params.id}`]}, (err, result) => {
 	            if (err) {
 	              console.log(err.stack);
 	              res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
@@ -1291,7 +1293,7 @@ app.get('/wish-d/:id', (req, res) => {
 	              req.session.alters = [];
 	              for (i in (result.rows)){
 	                //   console.table(result.rows[i]);
-	                  (req.session.alters).push({name: Buffer.from(result.rows[i].name, 'base64').toString(), id: result.rows[i].sys_id, a_id: result.rows[i].alt_id, mood: result.rows[i].mood, pronouns: result.rows[i].pronouns})
+	                  (req.session.alters).push({name: Buffer.from(result.rows[i].name, 'base64').toString(), id: result.rows[i].sys_id, a_id: result.rows[i].alt_id, mood: result.rows[i].mood, pronouns: result.rows[i].pronouns, is_archived: result.rows[i].is_archived})
 	              }
 				  try {
 					(req.session.alters).sort((a, b) => a.name.localeCompare(b.name))
@@ -1330,31 +1332,76 @@ app.get('/wish-d/:id', (req, res) => {
 			}
 			   
 		   }
-		   client.query({text: "SELECT * FROM journals WHERE alt_id=$1;",values: [`${req.params.id}`]}, (err, nresult) => {
-			   if (err) {
-				  console.log(err.stack);
-				  console.log("Error with alter journals query.");
-				 return res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-			  } else {
-				  var altJournal = nresult.rows;
-			  }
+		   
+			client.query({text: "SELECT * FROM journals WHERE alt_id=$1;",values: [`${req.params.id}`]}, (err, nresult) => {
+				if (err) {
+				   console.log(err.stack);
+				   console.log("Error with alter journals query.");
+				  return res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+			   } else {
+				   var altJournal = nresult.rows;
+			   }
+ 
+				 client.query({text: "SELECT * FROM systems WHERE user_id=$1;",values: [`${getCookies(req)['u_id']}`]}, (err, result) => {
+				   if (err) {
+					 console.log(err.stack);
+					console.log("Error with alter's system query.");
+					return res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+				 } else {
+					 req.session.sysList = result.rows;
+				 if (alterInfo.is_archived == true){
+					// This is an archived alter. Do a query to grab their posts?
+					client.query({text: "SELECT * FROM posts WHERE j_id=$1 ORDER BY created_on DESC;",values: [`${altJournal[0].j_id}`]}, (err, mresult) => {
+						if (err) {
+						  console.log(err.stack);
+						 console.log("Error with alter's system query.");
+						 return res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+					  } else {
+						  let archivedPosts= new Array();
+						  for (i in mresult.rows){
+							archivedPosts.push({
+								id: mresult.rows[i].p_id,
+								title: decryptWithAES(mresult.rows[i].title),
+								body: decryptWithAES(mresult.rows[i].body),
+								created_on: mresult.rows[i].created_on
+							})
+						  }
+						  res.render(`pages/archived-alter`, { session: req.session, splash:splash,cookies:req.cookies, alterTypes:alterTypes, alterInfo:alterInfo, altJournal:altJournal, archivedPosts: archivedPosts });
+					  }
+					});
+					
+				   } else {
+					res.render(`pages/alter`, { session: req.session, splash:splash,cookies:req.cookies, alterTypes:alterTypes, alterInfo:alterInfo, altJournal:altJournal });
+				   }
 
-				client.query({text: "SELECT * FROM systems WHERE user_id=$1;",values: [`${getCookies(req)['u_id']}`]}, (err, result) => {
-	 			 if (err) {
-	 			   console.log(err.stack);
-				   console.log("Error with alter's system query.");
-	 			  return res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-	 		   } else {
-	 			   req.session.sysList = result.rows;
-	 		   }
-				  res.render(`pages/alter`, { session: req.session, splash:splash,cookies:req.cookies, alterTypes:alterTypes, alterInfo:alterInfo, altJournal:altJournal });
-			 });
-		   });
+				 }
+				   
+			  });
+			});
+		   
+		   
 		 });
 	 } else {
 		 res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });
 	 }
   });
+
+  app.get("/archive-alter/:id", (req, res, next)=>{
+
+	if (isLoggedIn(req)){
+		client.query({text: "SELECT alters.* FROM alters INNER JOIN systems ON systems.sys_id = alters.sys_id WHERE alters.alt_id=$1",values: [`${req.params.id}`]}, (err, result) => {
+			if (err) {
+			  console.log(err.stack);
+			  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+		  } else {
+			  let chosenAlter = result.rows[0];
+			  res.render(`pages/archive-alter`, { session: req.session, splash:splash,cookies:req.cookies, alterTypes:alterTypes,chosenAlter:chosenAlter });
+		  }
+		});
+	} else {
+		res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });
+	}
+ });
 
   app.get("/edit-alter/:id", (req, res, next)=>{
 
@@ -1588,6 +1635,27 @@ app.get('/wish-d/:id', (req, res) => {
 
 
 	*/
+	app.post("/archive-alter/:id", (req, res, next)=>{
+		if (isLoggedIn(req)){
+			client.query({text: "UPDATE alters SET is_archived= NOT is_archived WHERE alt_id=$1",values: [`${req.params.id}`]}, (err, result) => {
+				if (err) {
+				  console.log(err.stack);
+				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
+			  } else {
+				if (req.body.archive){
+					req.flash("flash", "Archived.");
+				} else {
+					req.flash("flash", "Un-Archived");
+				}
+				  
+				  res.redirect(`/alter/${req.params.id}`);
+			  }
+			});
+		} else {
+			res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });
+		}
+	 });
+
 	app.post('/reply/:id', (req, res) => {
 		if (isLoggedIn(req)){
 			client.query({text: "UPDATE thread_posts SET body=$2, alt_id=$3 WHERE id=$1;",values: [`${req.params.id}`, `${encryptWithAES(req.body.editor3)}`, req.body.replyauthor]}, (err, result) => {

@@ -72,7 +72,8 @@
             for (i in sysInfo.search){
             if ('<%- chosenReply.alt_id %>' == sysInfo.search[i].alt_id){
                   $("#replyauthor").append(`<option value="${sysInfo.search[i].alt_id}" selected>${sysInfo.search[i].name} (<%- capitalise(cookies.system_term) %>: ${sysInfo.search[i].sys_alias})</option>`);
-            } else{
+            } else if (!sysInfo.search[i].is_archived){
+                // Only un-archived alters may have posts changed to them.
                 $("#replyauthor").append(`<option value="${sysInfo.search[i].alt_id}">${sysInfo.search[i].name} (<%- capitalise(cookies.system_term) %>: ${sysInfo.search[i].sys_alias})</option>`);
             }
             }

@@ -17,6 +17,10 @@
 .radio-toolbar input[type="radio"]:checked ~ * { 
     background:#9CD9D3 !important;
 }
+.archived{
+    background: silver !important;
+    color: dimgrey !important;
+}
     </style>
 </head>
 
@@ -59,7 +63,7 @@ var journSkin=[
             <% if (alterArr.length > 0){ %>
             <div class="grid">
                 <% for ( i in alterArr) {  %>
-                    <a href="/alter/<%= alterArr[i].a_id %>"><%= alterArr[i].name %> <% if (alterArr[i].mood) { %><%- moods[alterArr[i].mood].emoji %><% } %><% if (alterArr[i].pronouns){ %><% if (distill(alterArr[i].pronouns)){ %><br><small>(<%- Buffer.from(alterArr[i].pronouns, "base64").toString() %>)</small><% } %><% } %></a>
+                    <a href="/alter/<%= alterArr[i].a_id %>" <% if (alterArr[i].is_archived == true) { %>class="archived"<% } %>><%= alterArr[i].name %> <% if (alterArr[i].mood) { %><%- moods[alterArr[i].mood].emoji %><% } %><% if (alterArr[i].pronouns){ %><% if (distill(alterArr[i].pronouns)){ %><br><small>(<%- Buffer.from(alterArr[i].pronouns, "base64").toString() %>)</small><% } %><% } %></a>
                 <% } %>
             </div>
             <% } %>
