@@ -62,9 +62,20 @@ var journSkin=[
             <p>This <%= cookies.system_term %> has <%= alterArr.length %> <% if (alterArr.length == 1){ %><%= cookies.alter_term %><% } else { %><%= pluralize(cookies.alter_term)%><% } %>.</p>
             <% if (alterArr.length > 0){ %>
             <div class="grid">
-                <% for ( i in alterArr) {  %>
-                    <a href="/alter/<%= alterArr[i].a_id %>" <% if (alterArr[i].is_archived == true) { %>class="archived"<% } %>><%= alterArr[i].name %> <% if (alterArr[i].mood) { %><%- moods[alterArr[i].mood].emoji %><% } %><% if (alterArr[i].pronouns){ %><% if (distill(alterArr[i].pronouns)){ %><br><small>(<%- Buffer.from(alterArr[i].pronouns, "base64").toString() %>)</small><% } %><% } %></a>
-                <% } %>
+                <% for ( i in alterArr) {  
+                    if (alterArr[i].is_archived== false){
+                    %>
+                    <a href="/alter/<%= alterArr[i].a_id %>"><%= alterArr[i].name %> <% if (alterArr[i].mood) { %><%- moods[alterArr[i].mood].emoji %><% } %><% if (alterArr[i].pronouns){ %><% if (distill(alterArr[i].pronouns)){ %><br><small>(<%- Buffer.from(alterArr[i].pronouns, "base64").toString() %>)</small><% } %><% } %></a>
+                <% }} %>
+            </div>
+            <% } %>
+            <% if (alterArr.length > 0){ %>
+            <div class="grid">
+                <% for ( i in alterArr) {  
+                    if (alterArr[i].is_archived== true){
+                    %>
+                    <a href="/alter/<%= alterArr[i].a_id %>"class="archived"><%= alterArr[i].name %> <% if (alterArr[i].mood) { %><%- moods[alterArr[i].mood].emoji %><% } %><% if (alterArr[i].pronouns){ %><% if (distill(alterArr[i].pronouns)){ %><br><small>(<%- Buffer.from(alterArr[i].pronouns, "base64").toString() %>)</small><% } %><% } %></a>
+                <% }} %>
             </div>
             <% } %>
             <a href="/deletesys/<%= session.chosenSys.sys_id %>" name="<%= session.chosenSys.sys_id %>" class="deletebtn">Delete</a>&emsp;<a href="/editsys/<%= session.chosenSys.sys_id %>" name="<%= session.chosenSys.sys_id %>" class="editbtn">Edit</a>
