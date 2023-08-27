@@ -33,6 +33,7 @@ html{
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
+    height: 100%;
 }
 
 body{
@@ -709,4 +710,7 @@ img.emoji {
       50%  { content: '..'; }
       75%  { content: '...'; }
       100% { content: ''; }
+  }
+  .image > img{
+    max-width: 100%;
   }
