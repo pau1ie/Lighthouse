@@ -6,6 +6,20 @@
             #roster{
                 list-style-type: none;
             }
+            #loadcontainer{
+                width: 100%;
+                height: 2em;
+                background: var(--col2);
+                padding:calc(.25em);
+            }
+            #loadbar{
+                /* background: var(--col1); */
+                background: linear-gradient(var(--col1), var(--col4));
+                height: inherit;
+                width: 0.1%;
+                /* width: 50%; */
+                border-radius: 0 1em 1em 0;
+            }
         </style>
     </head>
     <script>
@@ -46,16 +60,20 @@
                 
                 <button onclick="allAboard()" id="import">Import System</button>
                 <p class="splash">"Create New <%- capitalise(cookies.system_term) %>" will create a new <%- cookies.system_term %> called "Imported from Pluralkit". If you already have a <%- cookies.system_term %> named that, 3 random numbers will be appended to the end to prevent confusion. Press "rename" next to these <%- pluralize(cookies.system_term) %>' names on the "My <%- capitalise(cookies.system_term) %>" page to rename them to whatever you like.</p>
+                
             </div>
         </section>
     </div>
     <div id="screen" class="modal" style="display:none;">
-        <div class="modal-content" style="overflow:hidden;">
+        <div id="modal-content" class="modal-content" style="overflow:hidden;">
             <h2>Talking to Pluralkit. Please wait.</h2>
             <img src="/img/svg/bubbles.svg" class="medimg">
             <p><strong>Moving things over from Pluralkit can take some time.</strong> If you have a large <%= cookies.system_term %>, this may take a bit.</p>
             <p id="systemcreate" style="display: none;" class="loading">Creating the system</p>
-            <p id="importalter" style="display: none;"><span class="loading">Importing <span id="callno">0</span> of <span id="importno">0</span> <%= pluralize(cookies.alter_term) %> to <span id="systemDrop">SYS</span></span></p>
+            <p id="importalter" style="display: none;"><span class="loading">Importing <span id="callno"></span> to <span id="systemDrop">SYS</span></span></p>
+            <div id="loadcontainer">
+                <div id="loadbar"></div>
+            </div>
         </div>
         
     </div>
@@ -194,9 +212,7 @@
         $("#systemcreate").hide()
         $("#systemDrop").text(systemName);
         $("#importalter").show();
-        var callno= 0;
-        var importno= $('.alterChoice:checkbox:checked').length;
-        $("#importno").text(importno);
+        var callno= "";
             var i = 0;
 
             async function callLoop() {
@@ -210,7 +226,8 @@
             let body = await response.text();
             let sysInfo = JSON.parse(body);
             callno++;
-            $("#callno").text(callno);
+            $("#callno").text(sysInfo.display_name == null ? sysInfo.name : sysInfo.display_name);
+            $("#loadbar").animate({width: (callno/($('.alterChoice:checkbox:checked').length) * 100) + "%"}, 400 );
             // Got info from Pluralkit. Now send it to Lighthouse.
              response = await fetch(`/system-data`, { 
                 method: "PUT",
@@ -235,12 +252,17 @@
                 callLoop();             //  ..  again which will trigger another 
                 } else {
                     // We're done.
-                    $("#screen").fadeOut("slow");
+                    // $("#screen").fadeOut("slow");
+                    $("#modal-content").empty().delay(1000).html(`<h2>${randomise(['Woo-Hoo', 'Congrats', 'Yay'])}! Your <%= cookies.system_term %> was successfully imported.</h2><p>You will be redirected in 2 seconds.</p>`);
                     $("#pid").val("")
                 $("#pktoken").val("")
+
+                setTimeout(function(){
                     window.location.replace(`/system/${chosenSystem}`);
+                }, 2000);
+                    
                 }   
-            }, 750); // Call every .75 seconds, even though the rate limit is .5s. Accounting for lag.
+            }, 500); // Call every .5 seconds.
             }
 
             callLoop();

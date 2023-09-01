@@ -1777,8 +1777,7 @@ app.get('/wish-d/:id', (req, res) => {
 
 	app.post('/mod', (req, res) => {
 		if (isLoggedIn(req)){
-			if (req.session.is_dev){
-				
+			if ([process.env.dev1, process.env.dev2, process.env.dev3].includes(getCookies(req)['u_id'])){
 				if (req.body.donor){
 					// Add a donor!
 					client.query({text: "INSERT INTO donators (nickname) VALUES ($1)",values: [req.body.donor]}, (err, result) => {
@@ -1790,7 +1789,6 @@ app.get('/wish-d/:id', (req, res) => {
 					  }
 					  });
 				}
-
 			}else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
 			
 		} else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}

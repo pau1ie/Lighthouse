@@ -89,17 +89,24 @@
 				<h3>Customisation</h3>
 				<form method="post" style="margin-top:calc(.5em);">
 					<label for="skinSel">Select a skin for Lighthouse (Light mode only): </label>
-					<select name="skinSel">
+					<select id="skinSel" name="skinSel" onchange="flashInfo()">
 						<option value="lighthouse" <% if (cookies.skin=="lighthouse"){ %>selected<%} %>>Lighthouse (Default)</option>
-						<option value="waves"<% if (cookies.skin=="waves"){ %>selected<%} %>>Waves (Blue)</option>
-						<option value="shells"<% if (cookies.skin=="shells"){ %>selected<%} %>>Shells (Pink)</option>
-						<option value="slate"<% if (cookies.skin=="slate"){ %>selected<%} %>>Slate (Grey)</option>
-						<option value="mermaid"<% if (cookies.skin=="mermaid"){ %>selected<%} %>>Mermaid (Green + Purple)</option>
-						<option value="coral"<% if (cookies.skin=="coral"){ %>selected<%} %>>Coral (Red + Orange)</option>
+						<option value="waves"<% if (cookies.skin=="waves"){ %>selected<%} %>>Waves</option>
+						<option value="shells"<% if (cookies.skin=="shells"){ %>selected<%} %>>Shells</option>
+						<option value="slate"<% if (cookies.skin=="slate"){ %>selected<%} %>>Slate</option>
+						<option value="mermaid"<% if (cookies.skin=="mermaid"){ %>selected<%} %>>Mermaid</option>
+						<option value="coral"<% if (cookies.skin=="coral"){ %>selected<%} %>>Coral</option>
 						<option value="sand"<% if (cookies.skin=="sand"){ %>selected<%} %>>Sand (Brown)</option>
 						<option value="icecream"<% if (cookies.skin=="icecream"){ %>selected<%} %>>Ice Cream (Pastel)</option>
+						<option value="winter"<% if (cookies.skin=="winter"){ %>selected<%} %>>Winter</option>
+						<option value="spring"<% if (cookies.skin=="spring"){ %>selected<%} %>>Spring</option>
+						<option value="summer"<% if (cookies.skin=="summer"){ %>selected<%} %>>Summer</option>
+						<option value="autumn"<% if (cookies.skin=="autumn"){ %>selected<%} %>>Autumn</option>
+						<option value="gorillaz"<% if (cookies.skin=="gorillaz"){ %>selected<%} %>>Plastic Beach</option>
 					</select>
-					<input type="submit" value="Set Skin">
+					
+					<input type="submit" value="Set Skin"><br>
+					<span id="skinsplash"></span>
 				</form>
 			</section>
 			<section>
@@ -122,6 +129,54 @@
 			
 <%- include ("../partials/footer.ejs") %>
 	<script>
+		function flashInfo(){
+						var skinDesc;
+						switch($("#skinSel").val()){
+							case "lighthouse":
+								skinDesc= "The default look for Lighthouse."
+							break;
+							case "waves":
+								skinDesc= "This skin is primarily blue."
+							break;
+							case "shells":
+								skinDesc= "This skin is primarily pink."
+							break;
+							case "slate":
+								skinDesc= "This skin is mainly in greyscale."
+							break;
+							case "mermaid":
+								skinDesc= "This skin is a fun mix of green, purple and teal."
+							break;
+							case "coral":
+								skinDesc= "This skin is red, pink and purple."
+							break;
+							case "sand":
+								skinDesc= "This skin is entirely beige."
+							break;
+							case "icecream":
+								skinDesc= "This skin is an assortment of pastel colours."
+							break;
+							case "winter":
+								skinDesc= "This skin is winter themed."
+							break;
+							case "spring":
+								skinDesc= "This skin is spring themed."
+							break;
+							case "summer":
+								skinDesc= "This skin is summer themed."
+							break;
+							case "autumn":
+								skinDesc= "This skin is autumn themed."
+							break;
+							case "gorillaz":
+								skinDesc= "This skin is based off of Gorillaz, the Lighthouse System's favourite band."
+							break;
+							default:
+								skinDesc=""
+								break;
+						}
+						$("#skinsplash").html("<em>"+ skinDesc + "</em>")
+					}
 		$('#innerworld').change(function() {
 			$('#intoggle').submit();
 		});

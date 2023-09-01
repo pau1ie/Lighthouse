@@ -1,0 +1,49 @@
+/* Sand Theme Colours */
+:root{
+    --col1: #8a0e52;
+    --col2: #ff90cd;
+    --col3: #4fc254;
+    --col4: #701327;
+    --col5: #e62aad;
+	--col6: #6d3750;
+    --col7: #ccf3dd;
+    --col8: #3d0f09;
+    color-scheme: light;
+}
+html{
+    background-image: url("../img/plastic-beach.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+#menubg{
+    background: url("/img/gorillaz.jpg");
+    background-size: cover;
+    background-position: center center;
+}
+#menubg:after{
+    content:' ';
+    background: linear-gradient(90deg, rgb(218, 51, 142) 0%, rgba(41, 23, 0, 0) 100%);
+    width: 50%;
+    height: 150px;
+    z-index: -3;
+    position: absolute;
+    top:0;
+    lefT:0;
+}
+#logoname, #logoname > *{
+    color: var(--col8)
+}
+
+@media only screen and (max-width: 800px) {
+    #menubg{
+        background: url("/img/gorillaz.jpg");
+        background-size: cover;
+        background-position: 90% 85%;
+    }
+    #menubg:after{
+        width: 100%;
+        background: none;
+    }
+}

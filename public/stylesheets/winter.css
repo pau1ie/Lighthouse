@@ -1,30 +1,30 @@
 /* Sand Theme Colours */
 :root{
-    --col1: #4d3d1e;
-    --col2: #e0b177;
-    --col3: #c09f84;
-    --col4: #8a775e;
-    --col5: #8a5e44;
-	--col6: #614d43;
-    --col7: #cfc1ae;
-    --col8: #504116;
+    --col1: #0a7f8f;
+    --col2: #bee7ff;
+    --col3: #2cd4c6;
+    --col4: #13705c;
+    --col5: #2ba1be;
+	--col6: #166ea8;
+    --col7: #c3faf7;
+    --col8: #09193d;
     color-scheme: light;
 }
 html{
-    background-image: url("../img/autumn-bg.png");
+    background-image: url("../img/winter-bg.png");
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
 }
 
 #menubg{
-    background: url("/img/sand2.jpg");
+    background: url("/img/winter.jpg");
     background-size: cover;
-    background-position: center center;
+    background-position: top left;
 }
 #menubg:after{
     content:' ';
-    background: linear-gradient(90deg, rgb(107, 73, 41) 0%, rgba(41, 23, 0, 0) 100%);
+    background: linear-gradient(90deg, rgb(32, 140, 167) 0%, rgba(41, 23, 0, 0) 100%);
     width: 50%;
     height: 150px;
     z-index: -3;
