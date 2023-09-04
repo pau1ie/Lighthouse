@@ -2133,7 +2133,15 @@ app.get('/wish-d/:id', (req, res) => {
 				}
 				// After all those changes.
 				// res.cookie('subsystem_term', req.body.subTerm,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true });
-				res.cookie('username', req.body.newName || Buffer.from(req.session.username, "base64").toString() ,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('email', req.body.newEmail || req.session.email ,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('alter_term', req.body.altTerm || req.session.alter_term ,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('system_term', req.body.sysTerm || req.session.system_term ,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('subsystem_term', req.body.subTerm || req.session.subsystem_term ,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('skin', req.body.skinSel || req.session.skin,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).redirect(302, "/profile");
+				res
+				.cookie('username', req.body.newName || Buffer.from(req.session.username, "base64").toString() ,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+				.cookie('email', req.body.newEmail || req.session.email ,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+				.cookie('alter_term', req.body.altTerm || req.session.alter_term ,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+				.cookie('system_term', req.body.sysTerm || req.session.system_term ,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+				.cookie('subsystem_term', req.body.subTerm || req.session.subsystem_term ,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+				.cookie('innerworld_term', req.body.iwTerm || req.session.innerworld_term ,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+				.cookie('plural_term', req.body.iwTerm || req.session.innerworld_term ,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+				.cookie('skin', req.body.skinSel || req.session.skin,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).redirect(302, "/profile");
 			}
 		});
 	});
@@ -2874,12 +2882,25 @@ app.get('/wish-d/:id', (req, res) => {
 						req.session.alter_term= result.rows[0].alter_term;
 						req.session.system_term= result.rows[0].system_term;
 						req.session.subsystem_term= result.rows[0].subsystem_term;
+						req.session.innerworld_term= result.rows[0].innerworld_term;
+						req.session.plural_term= result.rows[0].plural_term;
 					   req.session.loggedin = true;
 					   req.session.u_id= result.rows[0].id;
 					   req.session.username = Buffer.from(result.rows[0].username, 'base64').toString();
 					   req.session.is_legacy= result.rows[0].is_legacy;
 					   req.flash("flash", strings.account.created);
-					   res.cookie('loggedin', true, { maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('username',  Buffer.from(result.rows[0].username, 'base64').toString(),{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('u_id', result.rows[0].id,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('alter_term', result.rows[0].alter_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('system_term', result.rows[0].system_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('subsystem_term', result.rows[0].subsystem_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('is_legacy', result.rows[0].is_legacy,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('skin', result.rows[0].skin,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).redirect("/tutorial");
+					   res
+					   .cookie('loggedin', true, { maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+					   .cookie('username',  Buffer.from(result.rows[0].username, 'base64').toString(),{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+					   .cookie('u_id', result.rows[0].id,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+					   .cookie('alter_term', result.rows[0].alter_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+					   .cookie('system_term', result.rows[0].system_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+					   .cookie('subsystem_term', result.rows[0].subsystem_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+					   .cookie('innerworld_term', result.rows[0].innerworld_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+					   .cookie('plural_term', result.rows[0].plural_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+					   .cookie('is_legacy', result.rows[0].is_legacy,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+					   .cookie('skin', result.rows[0].skin,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+					   .redirect("/tutorial");
 					   
 					  }
 					});
@@ -2916,9 +2937,18 @@ app.get('/wish-d/:id', (req, res) => {
 					req.session.is_legacy= result.rows[0].is_legacy;
 			  // getCookies(req)['u_id']= result.rows[0].id;
 					  // Add to cookies
-					  res.cookie('loggedin', true, { maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('username',  Buffer.from(result.rows[0].username, 'base64').toString(),{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('u_id', result.rows[0].id,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('alter_term', result.rows[0].alter_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('system_term', result.rows[0].system_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('is_legacy', result.rows[0].is_legacy,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('skin', result.rows[0].skin,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true }).cookie('subsystem_term', result.rows[0].subsystem_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true });
-			  	req.flash("flash", strings.account.loggedin);
-				 res.redirect(302, '/');
+					  res.cookie('loggedin', true, { maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+					  .cookie('username',  Buffer.from(result.rows[0].username, 'base64').toString(),{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+					  .cookie('u_id', result.rows[0].id,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+					  .cookie('alter_term', result.rows[0].alter_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+					  .cookie('system_term', result.rows[0].system_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+					  .cookie('is_legacy', result.rows[0].is_legacy,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+					  .cookie('skin', result.rows[0].skin,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+					  .cookie('subsystem_term', result.rows[0].subsystem_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+					  .cookie('innerworld_term', result.rows[0].innerworld_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+					  .cookie('plural_term', result.rows[0].plural_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true });
+			  		req.flash("flash", strings.account.loggedin);
+				 	res.redirect(302, '/');
 				}
 			}
 		});
