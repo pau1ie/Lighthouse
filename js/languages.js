@@ -1,5 +1,6 @@
 const siteLanguage={
     "en":{ // English
+        "name": "Language: English",
         "flag": "🇬🇧",
         "title": "Lighthouse",
         "greeting": "Hi, [[USER]]!",
@@ -21,6 +22,7 @@ const siteLanguage={
         "pp": "Privacy Policy"
     },
     "es":{ // Spanish
+        "name": "Idioma: español",
         "flag": "🇪🇸",
         "title": "Faro",
         "greeting": "Hola, [[USER]]!",
@@ -42,6 +44,7 @@ const siteLanguage={
         "pp": "Política de Privacidad"
     },
     "fr":{ // French
+        "name": "Langue : Français",
         "flag": "🇫🇷",
         "title": "Phare",
         "greeting": "Salut, [[USER]]!",
@@ -63,6 +66,7 @@ const siteLanguage={
         "pp": "Politique de confidentialité"
     },
     "de":{ // German
+        "name": "Sprache: Deutsch",
         "flag": "🇩🇪",
         "title": "Leuchtturm",
         "greeting": "Hallo, [[USER]]!",
@@ -84,6 +88,7 @@ const siteLanguage={
         "pp": "Datenschutzrichtlinie"
     },
     "ko":{ // Korean
+        "name": "언어: 한국어",
         "flag": "🇰🇷",
         "title": "등대",
         "greeting": "안녕하세요, [[USER]]님!",
@@ -105,6 +110,7 @@ const siteLanguage={
         "pp": "개인정보 보호정책"
     },
     "pl":{ // Polish
+        "name": "Język: polski",
         "flag": "🇵🇱",
         "title": "Latarnia Morska",
         "greeting": "Witaj, [[USER]]!",
@@ -126,6 +132,7 @@ const siteLanguage={
         "pp": "Polityka prywatności"
     },
     "fil":{ // Filipino
+        "name": "Wika: Filipino",
         "flag": "🇵🇭",
         "title": "Parola",
         "greeting": "Kumusta, [[USER]]!",
@@ -147,6 +154,7 @@ const siteLanguage={
         "pp": "Patakaran sa Privacy"
     },
     "jp":{ // Japanese
+        "name": "言語: 日本語",
         "flag": "🇯🇵",
         "title": "灯台",
         "greeting": "こんにちは、[[USER]]!",
@@ -168,6 +176,7 @@ const siteLanguage={
         "pp": "プライバシーポリシー"
     },
     "uk":{ // Ukranian
+        "name": "Мова: українська",
         "flag": "🇺🇦",
         "title": "Маяк",
         "greeting": "Привіт, [[USER]]!",
@@ -189,6 +198,7 @@ const siteLanguage={
         "pp": "Політика конфіденційності"
     },
     "gd":{ // Gaelic, Scotland
+        "name": "Cànan: Scots Gaelic",
         "flag": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
         "title": "Taigh-solais",
         "greeting": "Halo, [[USER]]!",
@@ -210,6 +220,7 @@ const siteLanguage={
         "pp": "Poileasaidh Dìomhaireachd"
     },
     "ie":{ // Irish
+        "name": "Teanga: Gaeilge",
         "flag": "🇮🇪",
         "title": "Tigh Solais",
         "greeting": "Dia dhaoibh, [[USER]]!",
@@ -230,7 +241,30 @@ const siteLanguage={
         "tos": "Téarmaí seirbhíse",
         "pp": "Beartas Príobháideachta"
     },
+    "ie":{ // Italian
+        "name": "Lingua: italiano",
+        "flag": "🇮🇹",
+        "title": "Faro",
+        "greeting": "Ciao, [[USER]]!",
+        "signUp": "Iscriviti",
+        "signOut": "Esci",
+        "signIn": "Accedi",
+        "mySys": "Il mio [[SYSTEM]]",
+        "settings": "Impostazioni",
+        "myForum": "Il mio forum",
+        "info": "Informazione",
+        "about": "Chi siamo",
+        "tutorial": "Tutorial",
+        "glossary": "Glossario",
+        "changelog": "Log delle modifiche",
+        "crisis": "Intervento sulla salute mentale",
+        "back": "Indietro",
+        "system": "Sistema",
+        "tos": "Termini di servizio",
+        "pp": "Informativa sulla privacy"
+    },
     "eo":{ // Esperanto
+        "name": "Lingvo: Esperanto",
         "flag": "🇺🇳", // The actual esperanto flag isn't available.
         "title": "Lumturo",
         "greeting": "Saluton, [[USER]]!",

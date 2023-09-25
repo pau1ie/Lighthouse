@@ -120,7 +120,9 @@
     <% } else { %>
     <span style="color:var(--col7)">Journal Together</span>
       <% } %>
-  </a></div>
+  </a>
+
+</div>
   <div class="topnav" id="myTopnav">
     <% if (isLoggedIn(cookies)){ %>
       <a href="/logout"><%= siteLanguage[session.language || "en"].signOut %></a>
@@ -152,12 +154,15 @@
         <a href="/crisis"><%= siteLanguage[session.language || "en"].crisis %></a>
         <a href="/tos"><%= siteLanguage[session.language || "en"].tos %></a>
         <a href="/privacypolicy"><%= siteLanguage[session.language || "en"].pp %></a>
+        <a title="Current Language"><%= (siteLanguage[session.language || "en"].name) %> <%= (siteLanguage[session.language || "en"].flag) %></a>
       </div>
       
     </div> 
       <a href="javascript:history.back()"><%= siteLanguage[session.language || "en"].back %></a>
+      
   <button style="background:transparent; "onclick="toggleMode()"><span name="mode" class="material-symbols-outlined" style="vertical-align:middle;color: var(--col2);">light_mode</span></button>
   <a href="javascript:void(0);" style="font-size:15px;" class="icon" onclick="toggleMobile()">&#9776;</a>
+  
   
 
     
