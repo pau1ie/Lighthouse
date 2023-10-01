@@ -116,7 +116,7 @@
 					<span id="skinsplash"></span><br><br>
 					<label for="textsize">Website text size</label><br>
 					<div style="display:flex; align-items: center;">
-					<input type="range" name="textsize" id="textsize" min="0.95" max="1.1" value="<% if (cookies.textsize){ %><%= cookies.textsize %><% } else { %>1<% } %>" step=".05" onchange="showFontSize()"> <span id="sizesplash" style="font-size: .75em;"></span><br>
+					<input type="range" name="textsize" id="textsize" min="0.75" max="1.5" value="<% if (cookies.textsize){ %><%= cookies.textsize %><% } else { %>1<% } %>" step=".25" onchange="showFontSize()"> <span id="sizesplash" style="font-size: .75em;"></span><br>
 						
 					</div>
 					<input type="submit" value="Set Customisation Settings">
@@ -317,13 +317,13 @@
 		function showFontSize(){
 			var sizeText;
 			switch($("#textsize").val()){
-				case "0.95":
+				case "0.75":
 					sizeText="smallest";
 					break;
-				case "1.05": 
+				case "1.25": 
 					sizeText="larger";
 					break;
-				case "1.1": 
+				case "1.5": 
 					sizeText="largest"
 					break;
 				default: 

@@ -597,6 +597,12 @@ app.get('/safety-plan/edit', (req, res) => {
 	} else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
 	
 });
+app.get('/coaxing', (req, res) => {
+	if (isLoggedIn(req)){
+		res.render(`pages/coax-alters`, { session: req.session, splash:splash, cookies:req.cookies });
+	} else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
+	
+})
 
 app.get('/tutorial', (req, res) => {
 		res.render(`pages/tutorial`, { session: req.session, splash:splash, cookies:req.cookies});

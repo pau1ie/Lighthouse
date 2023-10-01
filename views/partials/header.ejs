@@ -19,9 +19,17 @@
         $("head").append(`<link rel="stylesheet" href="/stylesheets/dark.css?v=1.0.2">`);         
       }
       <% if (cookies.textsize) { %> 
-        <% if (!cookies.textsize !== 1) {%> 
-          $("*:not(.ck,.ck-reset,.ck-editor,.ck-rounded-corners)").css("fontSize", `<%= (parseFloat(cookies.textsize) || 1) * 100 %>%`);
-        <% } %>
+        // <% if (!cookies.textsize !== 1) {%> 
+        //   $("*:not(.ck,.ck-reset,.ck-editor,.ck-rounded-corners)").css("fontSize", `<%= (parseFloat(cookies.textsize) || 1) * 100 %>%`);
+        // <% } %>
+        // $('body').css('font-size', function (i,size) {
+        // return parseInt(size,10) + (clicked.id === 'up' ? 2 : -2) + 'px';
+        //  });
+        $( "body" ).each(function( index ) {
+          // console.log( index + ": " + $( this ).text() );
+
+          $(this).css("font-size", `${parseInt($(this).css("font-size")) * <%= parseFloat(cookies.textsize) || 1 %>}px`)
+        });
       <% } %>
 			
 
