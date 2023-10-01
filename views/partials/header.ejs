@@ -18,6 +18,12 @@
         $("html").addClass("dark-mode");
         $("head").append(`<link rel="stylesheet" href="/stylesheets/dark.css?v=1.0.2">`);         
       }
+      <% if (cookies.textsize) { %> 
+        <% if (!cookies.textsize !== 1) {%> 
+          $("*:not(.ck,.ck-reset,.ck-editor,.ck-rounded-corners)").css("fontSize", `<%= (parseFloat(cookies.textsize) || 1) * 100 %>%`);
+        <% } %>
+      <% } %>
+			
 
       document.body.style.visibility = 'visible';
       try{
@@ -26,8 +32,6 @@
       console.log(e)
     }
     });
-    
-    
     </script>
     
 <link rel="icon" type="image/x-icon" href="/img/logo.png">
@@ -68,4 +72,5 @@
 // an application may want to use UTC and make that visible
 options.timeZoneName = "short";
 // console.log(new Date().toLocaleDateString("en-US", options));
+
 </script>
