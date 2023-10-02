@@ -2,6 +2,52 @@
 <html lang="en" dir="ltr" style="visibility: hidden;">
     <head>
         <%- include ("../partials/header.ejs") %>
+        <style>
+            table{
+                /* border: 1px solid blue; */
+                width: 95%;
+                border-collapse: collapse;
+            }
+            tr{
+                padding: 1em;
+                transition: 0.5s;
+            }
+            tbody tr:hover{
+                background-color: rgba(0,0,0,.1);
+            }
+            td{
+                text-align: center;
+                padding: 1em;
+                word-wrap: break-word;
+                width: 25%;
+            }
+            tr:not(:last-child){
+                border-bottom: 1px dashed var(--col1);
+            }
+            input[type=text]{
+                border-bottom: 1px solid black;
+                border-top: none;
+                border-left:none;
+                border-right: none;
+                background: rgba(0,0,0,.1);
+                margin-bottom: 0;
+            }
+            .short{
+                width: 6em;
+            }
+            .medium{
+                width: 10em;
+            }
+            .long{
+                width: 16em;
+            }
+            .xlong{
+                width: 25em;
+            }
+            textarea{
+                display: block;
+            }
+        </style>
     </head>
     <body>
         <%- include ("../partials/nav.ejs") %>
@@ -11,8 +57,85 @@
             <% } %>
             <section>
                 <h1>Coaxing Out <%= pluralize(capitalise(cookies.alter_term)) %></h1>
+                <p>This page is on how to coax out <%= pluralize(cookies.alter_term) %> in a safe, positive way that mitigates dissociative symptoms. <strong>Dissociation is a spectrum experience, and certain tips may not apply to you.</strong> This page does not save, that way it can be used later on.</p><p>Follow along with the sentences and try to practice as you go. Remember, the <%= cookies.alter_term %> you're coaxing out may not want to come out, and that's ok.</p>
+                <hr>
+                
+                <label for="who">I'm trying to coax out </label><input type="text" id="alter-name" class="short">. <label for="grounding">I can help <span class="alter-name">them</span> feel safe in the moment by</label> <input id="grounding" type="text" class="long">. I might also want to find a quiet, insulated space for <span class="alter-name">them</span> to feel comfortable in. <label for="triggers">Something safe and positive that seems to bring out <span class="alter-name">them</span> often is</label> <input type="text" id="triggers" class="medium">. <label for="likes">I can try to start a conversation with them by talking about</label> <input type="text" class="long" id="likes">.
+                <p>After establishing a safe place, try to talk aloud or write to <span class="alter-name">them</span> about <span class="alter-likes">things</span>. Be sure to remind them where they are, what the date is, and that they're safe to make sure they are grounded. Notice how the page continues to reference <span class="alter-name">alter</span> by name in an attempt to call them out.</p>
+                <label for="start">If <span class="alter-name">alter</span> has started to talk, what are some things that's being said?</label><br>
+                <textarea id="start"></textarea>
+                <label for="feelings">Try to identify how <span class="alter-name">alter</span> is feeling, either by listening or asking. What feelings are being communicated? Are these feelings positive? Negative?</label>
+                <textarea id="feelings"></textarea>
+                <label for="helpingout">If these feelings are negative, what can I do to help <span class="alter-name">them</span> feel better?</label>
+                <textarea id="helpingout"></textarea>
+                <hr>
+                <p>Unsure what can bring <%= pluralize(cookies.alter_term) %> out? See below for a chart of all <%= pluralize(cookies.alter_term) %> recorded in Lighthouse.</p>
+                <table id="alters">
+                    <thead>
+                        <tr>
+                          <th><%= capitalise(cookies.alter_term) %></th>
+                          <th>Positive Triggers</th>
+                          <th>Interests</th>
+                          <th>Front Tells</th>
+                        </tr>
+                      </thead>
+                      <tbody id="appendalt">
+
+                      </tbody>
+                </table>
             </section>
     </div>
     <%- include ("../partials/footer.ejs") %>
-    </body>
+    <script>
+        async function getAlters(){
+  let response = await fetch(`/system-data`, { 
+method: "GET",
+        headers: { 
+          "api-lh-call": "api-lh-call",
+          'Content-Type': 'application/json',
+          "grab": "alters"
+        } 
+    });
+    let body = await response.text();
+    let sysInfo = JSON.parse(body);
+    // console.log(sysInfo)
+    var alterArr= new Array();
+    for (i in sysInfo.search){
+      if (!sysInfo.search[i].is_archived){
+        $("#appendalt").append(`<tr>
+            <td>${sysInfo.search[i].name}</td>
+            <td>${sysInfo.search[i].triggers_pos || "Nothing listed here."}</td>
+            <td>${sysInfo.search[i].likes || "Nothing listed here."}</td>
+            <td>${sysInfo.search[i].fronttells || "Nothing listed here."}</td>
+            </tr>`);
+        alterArr.push({name: sysInfo.search[i].name, triggers: sysInfo.search[i].triggers_pos || "Nothing listed here.", interests:sysInfo.search[i].likes || "Nothing listed here.", tells: sysInfo.search[i].fronttells || "Nothing listed here."})
+      }
+      
+    }
+}
+getAlters();
+
+//Fill name in.
+$("#alter-name").on("keyup paste change", function(){
+    $(".alter-name").each(function() {
+    $(this).text($("#alter-name").val()== ""? "them": $("#alter-name").val());
+});
+});
+
+// Fill likes in.
+$("#likes").on("keyup paste change", function(){
+    $(".alter-likes").each(function() {
+    $(this).text($("#likes").val()== ""? "their interests": $("#likes").val());
+});
+});
+
+
+$(".alter-name").each(function() {
+    $(this).text($("#alter-name").val()== ""? "them": $("#alter-name").val());
+});
+$(".alter-likes").each(function() {
+    $(this).text($("#likes").val()== ""? "their interests": $("#likes").val());
+});
+</script>
+</body>
 </html>

@@ -14,6 +14,7 @@ var pdf = require("html-pdf");
 const nodemailer = require('nodemailer');
 const ejs = require('ejs');
 var pluralize = require('pluralize');
+var compromise= require("compromise");
 var pjson = require('./package.json');
 var flash = require('express-flash');
 console.log( `Lighthouse v${pjson.version}`);
@@ -301,6 +302,10 @@ app.locals.capitalise= function(s){
 		return s[0].toUpperCase() + s.slice(1);
 	}
 app.locals.pluralize= pluralize;
+app.locals.possessive= function(s){
+	let doc= compromise.nlp(s);
+	console.log(doc)
+};
 
   app.set('views', path.join(__dirname, 'views'))
   app.set('view engine', 'ejs');
