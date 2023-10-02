@@ -56,6 +56,11 @@
                 <div class="splash"><%- locals.messages.flash %></div>
             <% } %>
             <section>
+                <ul class="breadcrumb">
+                    <li><a href="/system" title="Your <%= capitalise(cookies.system_term) %>"><%= capitalise(cookies.system_term) %></a></li>
+                    <li><a href="/worksheets" title="Worksheets">Worksheets</a></li>
+                    <li>Coaxing Out <%= pluralize(capitalise(cookies.alter_term)) %></li>
+                </ul>  
                 <h1>Coaxing Out <%= pluralize(capitalise(cookies.alter_term)) %></h1>
                 <p>This page is on how to coax out <%= pluralize(cookies.alter_term) %> in a safe, positive way that mitigates dissociative symptoms. <strong>Dissociation is a spectrum experience, and certain tips may not apply to you.</strong> This page does not save, that way it can be used later on.</p><p>Follow along with the sentences and try to practice as you go. Remember, the <%= cookies.alter_term %> you're coaxing out may not want to come out, and that's ok.</p>
                 <hr>

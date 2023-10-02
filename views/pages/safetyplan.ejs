@@ -18,6 +18,11 @@
     <body>
         <%- include ("../partials/nav.ejs") %>
         <div id="wrapper">
+            <ul class="breadcrumb">
+                <li><a href="/system" title="Your <%= capitalise(cookies.system_term) %>"><%= capitalise(cookies.system_term) %></a></li>
+                <li><a href="/worksheets" title="Worksheets">Worksheets</a></li>
+                <li>Your Safety Plan</li>
+            </ul>  
             <% if (locals.messages.flash) { %>
                 <div class="splash"><%- locals.messages.flash %></div>
             <% } %>

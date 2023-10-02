@@ -37,13 +37,18 @@
     <body>
         <%- include ("../partials/nav.ejs") %>
         <div id="wrapper">
+            <ul class="breadcrumb">
+                <li><a href="/system" title="Your <%= capitalise(cookies.system_term) %>"><%= capitalise(cookies.system_term) %></a></li>
+                <li><a href="/worksheets" title="Worksheets">Worksheets</a></li>
+                <li>DES-II</li>
+            </ul>  
             <% if (locals.messages.flash) { %>
                 <div class="splash"><%- locals.messages.flash %></div>
             <% } %>
             <section>
                 <h2>DES-II</h2>
                 <p><strong>This is not a diagnostic tool, nor is this written by a professional.</strong> Please consult a professional regarding any mental health concerns you may have. The purpose of this test is to help people gauge or track the severity of their dissociative symptoms, if present.</p>
-                <p>For each question, answer each question with a percentage of how much that question applies, in a general sense.</p>
+                <p>For each question, answer each question with a percentage of how much that question applies, in a general sense from minimal (left) to constant (right).</p>
                 <hr>
                 <!-- DES Questions-->
 

@@ -9,8 +9,12 @@
             <% if (locals.messages.flash) { %>
                 <div class="splash"><%- locals.messages.flash %></div>
             <% } %>
-            <section>   
-                <h2>Worksheets for your <%- capitalise(cookies.system_term) %></h2>
+            <section> 
+                <ul class="breadcrumb">
+                    <li><a href="/system" title="Your <%= capitalise(cookies.system_term) %>"><%= capitalise(cookies.system_term) %></a></li>
+                    <li>Worksheets</li>
+                </ul>  
+                <h2>Worksheets and Activities for your <%- capitalise(cookies.system_term) %></h2>
                 <ul>
                     <li><a href="/safety-plan">Your Safety Plan</a></li>
                     <li><a href="/bda">Before, During, After</a></li>
