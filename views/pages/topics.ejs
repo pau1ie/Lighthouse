@@ -161,13 +161,20 @@
                   </thead>
                   
                   <tbody>
-                    <% for (i in topics){ %> 
+                    <% for (i in topics){ if (topics[i].is_sticky==true){%> 
                       <tr style="padding: 5em; border-bottom:1px solid black;">
-                        <td style="text-align: left;"><a href="/topic/<%- topics[i].id %>"><%= truncate(topics[i].name, 24) %></a><br><small>by: <a href="/alter/<%- topics[i].alt_id %>"><%- topics[i].alter %></a> on <%- (topics[i].created_on).toLocaleString().split(",")[0] %><br><span style="padding-left: 2em;"><%- truncate((topics[i].preview).replace(/\<.+?\>/g, ""), 80) %></span></small></td>
+                        <td style="text-align: left;"><% if (topics[i].is_locked == true){ %><i title="Locked Topic" class="fa fa-lock" aria-hidden="true"></i> <% } %><i class="fa fa-thumb-tack" title="Pinned Topic" aria-hidden="true"></i> <a href="/topic/<%- topics[i].id %>"><%= truncate(topics[i].name, 24) %></a><br><small>by: <a href="/alter/<%- topics[i].alt_id %>"><%- topics[i].alter %></a> on <%- (topics[i].created_on).toLocaleString().split(",")[0] %><br><span style="padding-left: 2em;"><%- truncate((topics[i].preview).replace(/\<.+?\>/g, ""), 80) %></span></small></td>
                         <td name="<%= topics[i].id %>"></td>
                         <td name="fetch" id="<%- topics[i].id %>" style="text-align: right;"></td>
                       </tr>
-                    <% } %>
+                    <% }} %>
+                    <% for (i in topics){ if (topics[i].is_sticky==false){%> 
+                      <tr style="padding: 5em; border-bottom:1px solid black;">
+                        <td style="text-align: left;"><% if (topics[i].is_locked == true){ %><i title="Locked Topic" class="fa fa-lock" aria-hidden="true"></i> <% } %><a href="/topic/<%- topics[i].id %>"><%= truncate(topics[i].name, 24) %></a><br><small>by: <a href="/alter/<%- topics[i].alt_id %>"><%- topics[i].alter %></a> on <%- (topics[i].created_on).toLocaleString().split(",")[0] %><br><span style="padding-left: 2em;"><%- truncate((topics[i].preview).replace(/\<.+?\>/g, ""), 80) %></span></small></td>
+                        <td name="<%= topics[i].id %>"></td>
+                        <td name="fetch" id="<%- topics[i].id %>" style="text-align: right;"></td>
+                      </tr>
+                    <% }} %>
                   </tbody>
                   </table>
             </section>

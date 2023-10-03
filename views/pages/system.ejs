@@ -35,7 +35,7 @@
               <a title="Worksheets for trauma (WIP)" href="/worksheets">Worksheets</a>
               <a title="Crash course on using Lighthouse" href="/tutorial">Tutorial</a>
             </div>
-            <p><sub id="sysCount"></sub></p>
+            <p><sub id="sysCount" style="display: none;"></sub></p>
             <div id="WaitSys"></div>
             <div id="sysList">
             </div>
@@ -176,7 +176,11 @@ async function fetchPosts(){
             var sysCount = 0;
             var subSysCount = 0;
             if (sysInfo.sysArr.length > 0){
+              $("#sysCount").show();
               $("#sysList").append("For sanity's sake and neatness, <%- pluralize(cookies.subsystem_term) %> are only shown 1 level deep. <%- capitalise(pluralize(cookies.subsystem_term)) %> within <%- pluralize(cookies.subsystem_term) %> are nested in their parent's page.");
+            } else {
+              $("#sysCount").hide();
+              $("#sysList").append("You don't have a <%= cookies.system_term %> created yet. Click \"Add a <%= capitalise(cookies.system_term) %>\"");
             }
             for (i in sysInfo.sysArr){
               // We need to do some logic. 

@@ -2,6 +2,18 @@
 <html lang="en" dir="ltr" style="visibility: hidden;">
     <head>
         <%- include ("../partials/header.ejs") %>
+        <style>
+          .modpanel{
+            width: 30%;
+            /* background: powderblue; */
+            padding: .5em;
+            font-size: 1.25em;
+            display: flex;
+            justify-content: space-around;
+            border: thick double var(--col1) ;
+            border-radius: 5px;
+          }
+        </style>
     </head>
     <body>
         <%- include ("../partials/nav.ejs") %>
@@ -88,7 +100,18 @@
                } %>
 
            
-            <h2><%= originalPost.title %> <% if (!opInfo.is_archived){%><a title="Edit <%- originalPost.title %>" class="editCat"><i id="tbutton" class="fa fa-pencil" aria-hidden="true"></i></a> <% } %><a title="Delete <%- originalPost.title %>"  class="" onclick="deleteTopic('<%- originalPost.title %>', '<%- originalPost.id %>')"><i class="fa fa-trash textless" aria-hidden="true"></i></a></h2>
+            <h2><% if (originalPost.is_sticky== true){ %>(Pinned) <% } %><% if (originalPost.is_locked== true){ %>(Locked) <% } %><%= originalPost.title %> <% if (!opInfo.is_archived){%></h2>
+              <span>Moderation Panel</span>
+              <div class="modpanel">
+                <a title="Edit <%- originalPost.title %>" class="editCat"><i id="tbutton" class="fa fa-pencil" aria-hidden="true"></i></a> 
+                
+                <a title="Delete <%- originalPost.title %>"  class="" onclick="deleteTopic('<%- originalPost.title %>', '<%- originalPost.id %>')"><i class="fa fa-trash textless" aria-hidden="true"></i></a> 
+                
+                <i style="color:var(--col4)" class="fa fa-thumb-tack" title="Pin this thread to the top of its forum" aria-hidden="true" onclick="modThread('sticky', '<%= originalPost.id %>')"></i> 
+                
+                <% if (originalPost.is_locked== true) { %><i title="Unlock thread and allow replies."  onclick="modThread('lock', '<%= originalPost.id %>')" class="fa fa-unlock" aria-hidden="true"></i><% } else { %><i title="Lock thread and prevent replies." onclick="modThread('lock', '<%= originalPost.id %>')" class="fa fa-lock" aria-hidden="true"></i><% } %>
+              </div>
+            <% } %>
             <section class="threadpost">
                 <div class="user">
                 <!-- Time to do some alter logic. -->
@@ -148,6 +171,7 @@
                 </section>
             <% } %>
             <section>
+              <% if (originalPost.is_locked == false){ %>
                 <h2>Reply to this thread</h2>
                 <form autocomplete=off  method="post">
                     <label for="replyauthor">Who is replying to this?</label>
@@ -194,7 +218,10 @@
                           console.error( error );
                         } );
                     </script>
-                
+                <% } else { %>
+                  <h2>This thread has been locked. <i class="fa fa-lock" aria-hidden="true"></i></h2>
+                  <p>No more replies can be made until the thread is unlocked.</p>
+                <% } %>
             </section>
     </div>
     <script>
@@ -254,6 +281,22 @@
             let sysInfo = JSON.parse(body);
             if (sysInfo.code== 200) location.reload();
           }
+        }
+        async function modThread(mode, id){
+          let response = await fetch(`/forum-data`, { 
+                method: "PUT",
+                headers: { 
+                  "api-lh-call": "api-lh-call",
+                  'Content-Type': 'application/json'
+                }, 
+                body: JSON.stringify({
+                  "mode": `${mode}`,
+                  "id": `${id}`
+                })
+            });
+            let body = await response.text();
+            let sysInfo = JSON.parse(body);
+            if (sysInfo.code== 200) location.reload();
         }
         async function getAlters(){
           let response = await fetch(`/system-data`, { 

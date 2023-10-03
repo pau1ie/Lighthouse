@@ -672,14 +672,14 @@ app.get('/worksheets', (req, res) => {
 
   app.get('/forum', (req, res) => {
 	if (isLoggedIn(req)){
-		client.query({text: "SELECT * FROM categories WHERE u_id=$1 ORDER BY created_on ASC;",values: [getCookies(req)['u_id']]}, (err, result) => {
+		client.query({text: "SELECT * FROM categories WHERE u_id=$1 ORDER BY f_order ASC;",values: [getCookies(req)['u_id']]}, (err, result) => {
 			if (err) {
 			  console.log(err.stack);
 			  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash, cookies:req.cookies });
 		  } else {
 			let categories= new Array();
 			for (i in result.rows){
-				categories.push({name: decryptWithAES(result.rows[i].name), desc: decryptWithAES(result.rows[i].description), icon: result.rows[i].icon, id: result.rows[i].id});
+				categories.push({name: decryptWithAES(result.rows[i].name), desc: decryptWithAES(result.rows[i].description), icon: result.rows[i].icon, id: result.rows[i].id, order: result.rows[i].f_order});
 			}
 			// var forums= new Array();
 			var forums = []; // Empty this array or create it.
@@ -3387,6 +3387,57 @@ app.get('/wish-d/:id', (req, res) => {
 			
 
  */
+app.put("/forum-data", (req,res) => {
+		// Deleting Forum Data
+		if (isLoggedIn(req)){
+			if (apiEyesOnly(req)){
+				if (req.body.mode=="sticky"){
+					// Toggle Sticky Mode.
+					client.query({text: "UPDATE threads SET is_sticky= NOT is_sticky WHERE id=$2 AND u_id=$1;",values: [getCookies(req)['u_id'], req.body.id]}, (err, result) => {
+						if (err) {
+							console.log(err.stack);
+							res.status(400).json({code: 400, message: err.stack});
+						} else {
+						req.flash("flash", "Topic pinned.");
+						res.status(200).json({code: 200});
+						}
+						});
+				} else if (req.body.mode=="lock"){
+					// Toggle Sticky Mode.
+					client.query({text: "UPDATE threads SET is_locked= NOT is_locked WHERE id=$2 AND u_id=$1;",values: [getCookies(req)['u_id'], req.body.id]}, (err, result) => {
+						if (err) {
+							console.log(err.stack);
+							res.status(400).json({code: 400, message: err.stack});
+						} else {
+						req.flash("flash", "Topic locked.");
+						res.status(200).json({code: 200});
+						}
+						});
+				} else if (req.body.mode=="pop"){
+					// Toggle Sticky Mode.
+					client.query({text: "UPDATE threads SET is_popular= NOT is_popular WHERE id=$2 AND u_id=$1;",values: [getCookies(req)['u_id'], req.body.id]}, (err, result) => {
+						if (err) {
+							console.log(err.stack);
+							res.status(400).json({code: 400, message: err.stack});
+						} else {
+						req.flash("flash", "Topic made popular.");
+						res.status(200).json({code: 200});
+						}
+						});
+				} else if (req.body.mode=="cat-order"){
+					// Toggle Sticky Mode.
+					client.query({text: "UPDATE categories SET f_order= $3 WHERE id=$2 AND u_id=$1;",values: [getCookies(req)['u_id'], req.body.id, req.body.order]}, (err, result) => {
+						if (err) {
+							console.log(err.stack);
+							res.status(400).json({code: 400, message: err.stack});
+						} else {
+						res.status(200).json({code: 200});
+						}
+						});
+				} 
+			} else res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies })
+		} else res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies })
+	});
  	app.delete("/forum-data", (req,res) => {
 		// Deleting Forum Data
 		if (isLoggedIn(req)){
