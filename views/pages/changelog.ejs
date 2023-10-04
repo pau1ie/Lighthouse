@@ -14,12 +14,12 @@
                     <% 
                     // DD, MM, YYYY
                         var dateArr=(((changes[i].date).toLocaleString()).split(",")[0]).split("/");
-                        var dateMonth= parseInt(dateArr[1]);
+                        var dateMonth= parseInt(dateArr[0]);
                     %>
                     <hr>
                     <section>
                         <h3><%- changes[i].title %></h3>
-                        <p><small>Posted on <%= parseInt(dateArr[0]) %> <%= monthNames[dateMonth-1] %>, <%= dateArr[2] %></small></p>
+                        <p><small>Posted on <%= parseInt(dateArr[1]) %> <%= monthNames[dateMonth-1] %>, <%= dateArr[2] %></small></p>
                         <% var cbodyArr= (changes[i].body).replace(/\r/gi, '').split("\n").filter(function() { return true; });
                         for (j in cbodyArr){
                             if (cbodyArr[j] !== ''){ %>
