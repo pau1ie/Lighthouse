@@ -10,10 +10,52 @@
                 <div class="splash"><%- locals.messages.flash %></div>
             <% } %>
             <section>
-                <h2>Developer Section</h2>
+                <h1>Developer Section</h1>
+                <h2>Donations/Supporters</h2>
                 <form method="post">
-                    <input type="text" name="donor" placeholder="Add New Donor">
-                    <input type="submit">
+                    <label for="donor">New Donor: </label>
+                    <input type="text" ID="donor" name="donor" placeholder="Add New Donor">
+                    <input type="submit" value="Add Donor">
+                </form>
+                <hr/>
+                <form method="post">
+                    <h2>New Changelog Entry</h2>
+                    <label for="ptitle">Title: </label>
+                    <input type="text" name="ptitle" id="ptitle"><br>
+                    <label for="pbody">Body: </label><br>
+                    <textarea id="pbody" name="pbody"></textarea><br>
+                    <script>ClassicEditor
+                        .create( document.querySelector( '#pbody' ), {
+                          licenseKey: '',
+                          fontColor: {
+                                  colors: [
+                                      {color: 'red',label: 'Red'},
+                                      {color: '#ff691f',label: 'Orange'},
+                                      { color: '#ffc20a',label: 'Yellow'},
+                                      {color: 'green',label: 'Green'},
+                                      {color: 'teal',label: 'Teal'},
+                                      {color: 'blue',label: 'Blue'},
+                                      {color: 'purple',label: 'Purple'},
+                                      {color: '#ff0f83',label: 'Pink'},
+                                      {color:'#663c28', label: 'Brown'}, 
+                                      {color: 'lightgray', label: 'Silver'}, 
+                                      {color: 'gray', label: 'Stone'}, 
+                                      {color: 'black', label: 'Black'}, 
+                                      {color: 'white', label: "White"}
+                                    ]
+                                }
+                        } )
+                        .then( editor => {
+                          window.editor = editor;
+                        } )
+                        .catch( error => {
+                          console.error( 'Oops, something went wrong!' );
+                          console.error( 'Please, report the following error on https://github.com/ckeditor/ckeditor5/issues with the build id and the error stack trace:' );
+                          console.warn( 'Build id: 7x5cosrncqsm-gncdo1e4b9nh' );
+                          console.error( error );
+                        } );
+                    </script>
+                    <input type="submit" value="Create entry">
                 </form>
             </section>
     </div>

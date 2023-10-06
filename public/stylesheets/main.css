@@ -105,11 +105,6 @@ nav {
     max-height: 6em;
 }
 
-/* nav a, nav button{
-  font-size: calc(1em);
-  font-weight: 400;
-  vertical-align: middle;
-} */
 
 article{
     border-bottom: 1px solid black;
@@ -823,4 +818,12 @@ img.emoji {
   }
   .image > img{
     max-width: 100%;
+  }
+
+  .pageJump > ul > li{
+    display: inline;
+    padding: 0.5em;
+  }
+  .currPage{
+    border:1px solid var(--col1);
   }

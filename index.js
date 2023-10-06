@@ -281,6 +281,25 @@ app.locals.monthNames= ["January","February","March","April","May","June","July"
 "August","September","October","November","December"];
 app.locals.dayNames= ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
+
+/** 
+  *@param a- The array you're paginating.
+  *@param n- How many items per page.
+*/
+function paginate (a, n){
+	// Make a new array object that will carry the paginated results.
+	let b= new Array();
+	// Iterate 
+	for (i in a){
+		// Push an array that splices the original array from index 0 to however many items should be per page.
+		b.push(a.splice(0,n));
+	}
+	// If there's a remainder, tack it on to the end.
+	if (a.length > 0) b.push(a)
+	return b;
+}
+app.locals.paginate = paginate;
+
 // Back end Functions
 function truncate (str, n){
 	return (str.length > n) ? str.slice(0, n-1) + '...' : str;
@@ -297,6 +316,11 @@ function encryptWithAES(text){
 	const originalText = bytes.toString(CryptoJS.enc.Utf8);
 	return originalText;
   }
+
+  const parseIp = (req) =>{
+	return req.headers['x-forwarded-for']?.split(',').shift()
+|| req.socket?.remoteAddress;
+}
   
 app.locals.capitalise= function(s){
 		return s[0].toUpperCase() + s.slice(1);
@@ -761,7 +785,8 @@ app.get('/worksheets', (req, res) => {
 	} else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
 	
   });
-  app.get('/topic/:id', (req, res)=>{
+  app.get('/topic/:id/:pg?', (req, res)=>{
+	
 	if (isLoggedIn(req)){
 		client.query({text: "SELECT threads.*, forums.topic FROM threads INNER JOIN forums ON threads.topic_id= forums.id WHERE threads.u_id=$1 AND threads.id=$2;",values: [getCookies(req)['u_id'], req.params.id]}, (err, result) => {
 			if (err) {
@@ -796,6 +821,16 @@ app.get('/worksheets', (req, res) => {
 						id: aresult.rows[i].id
 					});
 				}
+				// console.log(`${replyArr.length} replies.`);
+				var replyPages= paginate(replyArr, 15);
+				var finalPage= replyPages.length;
+				if (req.params.pg){
+					if (req.params.pg > finalPage) req.params.pg = finalPage;
+					if (req.params.pg < 1) req.params.pg = 1;
+				}
+				replyArr= replyPages[req.params.pg-1 || 0];
+				
+				// console.log(`Post pagination: ${replyArr.length} replies loading.`);
 				client.query({text: "SELECT * FROM alters INNER JOIN systems ON alters.sys_id = systems.sys_id WHERE systems.user_id=$1;",values: [`${getCookies(req)['u_id']}`]}, (err, bresult) => {
 					if (err) {
 					  console.log(err.stack);
@@ -825,7 +860,7 @@ app.get('/worksheets', (req, res) => {
 						for (i in cresult.rows){
 							forumArr.push({id: cresult.rows[i].id, topic: decryptWithAES(cresult.rows[i].topic), description: decryptWithAES(cresult.rows[i].description)})
 						}
-						res.render(`pages/thread`, { session: req.session, splash:splash, cookies:req.cookies, originalPost: originalPost, replyArr: replyArr, alterArr:alterArr, forumArr: forumArr});					
+						res.render(`pages/thread`, { session: req.session, splash:splash, cookies:req.cookies, originalPost: originalPost, replyArr: replyArr, alterArr:alterArr, forumArr: forumArr, finalPage:finalPage, topic: req.params.id, currPage: req.params.pg || 1});					
 					  }
 					});
 				  }
@@ -900,15 +935,42 @@ app.get('/worksheets', (req, res) => {
 	
   });
   app.get('/mod', (req, res) => {
+	// console.log(req.socket.remoteAddress);
 	if (isLoggedIn(req)){
 		if ([process.env.dev1, process.env.dev2, process.env.dev3].includes(getCookies(req)['u_id'])){
 			res.render(`pages/mod-panel`, { session: req.session, splash:splash, cookies:req.cookies });
-		}else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
+		} else {
+			var mailOptions = {
+				from: '"Lighthouse" <dee_deyes@writelighthouse.com>',
+				to: 'dee_deyes@writelighthouse.com',
+				subject: `Unauthorised attempt to access mod panel.`,
+				html: `<p>A user has attempted to enter the mod panel!</p><p>User: ID: ${getCookies(req)['u_id'] || "Guest/Logged Out User"}</p><p>Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}</p><p>IP Address: ${req.socket.remoteAddress}</p>`
+			  };
 		
+			  transporter.sendMail(mailOptions, (error, info) => {
+				if (error) {
+				  return console.log(error);
+				}
+			  });
+			console.log(`An attempt to enter the mod panel was made.\n Attempt made by: ${getCookies(req)['u_id'] || "Guest/Logged Out User"} | Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}. IP Address: ${req.socket.remoteAddress}`);
+			res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });
+			}
 	} else {
-		console.log(`An attempt to enter the mod panel was made.\n Attempt made by: ${getCookies(req)['u_id'] || "Guest/Logged Out User"} | Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}`);
-		res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies 
-	});}
+		var mailOptions = {
+			from: '"Lighthouse" <dee_deyes@writelighthouse.com>',
+			to: 'dee_deyes@writelighthouse.com',
+			subject: `Unauthorised attempt to access mod panel.`,
+			html: `<p>A user has attempted to enter the mod panel!</p><p>User: ID: ${getCookies(req)['u_id'] || "Guest/Logged Out User"}</p><p>Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}</p><p>IP Address: ${req.socket.remoteAddress}</p>`
+		  };
+	
+		  transporter.sendMail(mailOptions, (error) => {
+			if (error) {
+			  return console.log(error);
+			}
+		  });
+		console.log(`An attempt to enter the mod panel was made.\n Attempt made by: ${getCookies(req)['u_id'] || "Guest/Logged Out User"} | Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}. IP Address: ${req.socket.remoteAddress}`);
+		res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });
+	}
 	
   });
   app.get('/bda', (req, res) => {
@@ -979,8 +1041,7 @@ app.get('/worksheets', (req, res) => {
 
 
   app.get('/changelog', (req, res) => {
-	
-	client.query({text: "SELECT * FROM changelog ORDER BY log_id DESC LIMIT 50",values: []}, (err, result) => {
+	client.query({text: "SELECT * FROM changelog ORDER BY date DESC LIMIT 50",values: []}, (err, result) => {
 		if (err) {
 		  console.log(err.stack);
 		  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash, cookies:req.cookies });
@@ -2028,7 +2089,7 @@ app.get('/wish-d/:id', (req, res) => {
 		
 	  });
 
-	app.post('/topic/:id', (req, res)=>{
+	app.post('/topic/:id/:pg?', (req, res)=>{
 		if (req.body.newtop){
 			client.query({text: "INSERT INTO thread_posts (alt_id, body, thread_id) VALUES ($1, $2, $3)",values: [req.body.replyauthor, `${encryptWithAES(req.body.reply)}`, req.params.id]}, (err, result) => {
 				if (err) {
@@ -2036,7 +2097,8 @@ app.get('/wish-d/:id', (req, res) => {
 				res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash, cookies:req.cookies });
 			} else { 
 				req.flash("flash", "Reply posted!");
-				res.redirect(301, `/topic/${req.params.id}`);
+				// Let's redirect them to the page they were on.
+				res.redirect(301, `/topic/${req.params.id}/${req.body.pagenum}`);
 			}
 			})	
 		} else if (req.body.editop){
@@ -2127,9 +2189,11 @@ app.get('/wish-d/:id', (req, res) => {
 		} else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
 	});
 
+    
 	app.post('/mod', (req, res) => {
 		if (isLoggedIn(req)){
 			if ([process.env.dev1, process.env.dev2, process.env.dev3].includes(getCookies(req)['u_id'])){
+				//This is a developer account; let them in.
 				if (req.body.donor){
 					// Add a donor!
 					client.query({text: "INSERT INTO donators (nickname) VALUES ($1)",values: [req.body.donor]}, (err, result) => {
@@ -2141,9 +2205,51 @@ app.get('/wish-d/:id', (req, res) => {
 					  }
 					  });
 				}
-			}else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
+				if (req.body.pbody){
+					// Add a donor!
+					client.query({text: "INSERT INTO changelog (title, body) VALUES ($1, $2)",values: [req.body.ptitle, req.body.pbody]}, (err, result) => {
+						if (err) {
+						  console.log(err.stack);
+						  res.status(400).json({code: 400, message: err.stack});
+					  } else {
+						req.flash("flash", "Added changelog entry!")
+						return res.status(200).render(`pages/mod-panel`, { session: req.session, splash:splash, cookies:req.cookies });
+					  }
+					  });
+				}
+			} else {
+				var mailOptions = {
+					from: '"Lighthouse" <dee_deyes@writelighthouse.com>',
+					to: 'dee_deyes@writelighthouse.com',
+					subject: `Unauthorised attempt to POST to mod panel.`,
+					html: `<p>A user has attempted to POST to the mod panel!</p><p>User: ID: ${getCookies(req)['u_id'] || "Guest/Logged Out User"}</p><p>Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}</p><p>IP Address: ${req.socket.remoteAddress}</p>`
+				  };
 			
-		} else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
+				  transporter.sendMail(mailOptions, (error, info) => {
+					if (error) {
+					  return console.log(error);
+					}
+				  });
+				console.log(`An attempt to POST to the mod panel was made.\n Attempt made by: ${getCookies(req)['u_id'] || "Guest/Logged Out User"} | Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"} | IP Address: ${req.socket.remoteAddress}`);
+		res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies});
+			}
+			
+		} else {
+			var mailOptions = {
+				from: '"Lighthouse" <dee_deyes@writelighthouse.com>',
+				to: 'dee_deyes@writelighthouse.com',
+				subject: `Unauthorised attempt to POST to mod panel.`,
+				html: `<p>A user has attempted to POST to the mod panel!</p><p>User: ID: ${getCookies(req)['u_id'] || "Guest/Logged Out User"}</p><p>Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}</p><p>IP Address: ${req.socket.remoteAddress}</p>`
+			  };
+		
+			  transporter.sendMail(mailOptions, (error, info) => {
+				if (error) {
+				  return console.log(error);
+				}
+			  });
+			console.log(`An attempt to POST to the mod panel was made.\n Attempt made by: ${getCookies(req)['u_id'] || "Guest/Logged Out User"} | Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"} | IP Address: ${req.socket.remoteAddress}`);
+	res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies});
+		}
 	});
 	
 	app.post('/safety-plan/edit', (req, res) => {
