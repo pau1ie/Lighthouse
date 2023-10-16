@@ -186,6 +186,10 @@ app.locals.journalArr= [
 	{val: '18', c: "Flowers"},  // 19 is skipped bc thato's the legacy journal.
 	{val: '24', c: "Coniferous (🎨Quantum System)"},
 	{val: '25', c: "Cosmos (🎨Galaxii Kingdom)"},
+	{val: '26', c: "Lunar (🎨Galaxii Kingdom)"},
+	{val: '27', c: "Axolotl (🎨Galaxii Kingdom)"},
+	{val: '28', c: "Fantasy (🎨Galaxii Kingdom)"},
+	{val: '29', c: "Fangs (CW: Teeth) (🎨Galaxii Kingdom)"},
 	{val: '20', c: "Witchy"},
 	{val: '21', c: "Spraypaint"},
 	{val: '22', c: "Princess"},
@@ -673,7 +677,25 @@ app.get('/coaxing', (req, res) => {
 	} else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
 	
 })
-
+app.get('/bottle-letters', (req, res) => {
+	if (isLoggedIn(req)){
+		if (!req.session.worksheets_enabled){
+			// Make sure they have worksheets enabled.
+			client.query({text: "SELECT worksheets_enabled FROM users WHERE id=$1;",values: [getCookies(req)['u_id']]}, (err, result) => {
+				if (err) {
+				  console.log(err.stack);
+				  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash, cookies:req.cookies });
+			  } else {
+				req.session.worksheets_enabled= result.rows[0].worksheets_enabled;
+				if (req.session.worksheets_enabled== false) return res.render(`pages/worksheetsdisabled`, { session: req.session, splash:splash, cookies:req.cookies });
+				res.render(`pages/void-letters`, { session: req.session, splash:splash, cookies:req.cookies });
+			  }
+		  });
+		}
+		
+	} else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
+	
+})
 app.get('/tutorial', (req, res) => {
 		res.render(`pages/tutorial`, { session: req.session, splash:splash, cookies:req.cookies});
 	

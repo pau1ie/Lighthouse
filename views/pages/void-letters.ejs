@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" style="visibility: hidden;">
+    <head>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+        <%- include ("../partials/header.ejs") %>
+        <style>
+            input[type=text], textarea{
+                border-bottom: 1px solid rgb(0, 81, 255);
+                border-top: none;
+                border-left:none;
+                border-right: none;
+                background: rgba(46, 125, 243, 0.1);
+                margin-bottom: 0;
+            }
+            textarea{
+                width:90%;
+                height: 10em;
+            }
+            .bottle{
+                position:relative; 
+                top:0; 
+                left:0;
+                transform-origin: center;
+                transition: transform .2s;
+                -webkit-filter: drop-shadow(5px 15px 5px rgba(16, 20, 31,0.15));
+            filter: drop-shadow(5px 15px 5px rgba(16, 20, 31,0.15));
+            }
+            .bottle:hover{
+                transform: scale(1.25) rotate(-0.05turn);
+                -webkit-filter: drop-shadow(7px 15px 15px rgba(16, 20, 31,0.15));
+                filter: drop-shadow(7px 15px 15px rgba(16, 20, 31,0.15));
+            }
+
+        </style>
+    </head>
+    <body>
+        <%- include ("../partials/nav.ejs") %>
+        <div id="wrapper">
+            <% if (locals.messages.flash) { %>
+                <div class="splash"><%- locals.messages.flash %></div>
+            <% } %>
+            <section>
+                <h1>Messages in a Bottle</h1>
+                <p>This is an exercise for letting feelings and unsaid words out.</p>
+                <p>Imagine, for a moment, that you're standing on a beach or by a gentle stream. You have a piece of paper and a glass bottle. On this piece of paper, you can write a letter and then toss it into the water, therefore letting it go. Rest assured that once as you send it, it doesn't actually deliver to anyone and is erased.</p>
+            </section><hr/>
+            <!-- ----------------------------------------------------------- -->
+            <section id="makeletter">
+                <div id="collapse">
+                    <label for="recipient">Who is this letter directed to? </label><input type="text" id="recipient"><br>
+                    <label for="message">Write out everything you want to say here.</label><br>
+                    <textarea id="message"></textarea><br> 
+                </div>
+                <label id="ready">When you're ready, click the bottle below.</label><br>
+                <img src="/img/svg/bottle2.svg" class="medimg bottle" id="bottle">
+            </section>
+            <!-- ----------------------------------------------------------- -->
+            <section id="release" style="display: none;">
+                <h2>Away it goes...</h2>
+                <div id="goodbye"></div>
+            </section>
+            <!-- ----------------------------------------------------------- -->
+            <section id="reminder" style="display: none;">
+                <p>Remind to ground</p>
+            </section>
+
+    </div>
+    <%- include ("../partials/footer.ejs") %>
+    <script>
+        $("#bottle").click(function(){
+            var selfReg= /\b(?:me|self|myself)\b/gi;
+            var toSelf= $("#recipient").val().match(selfReg) || $("#recipient").val().length < 1;
+            $("#collapse")
+            .animate({height:'-=200px', opacity: 0}, "fast", function(){
+                // Animation done.
+                $('#bottle').animate({top: '3vh'}, 750)
+                setTimeout(function(){
+                    $('#bottle')
+                    .stop(true)
+                    .animate({ rotate: '359deg', left: '+=100vw', top: '-=50vh'}, 300);   
+                    $("#makeletter").fadeOut("slow");
+                    setTimeout(function(){
+                            $("#goodbye").html(`<p>The message has been written and tossed. ${toSelf ? "You" : $("#recipient").val()} will ${toSelf ? "not have to": "never"} see it${toSelf ? " again" : ", and the letter has been deleted"}.</p><p>Now that you've released these feelings, now would be a great time to do something that can be soothing and comforting. If you would like to write another letter, refresh this page and a new one will appear.</p>`);
+                            $("input, textarea").val("");
+                            $("#release").fadeIn("slow"); 
+                        }, 2000);
+                }, 1000);
+            });
+            
+        })
+    </script>
+    </body>
+</html>
