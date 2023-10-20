@@ -196,9 +196,9 @@ app.locals.journalArr= [
 	{val: '30', c: "Lighthouse (🎨Galaxii Kingdom)"},
 	{val: '32', c: "Fiery (🎨Galaxii Kingdom)"},
 	{val: '31', c: "Constellation (🎨Constellation Collective)"},
-	// {val: '33', c: "Composition Notebook (🎨)"},
-	// {val: '34', c: "Spiralbound Notebook (🎨)"},
 	{val: '35', c: "Sun in Shadows (🎨 Constellation Collective)"},
+	{val: '33', c: "Composition Notebook (🎨 Chaotic Troop)"},
+	{val: '34', c: "Spiralbound Notebook (🎨 Chaotic Troop)"},
 ]
 app.locals.strings=strings;
 app.locals.apiKey= process.env.apiKey;

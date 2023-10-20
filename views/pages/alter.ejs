@@ -318,7 +318,7 @@ td{
                     if ((altJournal[0].skin).match(/undefined/gi) ){
                         var skin= "1";
                     } else {
-                        var skin= altJournal[0].skin;
+                        var skin= (altJournal[0].skin).replace(/'/g, "");
                     }
                 %>
                 <% if (altJournal[0].is_private == true){ %>
