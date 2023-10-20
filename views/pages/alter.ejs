@@ -354,7 +354,7 @@ td{
                     <div class="parent" style="height: auto;margin:auto;">
                     <% for (let i=0; i < 11; i++){ %>
                         <div class="radio-toolbar child">
-                            <input type="radio" id="<%= i+1 %>" name="journ" value="<%= i+1 %>">
+                            <input type="radio" id="<%= i+1 %>" name="journ" value="<%= i+1 %>" <% if (i== 0){%>checked<% }%>>
                             <label for="<%= i+1 %>"><img src="/img/<%= i+1 %>.png" class="tinyimg"  style="display:block; margin:0 auto;"><%= ['Red', 'Orange', 'Yellow', 'Green', 'Teal', 'Blue', 'Purple', 'Pink', 'White', 'Black', 'Rainbow', 'Ocean', 'Space'][i] %></label>
                         </div>
                     <% } %>
