@@ -1635,7 +1635,7 @@ app.get('/wish-d/:id', (req, res) => {
 						mood: result.rows[i].mood, 
 						pronouns: result.rows[i].pronouns, 
 						is_archived: result.rows[i].is_archived, 
-						icon: result.rows[i].img_url,
+						icon: result.rows[i].img_url || "aHR0cHM6Ly93d3cud3JpdGVsaWdodGhvdXNlLmNvbS9pbWcvYXZhdGFyLWRlZmF1bHQuanBn",
 						img_blob: result.rows[i].img_blob,
 						mimetype: result.rows[i].blob_mimetype
 					})
@@ -1694,7 +1694,7 @@ app.get('/wish-d/:id', (req, res) => {
 					return res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 				 } else {
 					 req.session.sysList = result.rows;
-				 if (alterInfo.is_archived == true){
+				 if (alterInfo.is_archived){
 					// This is an archived alter. Do a query to grab their posts?
 					try {
 						client.query({text: "SELECT * FROM posts WHERE j_id=$1 ORDER BY created_on DESC;",values: [`${altJournal[0].j_id}`]}, (err, mresult) => {
@@ -1910,6 +1910,8 @@ app.get('/wish-d/:id', (req, res) => {
 					res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 				} else {
 					let chosenAlter= result.rows[0];
+					// No alter?
+					if (!result.rows[0]) return res.status(400).render('pages/400',{ session: req.session, code:"Database Error", splash:splash,cookies:req.cookies });
 					res.render(`pages/delete_alter`, { session: req.session, splash:splash, cookies:req.cookies,chosenAlter: chosenAlter});
 				}
 				
@@ -3356,9 +3358,10 @@ app.get('/wish-d/:id', (req, res) => {
 	// Bookmarks: signup post, post signup
 
 	  if (req.body.mjl2fbbz8s) return res.send("(:"); // It's a bot. Do not let them load anything.
+	  let email= (req.body.email).toLowerCase();
       var query = {
         text: "SELECT * FROM users WHERE email=$1 OR username=$2;",
-        values: [`'${Buffer.from((req.body.email).toLowerCase()).toString('base64')}'`, `'${Buffer.from(req.body.username).toString('base64')}'`]
+        values: [`'${Buffer.from((email).toLowerCase()).toString('base64')}'`, `'${Buffer.from(req.body.username).toString('base64')}'`]
       }
       client.query(query, (err, result) => {
           if (err) {
@@ -3372,7 +3375,6 @@ app.get('/wish-d/:id', (req, res) => {
                 res.render(`pages/signup`, { session: req.session, splash:splash,cookies:req.cookies });
             } else {
                 // Write to the db
-				let email= (req.body.email).toLowerCase();
                 var query = {
                   text: "INSERT INTO users (email, username, pass, email_link) VALUES ($1, $2, $3, $4)",
                   values: [`'${Buffer.from(email).toString('base64')}'`, `'${Buffer.from(req.body.username).toString('base64')}'`, `'${CryptoJS.SHA3(req.body.password)}'`, `'${Math.random().toString(36).substr(2, 16)}'`]
@@ -3388,7 +3390,6 @@ app.get('/wish-d/:id', (req, res) => {
 						  console.log(err.stack);
 						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
 					  } else {
-						console.log(result.rows[0].id);
 						ejs.renderFile(__dirname + '/views/pages/email-welcome.ejs', { alias: req.body.username || randomise(["Buddy", "Friend", "Pal"]), userid: result.rows[0].id }, (err, data) => {
 							if (err) {
 							  console.log(err);
