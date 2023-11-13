@@ -318,7 +318,6 @@ td{
                         <input type="submit" value="Change <%= Buffer.from(alterInfo.name, 'base64').toString() %>'s Password" name="changePass">
                     </form>
                 </div>
-                <% console.log(skin) %>
                 <% if (altJournal[0].is_private == true){ %>
                     <img class= "pixelart" src="/img/<%- skin.val %>.<%- skin.ext %>" width="400px" id="login" onclick="blogPopup()" alt="<%= Buffer.from(alterInfo.name, 'base64').toString() %>'s Journal.">
                 <% } else { %>
