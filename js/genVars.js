@@ -57,6 +57,7 @@ var tuning={
 // Group 8: DivineChrysalism
 // Group 9: GOOPYGAMER9000
 // Group 10: Era Vulgaris
+// Group 11: Unlockables
 var journals=[
 	{val: '1', c: "Red", group:1, ext:"png"}, 
 	{val: '2', c: "Orange", group:1, ext:"png"}, 
@@ -76,7 +77,8 @@ var journals=[
 	{val: '15', c: "Autumn", group:1, ext:"png"}, 
 	{val: '16', c: "Spring", group:1, ext:"png"}, 
 	{val: '17', c: "Summer", group:1, ext:"png"}, 
-	{val: '18', c: "Flowers", group:1, ext:"png"},  // 19 is skipped bc that's the legacy journal.	
+	{val: '18', c: "Flowers", group:1, ext:"png"},
+	{val: '19', c: "Old Journal", group: 11, ext: "png"},	
 	{val: '20', c: "Witchy", group:1, ext:"png"},
 	{val: '21', c: "Spraypaint", group:1, ext:"png"},
 	{val: '22', c: "Princess", group:1, ext:"png"},

@@ -46,6 +46,7 @@
                 <label for="pktoken">Optional: Pluralkit token </label><input type="text" id="pktoken" autocomplete="off"><br>
                 <button onclick="getPK()">Fetch from Pluralkit</button>
             </form>
+            <textarea id="jsonPlop" style="display:none;"></textarea>
             <span id="Wait"></span>
 
             <div id="submitAlt" style="display:none;">
@@ -70,7 +71,7 @@
             <img src="/img/svg/bubbles.svg" class="medimg">
             <p><strong>Moving things over from Pluralkit can take some time.</strong> If you have a large <%= cookies.system_term %>, this may take a bit.</p>
             <p id="systemcreate" style="display: none;" class="loading">Creating the <%= cookies.system_term %></p>
-            <p id="importalter" style="display: none;"><span class="loading">Importing <span id="callno"></span> to <span id="systemDrop">SYS</span></span></p>
+            <p id="importalter" style="display: none;"><span class="loading">Importing <%= pluralize(cookies.alter_term) %> to <span id="systemDrop">SYS</span></span></p>
             <div id="loadcontainer">
                 <div id="loadbar"></div>
             </div>
@@ -129,7 +130,9 @@
                 } 
             });
             let body = await response.text();
+            $("#jsonPlop").text(body)
             let sysInfo = JSON.parse(body);
+            var altJSON= sysInfo;
             $("#Wait").html("<h3>Lighthouse will import:</h3>");
             
             let systemArray = new Array();
@@ -178,6 +181,10 @@
         // 
         event.preventDefault();
         if ($('.alterChoice:checkbox:checked').length == 0) return;
+        var newAlts = [];
+        $('.alterChoice:checkbox:checked').each(function() {
+        newAlts.push($(this).val());
+        });
         $("#screen").fadeIn("slow");
         // For each checked item, make a call to Pluralkit to grab information. Then make a call to Lighthouse to import that information.
         /* 
@@ -216,23 +223,11 @@
         $("#systemDrop").text(systemName);
         $("#importalter").show();
         var callno= "";
-            var i = 0;
-
-            async function callLoop() {
-            setTimeout(async function() {
-                let response = await fetch(`https://api.pluralkit.me/v2/members/${$('.alterChoice:checkbox:checked')[i].id}`, { 
-                headers: { 
-                    "Authorization": $("#pktoken").val(),
-                    "User-Agent": "Lighthouse/Web App (www.writelighthouse.com, dee_deyes@writelighthouse.com, put here for contact if PK devs need to)" 
-                } 
-            });
-            let body = await response.text();
-            let sysInfo = JSON.parse(body);
-            callno++;
-            $("#callno").text(sysInfo.display_name == null ? sysInfo.name : sysInfo.display_name);
-            $("#loadbar").animate({width: (callno/($('.alterChoice:checkbox:checked').length) * 100) + "%"}, 400 );
-            // Got info from Pluralkit. Now send it to Lighthouse.
-             const lhresponse = await fetch(`/system-data`, { 
+        let altJSON= JSON.parse($("#jsonPlop").text());
+        let altQue= altJSON.filter((alter)=>newAlts.includes(alter.id));
+        altQue.forEach(async function(alter){
+            
+            const lhresponse = await fetch(`/system-data`, { 
                 method: "PUT",
                 headers: { 
                   "api-lh-call": "api-lh-call",
@@ -241,36 +236,18 @@
                 body: JSON.stringify({
                   "edit": "pluralkit-alter",
                   "sysId": `${chosenSystem}`,
-                  "name": sysInfo.display_name == null ? sysInfo.name : sysInfo.display_name,
-                  "pronouns": sysInfo.pronouns,
-                  "avatar": sysInfo.avatar_url,
-                  "birthday": sysInfo.birthday
+                  "name": alter.display_name == null ? alter.name : alter.display_name,
+                  "pronouns": alter.pronouns,
+                  "avatar": alter.avatar_url,
+                  "birthday": alter.birthday
                 })
             });
-             body = await response.text();
-             if (!response.ok) return $("#wrapper").html("<p><img src='/img/svg/ship-icon.svg' class='tinyimg'><em>There was an error communicating with our database. Please reload or try again later.</em></p>");
-             sysInfo = JSON.parse(body);
-                // If SP's response was ok, increment. Otherwise, don't and try again in a moment.
-                if (response.ok) i++;                    //  increment the counter
-                if (i < $('.alterChoice:checkbox:checked').length) {           //  if the counter < length, call the loop function
-                callLoop();             //  ..  again which will trigger another 
-                } else {
-                    // We're done.
-                    // $("#screen").fadeOut("slow");
-                    $("#modal-content").empty().delay(1000).html(`<h2>${randomise(['Woo-Hoo', 'Congrats', 'Yay'])}! Your <%= cookies.system_term %> was successfully imported.</h2><p>You will be redirected in 2 seconds.</p>`);
-                    $("#pid").val("")
-                $("#pktoken").val("")
-
-                setTimeout(function(){
+            callno++;
+            $("#loadbar").animate({width: (callno/($('.alterChoice:checkbox:checked').length) * 100) + "%"}, 200 );
+        });
+        setTimeout(function(){
                     window.location.replace(`/system/${chosenSystem}`);
                 }, 2000);
-                    
-                }   
-            }, 500); // Call every .5 seconds.
-            }
-
-            callLoop();
-            // $("#screen").fadeOut("slow")
     }
 
     </script>

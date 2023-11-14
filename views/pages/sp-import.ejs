@@ -34,6 +34,7 @@
                 <p>If you have a <%= cookies.system_term %> on Simply Plural, you can import your <%= pluralize(cookies.alter_term) %> onto Lighthouse. To do this, you will need your user ID. You can find this under Settings > Account > Account Settings. Your ID will be at the bottom of your account. You will also need to generate a token. Lighthouse only needs read permissions from this token. You can generate one under Settings > Account > Tokens.</p>
                 <p>Please keep in mind that <strong>Lighthouse does not store your User ID or your token.</strong> We cannot retrieve account information based on these things.</p>
             </section>
+            <textarea id="jsonPlop" style="display:none;"></textarea>
             <section id="form">
                 <p>All information below is <strong>required</strong> in order to import your <%= cookies.system_term %>.</p>
                 <label for="usertoken">Account Token</label> <input type="text" name="usertoken" id="usertoken" required><br>
@@ -108,13 +109,14 @@
                 }); 
         async function getAlter(id, token){
         $("#fetchsplash").html('<img src="/img/svg/bubbles.svg" class="tinyimg">');
-        const response = await fetch(`https://api.apparyllis.com/v1/socket/members/${id}`,{
+        const response = await fetch(`https://api.apparyllis.com/v1/members/${id}`,{
             method: "GET",
             headers:{
             "Authorization": token,
             "User-Agent": "Lighthouse/Web App (www.writelighthouse.com, dee_deyes@writelighthouse.com, put here for contact if SP devs need to)"
             }
         });
+        let alter= await response.text()
         if (response.status== 401){
             // Unauthorised
             $("#fetchsplash").html("Simply Plural returned a <strong>401</strong> error. Check your token and try again.")
@@ -125,14 +127,15 @@
             // Not OK.
             $("#fetchsplash").html("Simply Plural returned an error. Please try again later.")
         } else {
-            $("#form").slideUp("fast")
+            $("#form").slideUp("fast");
+            $("#jsonPlop").text(alter);
             // Is ok
             $("#fetchsplash").html("<h3>Lighthouse will import:</h3>")
-            const alter = await response.json();
             $("#submitAlt").fadeIn("slow")
-            for (i in alter){
+            let altArr= JSON.parse(alter);
+            for (i in altArr){
                 $('#roster')
-                    .append($(`<li><input type="checkbox" class="alterChoice" value="${alter[i].id}" id="${alter[i].id}"><label for="${alter[i].id}"><img src="${alter[i].content.avatarUrl}" class="vtinyimg"> ${alter[i].content.name}</label></li>`)
+                    .append($(`<li><input type="checkbox" class="alterChoice" value="${altArr[i].id}" id="${altArr[i].id}"><label for="${altArr[i].id}"><img src="${altArr[i].content.avatarUrl}" class="vtinyimg"> ${altArr[i].content.name}</label></li>`)
                         .hide()
                         .fadeIn(500)
                     );
@@ -148,6 +151,10 @@
         event.preventDefault();
         if ($('.alterChoice:checkbox:checked').length == 0) return;
         $("#screen").fadeIn("slow");
+        var newAlts = [];
+        $('.alterChoice:checkbox:checked').each(function() {
+        newAlts.push($(this).val());
+        });
        let chosenSystem; // This will be the ID for where the alters go.
        let systemName;
         if ($("#sysLoc").val() == "new"){
@@ -178,62 +185,33 @@
         $("#systemDrop").text(systemName);
         $("#importalter").show();
         var callno= "";
-            var i = 0;
-
-            async function callLoop() {
-            setTimeout(async function() {
-                // Using Socket because we're likely requesting a lot of information.
-                let response = await fetch(`https://api.apparyllis.com/v1/socket/member/${$("#userid").val()}/${$('.alterChoice:checkbox:checked')[i].id}`, { 
-                headers: { 
-                    "Authorization": $("#usertoken").val(),
-                    "User-Agent": "Lighthouse/Web App (www.writelighthouse.com, dee_deyes@writelighthouse.com, put here for contact if PK devs need to)" 
-                } 
-            });
-            let body = await response.text();
-            let sysInfo = JSON.parse(body);
-            callno++;
-            $("#callno").text(sysInfo.display_name == null ? sysInfo.name : sysInfo.display_name);
-            $("#loadbar").animate({width: (callno/($('.alterChoice:checkbox:checked').length) * 100) + "%"}, 400 );
-            // Got info from Simply Plural. Now send it to Lighthouse.
-             const lhresponse = await fetch(`/system-data`, { 
+        let altJSON= JSON.parse($("#jsonPlop").text());
+        let altQue= altJSON.filter((alter)=>newAlts.includes(alter.id));
+        altQue.forEach(async function(alter){
+            
+            const lhresponse = await fetch(`/system-data`, { 
                 method: "PUT",
                 headers: { 
                   "api-lh-call": "api-lh-call",
                   'Content-Type': 'application/json',
                 }, 
                 body: JSON.stringify({
-                  "edit": "sp-alter",
-                  "sysId": `${chosenSystem}`,
-                  "name": sysInfo.content.name,
-                  "pronouns": sysInfo.content.pronouns,
-                  "avatar": sysInfo.content.avatarUrl,
-                  "colour": sysInfo.content.color,
-                  "notes": sysInfo.content.desc
-                })
+          "edit": "sp-alter",
+          "sysId": `${chosenSystem}`,
+          "name": alter.content.name,
+          "pronouns": alter.content.pronouns,
+          "avatar": alter.content.avatarUrl,
+          "colour": alter.content.color,
+          "notes": alter.content.desc
+        })
             });
-             body = await lhresponse.text();
-             if (!lhresponse.ok) return $("#wrapper").html("<p><img src='/img/svg/ship-icon.svg' class='tinyimg'><em>There was an error communicating with our database. Please reload or try again later.</em></p>");
-             sysInfo = JSON.parse(body);
-             // If SP's response was ok, increment. Otherwise, don't and try again in a moment.
-             if (response.ok) i++;                    //  increment the counter
-                if (i < $('.alterChoice:checkbox:checked').length) {           //  if the counter < length, call the loop function
-                callLoop();             //  ..  again which will trigger another 
-                } else {
-                    // We're done.
-                    // $("#screen").fadeOut("slow");
-                    $("#modal-content").empty().delay(1000).html(`<h2>${randomise(['Woo-Hoo', 'Congrats', 'Yay'])}! Your <%= cookies.system_term %> was successfully imported.</h2><p>You will be redirected in 2 seconds.</p>`);
-                    $("#pid").val("")
-                $("#pktoken").val("")
-
-                setTimeout(function(){
+            callno++;
+            $("#loadbar").animate({width: (callno/($('.alterChoice:checkbox:checked').length) * 100) + "%"}, 200 );
+        });
+        setTimeout(function(){
                     window.location.replace(`/system/${chosenSystem}`);
                 }, 2000);
-                    
-                } 
-            }, 500); // Call every .5 seconds.
-            }
 
-            callLoop();
     }
     </script>
     </body>

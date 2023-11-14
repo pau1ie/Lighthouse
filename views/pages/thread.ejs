@@ -109,7 +109,7 @@
                }
                %>
 
-            <h2><% if (originalPost.is_sticky== true){ %>(Pinned) <% } %><% if (originalPost.is_locked== true){ %>(Locked) <% } %><%= originalPost.title %> <% if (!opInfo.is_archived){%></h2>
+            <h2><% if (originalPost.is_sticky== true){ %>(Pinned) <% } %><% if (originalPost.is_locked== true){ %>(Locked) <% } %><%= originalPost.title %></h2> <% if (!opInfo.is_archived){%>
               <span>Moderation Panel</span>
               <div class="modpanel">
                 <a title="Edit <%- originalPost.title %>" class="editCat"><i id="tbutton" class="fa fa-pencil" aria-hidden="true"></i></a> 

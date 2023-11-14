@@ -351,7 +351,6 @@ app.locals.journalArr= splitByGroup(tuning.journals);
 app.locals.journals= tuning.journals;
 app.locals.strings=strings;
 app.locals.apiKey= process.env.apiKey;
-app.locals.legacyJournal= {val: '19', c: "Legacy"};
 app.locals.moods=tuning.moods;
 app.locals.isLoggedIn = function(cookies){
 	if (!cookies.u_id){
@@ -438,7 +437,6 @@ app.all('*', async function (req, res){
   // Refactored!
   app.get('/verify/:id', async function (req, res){
 		const userData= await query(client, "SELECT * FROM users WHERE id=$1;", [req.params.id], res,req);
-		console.log(userData[0])
 		req.session.alter_term= userData[0].alter_term;
 		req.session.system_term= userData[0].system_term;
 		req.session.subsystem_term= userData[0].subsystem_term;
@@ -1572,94 +1570,65 @@ app.get('/wish-d/:id', (req, res) => {
     splash=null;
   });
 
-  app.get("/alter/:id", (req, res, next)=>{
+  // Refactored!
+  app.get("/alter/:id", async function(req, res, next){
 	 if (isLoggedIn(req)){
-		// Grab alters, moods, and the system alias from this alter's id.
-		 client.query({text: "SELECT alter_moods.*, alters.*, systems.sys_alias, systems.user_id FROM alters INNER JOIN systems ON systems.sys_id = alters.sys_id LEFT JOIN alter_moods ON alters.alt_id = alter_moods.alt_id WHERE alters.alt_id=$1;",values: [`${req.params.id}`]}, (err, result) => {
-			 if (err) {
-			   console.log(err.stack);
-			   return res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-		   } else {
-			// This is our selected alter.
-			if (getCookies(req)['u_id'] !== result.rows[0].user_id) return res.status(404).render('pages/404',{ session: req.session, code:"Not Found", splash:splash,cookies:req.cookies }); //False 404 to avoid any further penetration attacks
-			var alterInfo= result.rows[0];
-			try{
-				
-			   if (alterInfo.reason){
-				alterInfo.reason = `${decryptWithAES(result.rows[0].reason)}`;
-			   }
-			} catch (e){
-				console.log("No mood.")
+		// Get Alter.
+		const altInfo= await query(client, "SELECT alter_moods.*, alters.*, systems.sys_alias, systems.user_id FROM alters INNER JOIN systems ON systems.sys_id = alters.sys_id LEFT JOIN alter_moods ON alters.alt_id = alter_moods.alt_id WHERE alters.alt_id=$1", [`${req.params.id}`], res, req);
+		var selectedAlt= altInfo[0];
+		// If they have a mood reason, decrypt that now.
+		try{
+			if (selectedAlt.reason){
+				selectedAlt.reason = `${decryptWithAES(selectedAlt.reason)}`;
 			}
-			   
-		   }
-		   
-			client.query({text: "SELECT * FROM journals WHERE alt_id=$1;",values: [`${req.params.id}`]}, (err, nresult) => {
-				if (err) {
-				   console.log(err.stack);
-				   console.log("Error with alter journals query.");
-				  return res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-			   } else {
-				   var altJournal = nresult.rows;
-				   
-				if (altJournal.length==0){
-					var skin= {
-					   val: "1",
-					   c: "Red",
-					   group: 1,
-					   ext: "png"
-					};
-				} else {
-					var skin= (tuning.journals).filter(jn => jn.val == (altJournal[0].skin).replace(/'/g, ""));
-				}
-			   }
- 
-				 client.query({text: "SELECT * FROM systems WHERE user_id=$1;",values: [`${getCookies(req)['u_id']}`]}, (err, result) => {
-				   if (err) {
-					 console.log(err.stack);
-					console.log("Error with alter's system query.");
-					return res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-				 } else {
-					 req.session.sysList = result.rows;
-				 if (alterInfo.is_archived){
-					// This is an archived alter. Do a query to grab their posts?
-					try {
-						client.query({text: "SELECT * FROM posts WHERE j_id=$1 ORDER BY created_on DESC;",values: [`${altJournal[0].j_id}`]}, (err, mresult) => {
-						if (err) {
-						  console.log(err.stack);
-						 console.log("Error with alter's system query.");
-						 return res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", splash:splash,cookies:req.cookies });
-					  } else {
-						  let archivedPosts= new Array();
-						  for (i in mresult.rows){
-							archivedPosts.push({
-								id: mresult.rows[i].p_id,
-								title: decryptWithAES(mresult.rows[i].title),
-								body: decryptWithAES(mresult.rows[i].body),
-								created_on: mresult.rows[i].created_on
-							})
-						  }
-						  res.render(`pages/archived-alter`, { session: req.session, splash:splash,cookies:req.cookies, alterTypes:alterTypes, alterInfo:alterInfo, altJournal:altJournal, archivedPosts: archivedPosts });
-					  }
-					});
-				} catch (e){
-					res.render(`pages/archived-alter`, { session: req.session, splash:splash,cookies:req.cookies, alterTypes:alterTypes, alterInfo:alterInfo, altJournal:altJournal, archivedPosts: [] });
-				}
-					
-				   } else {
-					
-					res.render(`pages/alter`, { session: req.session, splash:splash,cookies:req.cookies, alterTypes:alterTypes, alterInfo:alterInfo, altJournal:altJournal, skin: skin[0] });
-				   }
+		} catch (e){
+			// No mood.
+		}
+		// Grab journal info.
+		const journQuer= await query(client, "SELECT * FROM journals WHERE alt_id=$1;", [`${req.params.id}`], res, req);
+		var altJournal= journQuer[0];
+		// If we have none, make a placeholder.
+		let skin;
+		if (!altJournal){
+				skin= {
+				   val: "1",
+				   c: "Red",
+				   group: 1,
+				   ext: "png"
+				};
+			} else {
+				skin = (tuning.journals).filter(jn => jn.val == (altJournal.skin).replace(/'/g, ""));
 
-				 }
-				   
-			  });
-			});
-		   
-		   
-		 });
+			}
+		// Grab all systems.
+		req.session.sysList= await query(client, "SELECT * FROM systems WHERE user_id=$1;", [`${getCookies(req)['u_id']}`], res, req);
+
+		if (selectedAlt.is_archived==true){
+			// This alter is archived.
+			var archivedPosts= new Array();
+			try{
+				// This is in the try/catch because altJournal.j_id won't always exist.
+				const postQuer= await query(client, "SELECT * FROM posts WHERE j_id=$1 ORDER BY created_on DESC;", [`${altJournal.j_id}`], res, req);
+				postQuer.forEach(post=>{
+				archivedPosts.push({
+					id: post.p_id,
+					title: decryptWithAES(post.title),
+					body: decryptWithAES(post.body),
+					created_on: post.created_on
+				})
+			})
+			} catch(e){
+				console.error(e)
+				// Keep archivedPosts empty.
+			}
+			console.log(archivedPosts)
+			res.render(`pages/archived-alter`, { session: req.session, splash:splash,cookies:req.cookies, alterTypes:alterTypes, alterInfo:selectedAlt, altJournal:altJournal, archivedPosts:archivedPosts });
+		} else {
+			// Just render alter ejs.
+			res.render(`pages/alter`, { session: req.session, splash:splash,cookies:req.cookies, alterTypes:alterTypes, alterInfo:selectedAlt, altJournal:altJournal, skin: skin[0] });
+		}
 	 } else {
-		 res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });
+		forbidUser(res, req);
 	 }
   });
 
