@@ -241,7 +241,7 @@ const siteLanguage={
         "tos": "Téarmaí seirbhíse",
         "pp": "Beartas Príobháideachta"
     },
-    "ie":{ // Italian
+    "it":{ // Italian
         "name": "Lingua: italiano",
         "flag": "🇮🇹",
         "title": "Faro",
