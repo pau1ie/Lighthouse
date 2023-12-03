@@ -23,6 +23,7 @@
     background: var(--archivedbg) !important;
     color: var(--archivedtxt) !important;
 }
+
     </style>
                 
 </head>
@@ -77,8 +78,23 @@ var journSkin=[
                 <input type="submit" name="submit" value="Add">
             </form>
             <h2><% if (session.chosenSys.icon) { %> <img src="/img/svg/<%- session.chosenSys.icon %>.svg" class="vtinyimg"> <% } %><%= Buffer.from(session.chosenSys.sys_alias, 'base64').toString() %></h2>
-            <p>This <%= cookies.system_term %> has <strong><%= parseInt(alterArr.length).toLocaleString() %></strong> <% if (alterArr.length == 1){ %><%= cookies.alter_term %><% } else { %><%= pluralize(cookies.alter_term)%><% } %>.</p>
-            <% if (alterArr.length > 0){ %>
+            
+            <div id="pagination" class="pageJump">
+                <ul>
+                    <% if (curPage > 1){ %><li><i class="fa fa-arrow-left" aria-hidden="true"></i> <a href="/system/<%= session.chosenSys.sys_id %>/<%= parseInt(curPage) - 1 %>">Previous</a></li><% } %>
+                  <li class="currPage"><%= curPage %></li>
+                  <% if (curPage < pgCount){ %><li><a href="/system/<%= session.chosenSys.sys_id %>/<%= parseInt(curPage) + 1 %>">Next <i class="fa fa-arrow-right" aria-hidden="true"></i></a></li>
+                  <li><a href="/system/<%= session.chosenSys.sys_id %>/<%= parseInt(pgCount) %>">Last (<%= parseInt(pgCount) %>) <i class="fa fa-arrow-right" aria-hidden="true"></i></a></li>
+                  <% } %>
+                  </ul>
+                  <form method="none">
+                  <label for="page">Go to page: </label><input type="number" min="1" max="<%= pgCount %>" name="page" id="page" style="width: 3em;">
+                  <button id="go">Go</button>
+                  </form>
+                </div>
+            <% if (parseInt(altCount) > 0){ %>
+                <a class="linkbutton" href="/search"><i class="fa fa-search"></i> <%= capitalise(cookies.alter_term) %> Search</a>
+                <p><%= capitalise(pluralize(cookies.alter_term)) %>: <strong><%= parseInt(altCount).toLocaleString() %></strong></p>
             <div class="grid" id="sysContainer">
                 <% for ( i in alterArr) {
                     if (alterArr[i].is_archived== false){
@@ -269,7 +285,13 @@ var journSkin=[
             // End function
             });
         }
-            
+        $("#go").on("click", function(){
+          event.preventDefault();
+          window.location= `/system/<%= session.chosenSys.sys_id %>/${$("#page").val()}`
+        })
+        if (parseInt(<%= pgCount %>) <= 1){
+            $("#pagination").hide()
+        }
     </script>
 </body>
 

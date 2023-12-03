@@ -1061,6 +1061,8 @@ img.emoji {
   }
   .currPage{
     border:1px solid var(--col1);
+    width: fit-content;
+  padding: .25em;
   }
   .tabulator, .tabulator-col-content, .tabulator-cell, .tabulator-col-title {
     

@@ -1486,7 +1486,7 @@ app.get('/wish-d/:id', (req, res) => {
 
 	var alterArr;
 	// Refactored!
-  app.get('/system/:id', async function(req, res, next){
+  app.get('/system/:id/:pg?', async function(req, res, next){
     if (isLoggedIn(req)){
 		if (!req.session.worksheets_enabled){
 			// Quick, add that.
@@ -1518,10 +1518,24 @@ app.get('/wish-d/:id', (req, res) => {
 						colour: alter.colour
 				})
 			});
-			if (req.session.alters.length > 1){
-				(req.session.alters).sort((a, b) => a.name.localeCompare(b.name))
-			}
-			res.render(`pages/sys_info`, { session: req.session, splash:splash, alterArr: req.session.alters,cookies:req.cookies, sys_id: req.params.id});
+			let altCount= req.session.alters.length;
+			let numUp= new Number();
+			// Account for big systems so they don't have 4897 pages.
+			switch (true) {
+				case altCount > 150:
+				  numUp= 50;
+				  break;
+				case altCount > 200:
+				  numUp= 75;
+				  break;
+				default:
+				  numUp=15;
+			  }
+			req.session.alters= paginate(req.session.alters, numUp)
+			req.session.alters.forEach((alt)=>{
+				(alt).sort((a, b) => a.name.localeCompare(b.name))
+			})
+			res.render(`pages/sys_info`, { session: req.session, splash:splash, alterArr: req.session.alters[req.params.pg -1 || 0],cookies:req.cookies, sys_id: req.params.id, pgCount: req.session.alters.length, altCount: altCount, curPage: req.params.pg || 1});
 
     } else {
 		forbidUser(res, req)
