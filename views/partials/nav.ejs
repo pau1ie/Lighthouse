@@ -9,7 +9,12 @@
   color: var(--col2);
 }
 
-
+.panicbutton{
+  -webkit-filter: drop-shadow(1px 1px 0 black)
+                  drop-shadow(-1px -1px 0 black);
+  filter: drop-shadow(1px 1px 0 black) 
+          drop-shadow(-1px -1px 0 black);
+}
   </style>
   </head>
   <div id="menubg"></div>
@@ -62,7 +67,7 @@
   <button id="mode" style="background:transparent; "onclick="toggleMode()"><span name="mode" class="material-symbols-outlined mode" style="vertical-align:middle;color: var(--button)">light_mode</span></button>
   <a href="javascript:void(0);" style="font-size:15px;" class="icon" onclick="toggleMobile()">&#9776;</a>
   
-  
+  <!-- <a id="panic"><i class="fa fa-window-close panicbutton" aria-hidden="true" style="color:rgb(223, 65, 65); "></i></a> -->
 
     
   </div>
@@ -122,4 +127,5 @@ function toggleMode(){
 
   }
 }
+
 </script>

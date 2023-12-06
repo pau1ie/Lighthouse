@@ -2977,7 +2977,8 @@ app.get('/wish-d/:id', (req, res) => {
 		
 	});
 
-	app.post("/system/:alt", function(req, res){
+	app.post("/system/:alt/:pg?", function(req, res){
+		// Post system
 			if (isLoggedIn(req)){
 				if (req.body.sysid){
 					let sysId= req.body.sysid == "none" ? null : req.body.sysid;
@@ -3011,7 +3012,7 @@ app.get('/wish-d/:id', (req, res) => {
 				  });
 				  req.flash("flash",strings.alter.created);
 				}
-				res.redirect(`/system/${req.params.alt}`);
+				res.redirect(`/system/${req.params.alt}/`);
 				
 
 			} else {
