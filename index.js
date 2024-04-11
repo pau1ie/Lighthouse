@@ -3171,26 +3171,30 @@ app.get('/wish-d/:id', (req, res) => {
 				}
 			}
 
-			if (req.body.othersys){
-				let otherSystems;
+			
+			let otherSystems;
 			if (typeof req.body.othersys == "string"){
 				// Make an array
 				otherSystems = new Array(req.body.othersys);
+			} else if(typeof req.body.othersys == "undefined"){
+				otherSystems = new Array(5).fill(null)
 			} else {
 				otherSystems= req.body.othersys
 			}
-			
-			let totalLength = otherSystems.length <= 6 ? otherSystems.length : 6;
+			try{
+				let totalLength = otherSystems.length <= 6 ? otherSystems.length : 6;
 			const finalSystem = otherSystems.slice(0, 6).concat(Array(6 - totalLength ).fill(null));
 
 			// Let's update their systems if need be
 			for (let i = 1; i < 6; i++) {
-				if (finalSystem[i-1] !== null){
 					await db.query(client, `UPDATE alters SET subsys_id${i}=$2 WHERE alt_id=$1`, [`${req.params.id}`, finalSystem[i-1]], res, req);
-				}
 				
 			}
+			} catch(e){
+				console.log(e)
 			}
+			
+			
 			
 			
 			req.flash("flash","Page updated!");
