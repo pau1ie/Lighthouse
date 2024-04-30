@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" style="visibility: hidden;">
+    <head>
+        <%- include ("../partials/header-error.ejs") %>
+    </head>
+    <body>
+        <script>0</script>
+        <%- include ("../partials/nav.ejs") %>
+        <div id="wrapper">
+            <img src="/img/svg/buoy.svg" style="height:calc(24em); float: left;">
+            <h2>Oops! Something went wrong.</h2>
+            <p>We're sorry, but there was an error processing your request. This could be due to a temporary issue or invalid data provided. Please try again later, <a href="/logout">use this link to clear data from your browser</a>, or use the links below to report the issue:</p>
+            <ul>
+                <li>If you've gotten this screen a couple times, you can <a href="https://discord.gg/dNmQvvn55H">join our discord</a> to submit a ticket.</li>
+                <li><a href="mailto:dee_deyes@writelighthouse.com?subject=Error with Lighthouse (400)">Email Us (Please keep the error code generated in your subject line)</a></li>
+              </ul>
+            <p>When reporting, please give us a detailed description of what you were doing.</p>
+        </div>
+        <%- include ("../partials/footer.ejs") %>
+    </body>
+</html>

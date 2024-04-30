@@ -6,6 +6,11 @@ const client= db.client;
 const crypto= require('crypto');
 const CryptoJS = require("crypto-js");
 
+
+function checkUUID(str){
+	let uuidRegex= /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
+	return uuidRegex.test(str);
+}
 /**
  * Generates an object containing HTTP request cookies.
  * @param {object} req ExpressJS API request
@@ -76,6 +81,7 @@ router.get("/test", async function(req, res){
 
 // Grab user's members by user ID and token. If the token is not provided, reject them. The token should not be in the URL
 router.get('/members/:id', async function (req, res){
+    if (!checkUUID(req.params.id)) return res.status(400).send("Bad Request");
       let userCheck= await db.query(client, "SELECT users.id, tokens.* FROM users INNER JOIN tokens ON users.id= tokens.u_id WHERE users.id=$1;", [req.params.id], res, req);
       let matched= false;
       // Using a for loop bc I can easily break out of it.
@@ -132,6 +138,7 @@ router.get('/members/:id', async function (req, res){
   });
 // Grab user's systems by user ID and token. If the token is not provided, reject them. The token should not be in the URL
 router.get('/systems/:id', async function (req, res){
+  if (!checkUUID(req.params.id)) return res.status(400).send("Bad Request");
 
     let userCheck= await db.query(client, "SELECT users.id, tokens.* FROM users INNER JOIN tokens ON users.id= tokens.u_id WHERE users.id=$1;", [req.params.id], res, req);
     let matched= false;
@@ -165,6 +172,7 @@ router.get('/systems/:id', async function (req, res){
 
 // Grab user's systems by user ID and token. If the token is not provided, reject them. The token should not be in the URL
 router.get('/journals/:id', async function (req, res){
+  if (!checkUUID(req.params.id)) return res.status(400).send("Bad Request");
 
     let userCheck= await db.query(client, "SELECT users.id, tokens.* FROM users INNER JOIN tokens ON users.id= tokens.u_id WHERE users.id=$1;", [req.params.id], res, req);
     let matched= false;

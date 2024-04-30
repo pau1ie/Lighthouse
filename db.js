@@ -35,17 +35,15 @@ const { Pool, Client,pg, Query } = require('pg');
  * @returns {array} Array of matching rows to query.
  */
 async function query(client, customQuery, customValues, res, req) {
-	try{
-		const result= await client.query({ text: customQuery, values: customValues });
-	// console.log(result.rows)
-	return result.rows;
-	} catch(e){
-		console.log(e)
-	res.status(400).render('pages/400',{ session: req.session, code:"Bad Request",cookies:req.cookies });
-
+	try {
+	  const result = await client.query({ text: customQuery, values: customValues });
+	  return result.rows;
+	} catch (e) {
+	  console.error(e.stack);
+	  return res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", cookies:req.cookies });
 	}
-	
   }
+  
 
 client.connect();
 

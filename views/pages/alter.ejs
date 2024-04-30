@@ -126,7 +126,7 @@ td{
                 <% } else { %> 
                     <img src="https://i.ibb.co/vkwmWjF/avatar-default.jpg" class="medimg" style="float:left; margin-right:calc(1em);" alt="<%= Buffer.from(alterInfo.name, 'base64').toString() %>'s icon">
                 <% } %>
-                <table id="alterInfo">
+                <table id="alterInfo" style="text-indent: 0;">
                     <tbody>
                       
                         <% if (alterInfo.agetext) { %>
@@ -523,8 +523,8 @@ document.addEventListener("DOMContentLoaded", () => {
         tableRows.forEach((row)=>{
             let rowCells = Array.from(row.children);
             rowCells.forEach((cell)=>{
-                const existingText = cell.innerHTML; // Get existing text content
-                const parsedHtml = marked.parse(existingText).replace("“", "").replace("”", "");  // Parse with Marked
+                const existingText = cell.innerText; // Get existing text content
+                const parsedHtml = marked.parse(existingText).replace("“", "").replace("”", "");
                 cell.innerHTML = parsedHtml;  // Update with parsed HTML
             })
         })
