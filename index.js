@@ -2469,7 +2469,7 @@ app.get('/wish-d/:id', (req, res) => {
 		} else {res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", splash:splash,cookies:req.cookies });}
 	});
 	app.post('/mood/:alt', function(req, res){
-		if (!checkUUID(req.params.id)) return lostPage(res, req);
+		if (!checkUUID(req.params.alt)) return lostPage(res, req);
 		var now = new Date();
 		client.query({text: "SELECT * FROM alter_moods WHERE alt_id=$1",values: [`${req.params.alt}`]}, (err, result) => {
 			if (err) {
