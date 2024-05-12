@@ -323,9 +323,10 @@ td{
                         const theirList = [alterInfo.subsys_id1, alterInfo.subsys_id2, alterInfo.subsys_id3, alterInfo.subsys_id4, alterInfo.subsys_id5].filter(c => c !== null);
                         const joinedEntries = session.sysList.filter(sessionEntry => theirList.includes(sessionEntry.sys_id));
                         const groupNames = joinedEntries.map(entry => `<a href="/system/${entry.sys_id}">${decode(entry.sys_alias)}</a>`).join(", ");
+
                         %>
                         <tr><td>Also present in:</td>
-                            <td><%- groupNames %></td></tr>
+                            <td><%= groupNames %></td></tr>
                       <%  } %>
 
                     </tbody>
