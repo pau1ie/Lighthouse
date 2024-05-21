@@ -11,7 +11,7 @@
         <section>
             <% console.log(sysid) %>
             <% if(sysid){ %>
-                <input value="<%= sysid %>">
+                <input type="hidden" value="<%= sysid %>">
             <% } %>
             <h2>Delete <%- session.jPost.title %>?</h2>
             <h3 class="warningtext">Warning: This cannot be undone!</h3>
