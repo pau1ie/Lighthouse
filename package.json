@@ -1,7 +1,7 @@
 {
   "name": "lighthouse",
-  "version": "1.6.2",
-  "description": "A journal app for systems to write diaries. DID and OSDD specifically.",
+  "version": "1.6.3",
+  "description": "A journal app for systems to write diaries. Plural users specifically.",
   "main": "main.js",
   "scripts": {
     "start": "node index.js"
