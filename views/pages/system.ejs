@@ -48,12 +48,16 @@
       <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
         <%- include ("../partials/nav.ejs") %>
         <div id="wrapper">
-        <% let currentP= 0; %>
+        <% 
+        let currentP= 0; 
+        let innerWorld = session.innerworld_term || cookies.innerworld_term || "inner world"
+        
+        %>
             <h1 class="dyn">[[SYSTEMCAP]] Page</h1>
             <ul class="padLinks">
               <li><a class="dyn linkbutton" title= "<%= strings.system.links.search %>" href="/search"><%= strings.system.links.search %></a></li>
               <li><a class="dyn linkbutton" title= "<%= strings.system.links.rules %>" href="/rules"><%= strings.system.links.rules %></a></li>
-              <li><% if (session.innerworld == true) { %> <a class="dyn linkbutton" title="<%= capitalise(session.innerworld_term) %>" href="/inner-world"><%= capitalise(session.innerworld_term) %></a> <%}%></li>
+              <li><% if (session.innerworld == true) { %> <a class="dyn linkbutton" title="<%= capitalise(innerWorld) %>" href="/inner-world"><%= capitalise(innerWorld) %></a> <%}%></li>
               <li><a class="dyn linkbutton" title="<%= strings.system.links.wishlist %>" href="/wish"><%= strings.system.links.wishlist %></a></li>
               <li><% if (session.worksheets_enabled == true){ %><a class="dyn linkbutton" title="<%= strings.system.links.worksheets %>" href="/worksheets"><%= strings.system.links.worksheets %></a><% }%></li>
               <li><a class="dyn linkbutton" title="Crash course on using Lighthouse" href="/tutorial"><%= strings.system.links.tutorial %></a></li>
