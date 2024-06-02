@@ -5,6 +5,8 @@ const db = require('./db');
 const client= db.client;
 const crypto= require('crypto');
 const CryptoJS = require("crypto-js");
+var strings= require("./lang/en.json");
+
 
   router.get('/philosophy', (req, res, next) => { res.render(`pages/phil`, { session: req.session, cookies:req.cookies })});
   

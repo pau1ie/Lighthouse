@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('./db');
 const tuning= require('./js/genVars.js');
+var strings= require("./lang/en.json");
 const alterTypes= tuning.alterTypes;
 const dayNames= tuning.dayNames;
 const monthNames= tuning.monthNames;

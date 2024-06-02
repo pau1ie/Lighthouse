@@ -5,6 +5,8 @@ const db = require('./db');
 const client= db.client;
 const crypto= require('crypto');
 const CryptoJS = require("crypto-js");
+var strings= require("./lang/en.json");
+
 
 const { isLoggedIn, getCookies, apiEyesOnly, encryptWithAES, decryptWithAES, forbidUser, 
 lostPage, idCheck, isNumberOrUuid, paginate, checkUUID, truncate, parseIp, capitalise, 

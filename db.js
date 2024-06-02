@@ -1,5 +1,7 @@
 // DATABASE
 require('dotenv').config();
+var strings= require("./lang/en.json");
+
 
 const { Pool, Client,pg, Query } = require('pg');
   if (process.env['environment']== "dev"){
