@@ -44,7 +44,7 @@
                 <label for="pktoken">Optional: Pluralkit token </label><input type="text" id="pktoken" autocomplete="off"><br>
                 <button onclick="getPK()">Fetch from Pluralkit</button>
             </form>
-            <textarea id="jsonPlop" style="display:none;"></textarea>
+            <textarea id="jsonPlop" style="display:block;"></textarea>
             <span id="Wait"></span>
 
             <div id="submitAlt" style="display:none;">
@@ -238,7 +238,8 @@
                     "name": alter.display_name == null ? alter.name : alter.display_name,
                     "pronouns": alter.pronouns,
                     "avatar": alter.avatar_url,
-                    "birthday": alter.birthday
+                    "birthday": alter.birthday,
+                    "pk_id": alter.id
                     })
                 });
                 
