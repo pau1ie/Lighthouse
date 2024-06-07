@@ -60,7 +60,7 @@
                                                 </form>
                                                 <script>
                                                   var Font = Quill.import('formats/font');
-                                                  Font.whitelist = ['times-new-roman', 'arial', 'monospace', 'cursive', 'marker', 'creepster','homemade-apple', 'shadows' ,'redacted', 'rubik', 'notojp', 'notokr', 'linjasuwi'];
+                                                  Font.whitelist = ['times-new-roman', 'arial', 'monospace', 'cursive', 'marker', 'creepster','homemade-apple', 'shadows' ,'redacted', 'wingdings', 'rubik', 'notojp', 'notokr', 'linjasuwi'];
                                                   Quill.register(Font, true);
                                                   var myToolbar= [
                                                         [{ size: [ 'small', false, 'large', 'huge' ]}],
@@ -68,7 +68,7 @@
                                                         ['blockquote', 'code-block'],
                                                         [{ 'list': 'ordered' },{ 'list': 'bullet'}, { 'indent': '-1' }, { 'indent': '+1' } ], 
                                                         [{ 'color': [] }],         
-                                                        [{ 'font': ['', 'times-new-roman', 'arial', 'monospace', 'cursive','marker', 'creepster', 'shadows', 'homemade-apple', 'redacted', 'rubik', 'notojp', 'notokr', 'linjasuwi'] }],
+                                                        [{ 'font': ['', 'times-new-roman', 'arial', 'monospace', 'cursive','marker', 'creepster', 'shadows', 'homemade-apple', 'redacted', 'wingdings', 'rubik', 'notojp', 'notokr', 'linjasuwi'] }],
                                                         [{ 'align': [] }],
                                                         [{ 'direction': 'rtl' }],
                                                         ['link', 'image'],
@@ -292,7 +292,7 @@
                       // sortField: 'text' 
                     });
                     var Font = Quill.import('formats/font');
-    Font.whitelist = ['times-new-roman', 'arial', 'monospace', 'cursive', 'marker', 'creepster','homemade-apple', 'shadows' ,'redacted', 'rubik', 'notojp', 'notokr', 'linjasuwi'];
+    Font.whitelist = ['times-new-roman', 'arial', 'monospace', 'cursive', 'marker', 'creepster','homemade-apple', 'shadows' ,'redacted', 'wingdings', 'rubik', 'notojp', 'notokr', 'linjasuwi'];
     Quill.register(Font, true);
     
     var myToolbar= [
@@ -301,7 +301,7 @@
     ['blockquote', 'code-block'],
     [{ 'list': 'ordered' },{ 'list': 'bullet'}, { 'indent': '-1' }, { 'indent': '+1' } ], 
     [{ 'color': [] }],         
-    [{ 'font': ['', 'times-new-roman', 'arial', 'monospace', 'cursive','marker', 'creepster', 'shadows', 'homemade-apple', 'redacted', 'rubik', 'notojp', 'notokr', 'linjasuwi'] }],
+    [{ 'font': ['', 'times-new-roman', 'arial', 'monospace', 'cursive','marker', 'creepster', 'shadows', 'homemade-apple', 'redacted','wingdings', 'rubik', 'notojp', 'notokr', 'linjasuwi'] }],
     [{ 'align': [] }],
     [{ 'direction': 'rtl' }],
     ['link', 'image'],
@@ -457,17 +457,22 @@ $("#hidden-text").text(editor)
             if (!response.ok) return $("#wrapper").html("<p><img src='/img/svg/ship-icon.svg' class='tinyimg'><em>There was an error communicating with our database. Please reload or try again later.</em></p>");
             let sysInfo = JSON.parse(body);
             for (i in sysInfo.search){
-            if (!sysInfo.search[i].is_archived){
-              // Not archived.
-              if ('<%- originalPost.alt_id %>' == sysInfo.search[i].alt_id){
-                  $("#author").append(`<option value="${sysInfo.search[i].alt_id}" selected>${sysInfo.search[i].name} (<%- capitalise(cookies.system_term) %>: ${sysInfo.search[i].sys_alias})</option>`);
-            } else{
-                $("#author").append(`<option value="${sysInfo.search[i].alt_id}">${sysInfo.search[i].name} (<%- capitalise(cookies.system_term) %>: ${sysInfo.search[i].sys_alias})</option>`);
-            }
-            }
+              if (!sysInfo.search[i].is_archived){
+                // Not archived.
+                  if ('<%- originalPost.alt_id %>' == sysInfo.search[i].alt_id){
+                      $("#author").append(`<option value="${sysInfo.search[i].alt_id}" selected>${sysInfo.search[i].name} (<%- capitalise(cookies.system_term) %>: ${sysInfo.search[i].sys_alias})</option>`);
+                } else{
+                    $("#author").append(`<option value="${sysInfo.search[i].alt_id}">${sysInfo.search[i].name} (<%- capitalise(cookies.system_term) %>: ${sysInfo.search[i].sys_alias})</option>`);
+                }
+              }
             
             }
-            $("#author").append('<option value="blur">Blurry</option>')
+            if ('<%- originalPost.alt_id %>' == ''){
+              $("#author").append('<option value="blur" selected>Blurry</option>')
+            } else {
+              $("#author").append('<option value="blur">Blurry</option>')
+            }
+            
         }
         getAlters();
         $("#go").on("click", function(){
