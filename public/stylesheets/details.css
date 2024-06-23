@@ -1,0 +1,30 @@
+.toggle {
+  appearance: none !important;
+  display: none !important;
+}
+
+.toggle+label:before {
+  content: "⯈";
+  display: inline-block;
+  line-height: 0;
+  transition: transform .5s;
+}
+
+.toggle:checked+label:before {
+  transform: rotate(90deg);
+}
+
+.toggle~.details {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height .5s, opacity .5s;
+}
+
+.toggle:checked~.details {
+  max-height: 100vh;
+  opacity: 1;
+}
+.details{
+  margin-left: 2em;
+}

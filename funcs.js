@@ -127,7 +127,6 @@ function forbidUser(res, req){
  */
 function idCheck(req, arg){
 	return getCookies(req)['u_id'] == arg;
-	// return getCookies(req)['u_id']== req.session.u_id;
 }
 
 /**
@@ -353,7 +352,7 @@ function truncateAndStringify(array, maxLength) {
 	  return `${truncatedArray.join(", ")}`;
 	} else {
 	  return `${truncatedArray.join(", ")}... (+${
-		array.length - (maxLength + 1)
+		array.length - (maxLength)
 	  } more)`;
 	}
 	

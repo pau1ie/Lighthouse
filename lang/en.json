@@ -12,7 +12,7 @@
         "deleted": "Cleared mood."
     },
     "system": {
-        "addSystem": "Add a [[SYSTEM]]",
+        "addSystem": "Create",
         "created": "[[SYSTEMCAP]] created!",
         "updated": "[[SYSTEM]] updated!",
         "deleted": "Deleted [[SYSTEM]].",

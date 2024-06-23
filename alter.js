@@ -324,16 +324,13 @@ router.post("/alter/edit-journal/:id", authUser, validateParam('id'), async (req
           let spId= req.body.spid ? `${encryptWithAES(req.body.spid)}` : null;
           let colourEn= req.body.colourenabled =="on" ? true : false;
           let outlineEn= req.body.outlineenabled =="on" ? true : false;
-          // console.log(colourEn)
           // First-- Let's handle files.
           if (req.files){
             
             if (req.files.imgupload){
               // This is for the icons!
-              await db.query(client, "UPDATE alters SET img_blob=$2, blob_mimetype=$3, img_url=null WHERE alt_id=$1", [`${req.params.id}`,
-              req.body.clear ? null : req.files.imgupload.data,
-              req.body.clear ? null : req.files.imgupload.mimetype], 
-              res, req);
+              await db.query(client, "UPDATE alters SET img_blob=$2, blob_mimetype=$3 WHERE alt_id=$1", [ `${req.params.id}`, req.body.clear ? null : req.files.imgupload.data, req.body.clear ? null : req.files.imgupload.mimetype,], res, req); 
+              await db.query(client, "UPDATE alters SET img_url=null WHERE alt_id=$1", [ `${req.params.id}`], res, req); 
             }
             
             if (req.files.headeralt){

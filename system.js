@@ -111,6 +111,7 @@ router.get('/:id/:pg?', authUser, validateParam('id'), async function(req, res, 
 			req.session.worksheets_enabled= wsEn[0].worksheets_enabled;
 		}
 		const sysMap= await db.query(client, "SELECT systems.sys_id, systems.subsys_id, systems.user_id, systems.sys_alias, alters.alt_id, systems.icon, systems.description FROM systems LEFT JOIN alters ON systems.sys_id = alters.sys_id WHERE systems.sys_id=$1 ORDER BY alters.name ASC", [`${req.params.id}`], res, req);
+		if (sysMap.length < 1) return lostPage(res, req);
 		if (!idCheck(req, sysMap[0].user_id)) return res.status(404).render(`pages/404`, { session: req.session, code:"Not Found", cookies:req.cookies });
 		req.session.chosenSys= sysMap[0];
 

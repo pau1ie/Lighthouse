@@ -8,7 +8,6 @@
                 padding:0.5em;
                 background: rgb(173, 0, 0) !important;
                 color: white !important;
-                /* transition: .5s; */
             }
             #editAlt label{
                 margin-top:calc(1em);
@@ -20,34 +19,40 @@
             #editAlt textarea,input,select{
                 display:block;
             }
-        .column {
-        float: left;
-        width: 50%;
-        }
-
-        /* Clear floats after the columns */
-        .row:after {
-        content: "";
-        display: table;
-        clear: both;
-        }
-        #typeSplash{
-    padding-right: 1em;
-}
-        @media only screen and (max-width: 900px) {
             .column {
-                float:none;
-                width: 100%;
+                float: left;
+                width: 50%;
+            }
+
+            /* Clear floats after the columns */
+            .row:after {
+                content: "";
+                display: table;
+                clear: both;
             }
             #typeSplash{
-                padding-right: 0;
-                margin-bottom: .5em;
+                padding-right: 1em;
             }
-}
-#discordwarning{
-    font-size: .75em;
-    /* color: var(--col4); */
-}
+            @media only screen and (max-width: 900px) {
+                .column {
+                    float:none;
+                    width: 100%;
+                }
+                #typeSplash{
+                    padding-right: 0;
+                    margin-bottom: .5em;
+                }
+            }
+            #discordwarning{
+                font-size: .75em;
+            }
+            #advanced{
+                border-top: 1px solid var(--col1);
+                border-bottom: 1px solid var(--col1);
+                height: auto;
+                overflow: auto;
+                padding-bottom: 1em;
+            }
 
         </style>
         <link rel="stylesheet" href="/stylesheets/toggleswitch.css?v=<%- version %>">
@@ -163,16 +168,19 @@
 
             </div>
             <p>Uploaded images take priority over Image URLs.</p>
-            <div>
+            <div id="advanced" class="clearfix">
                 <h2>Advanced Section</h2>
+                <details>
+                    <summary>Expand/Collapse</summary>
                 <div class="column">
-                    <label for="spid">Simply Plural ID (if applicable): </label>
+                    <label for="spid">Simply Plural ID: </label>
                     <input type="text" name="spid" id="spid" value="<% if (chosenAlter.sp_id !== null) { %><%- decrypt(chosenAlter.sp_id) %><% } %>">
-                    <label for="pkid">Pluralkit ID (if applicable): </label>
+                    <label for="pkid">Pluralkit ID: </label>
                     <input type="text" name="pkid" id="pkid" maxlength="7" value="<% if (chosenAlter.pk_id !== null) { %><%- decrypt(chosenAlter.pk_id) %><% } %>">
                 </div>
                 <div class="column">
-                    <label class="dyn">Other [[SYSTEMS]] that <%- decode(chosenAlter.name) %> is in (up to 5):</label>
+                    <details>
+                       <summary><label class="dyn">Other [[SYSTEMS]] that <%- decode(chosenAlter.name) %> is in (up to 5):</label></summary>
                     <% 
                         sysInfo.forEach((sys)=>{ 
                             if (sys.sys_id !== chosenAlter.sys_id){ %>
@@ -191,15 +199,19 @@
                     <%
                         } 
                     }) 
-                    %>
+                    %> 
+                    </details>
+                    
                 </div>
+                </details>   
             </div>
                 
                 <input type="submit" value="Update <%= decode(chosenAlter.name) %>" id="submit"><input type="reset" value="Start Over">
             </form>
         </section>
-        <!-- Info about image hosts -->
-        <hr/>
+
+        <hr style="width: 100%;">
+
         <section>
             <h2>Image Hosts</h2>
             <p>Discord has officially changed how images are hosted on their servers, making the link require specific parameters and becoming unavailable after 24 hours. This will affect services like AO3, Pluralkit, Tupperbox, and Lighthouse. Below is a list of image hosting websites you can use in Discord's stead. <strong>If this <%= cookies.alter_term %> has their icon pointing to <u>cdn.discordapp.com</u>, then we advise you to upload their icon to one of the websites below:</strong></p>

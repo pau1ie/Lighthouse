@@ -41,6 +41,7 @@ const staticRouter = require('./staticpages');
 const wsRouter = require('./worksheets');
 const botRouter = require('./bots');
 const forumRouter = require('./forums');
+const messagesRouter = require('./messages');
 
 const twoWeeks = 1000 * 60 * 60 * 24 * 7 * 2;
 
@@ -158,6 +159,7 @@ app.use("", staticRouter); // For pages that require almost no extra checks befo
 app.use("", wsRouter); // For worksheet routes. 
 app.use("", botRouter); // For the web crawling routes. 
 app.use("", forumRouter); // For the forums routes. 
+app.use("/inbox", messagesRouter); // For the messages routes. 
 
 
 // ------ //
@@ -207,7 +209,6 @@ app.all('*', async function (req, res){
 		req.session.font="Lexend";
 		strings= require(`./lang/en.json`);
 	}
-	
 	req.next();
   });
 
@@ -2157,106 +2158,7 @@ if (process.env["environment"]== "dev"){
 	app.get("/dev-test", function (req, res){
 		res.send("Congrats! You found a dev-only page.")
 	})
-	app.get('/inbox/:alt', async function(req, res){
-		if (!checkUUID(req.params.alt)) return;
-		if (isLoggedIn(req)){
-			// Get Alter.
-			const altInfo= await db.query(client, "SELECT alters.*, systems.* from alters INNER JOIN systems ON systems.sys_id = alters.sys_id WHERE alt_id=$1", [`${req.params.alt}`], res, req);
-			var selectedAlt= altInfo[0];
 	
-			// console.log(selectedAlt)
-			// Before going any further-- Check that the alter's user ID and the actual requester's user ID matches.
-			if (!idCheck(req, selectedAlt.user_id)) return res.status(404).render(`pages/404`, { session: req.session, code:"Not Found", cookies:req.cookies });
-	
-			req.session.chosenAlt= selectedAlt;
-			const msg= await db.query(client, "SELECT * FROM messages WHERE sender = $1 OR recipient = $1;", [`${req.params.alt}`], res, req);
-			const messages = new Array();
-			msg.forEach((m)=>{
-				messages.push({
-					id: m.id,
-					sender: m.sender,
-					recipient: m.recipient,
-					created_on: m.created_on,
-					is_read: m.is_read,
-					title: m.title
-				})
-			})
-	
-			res.render(`pages/messages`, { session: req.session, cookies:req.cookies, alter:selectedAlt, messages: messages });
-		} else {
-			forbidUser(res, req)
-		}
-	  });
-	  app.get('/inbox/messages/:id', async function(req, res){
-		if (!checkUUID(req.params.id)) return lostPage(res, req);
-		if (isLoggedIn(req)){
-			// Before going any further-- Check that the alter's user ID and the actual requester's user ID matches.		
-			const msgTest= await db.query(client, "SELECT DISTINCT alters.alt_id, systems.user_id FROM alters INNER JOIN systems ON systems.sys_id = alters.sys_id INNER JOIN messages ON messages.recipient = alters.alt_id OR messages.sender = alters.alt_id WHERE messages.id=$1", [`${req.params.id}`], res, req);
-			if (!idCheck(req, msgTest[0].user_id)) return res.status(404).render(`pages/404`, { session: req.session, code:"Not Found", cookies:req.cookies }); // Fake 404 so people think it's just a mistake.
-	
-			// Message Info
-			const messageInf= await db.query(client, "SELECT * FROM messages WHERE id=$1", [`${req.params.id}`], res, req);
-			const message={
-				id: messageInf[0].id,
-				sender: messageInf[0].sender,
-				recipient: messageInf[0].recipient,
-				body: messageInf[0].msg,
-				title: messageInf[0].title,
-				created_on: messageInf[0].created_on
-			}
-	
-			const senderInf= await db.query(client, "SELECT alters.*, systems.* FROM alters INNER JOIN systems ON alters.sys_id = systems.sys_id WHERE alt_id=$1", [`${message.sender}`], res, req);
-			const sender= senderInf[0];
-	
-			const recInf= await db.query(client, "SELECT alters.*, systems.* FROM alters INNER JOIN systems ON alters.sys_id = systems.sys_id WHERE alt_id=$1", [`${message.recipient}`], res, req);
-			const recipient= recInf[0];
-	
-			// Mark as read if the recipient opens it!
-			// if (message.recipient == )
-	
-			res.render(`pages/message`, { session: req.session, cookies:req.cookies, message: message, sender: sender, recipient: recipient});
-		} else {
-			forbidUser(res, req)
-		}
-	  });
-	  app.get('/inbox/:alt/create', async function(req, res){
-		if (!checkUUID(req.params.alt)) return;
-		if (isLoggedIn(req)){
-			// Get Alter.
-			const altInfo= await db.query(client, "SELECT alters.*, systems.* from alters INNER JOIN systems ON systems.sys_id = alters.sys_id WHERE alt_id=$1", [`${req.params.alt}`], res, req);
-			var selectedAlt= altInfo[0];
-	
-			// console.log(selectedAlt)
-			// Before going any further-- Check that the alter's user ID and the actual requester's user ID matches.
-			if (!idCheck(req, selectedAlt.user_id)) return res.status(404).render(`pages/404`, { session: req.session, code:"Not Found", cookies:req.cookies });
-	
-			res.render(`pages/create_message`, { session: req.session, cookies:req.cookies, alter:selectedAlt });
-		} else {
-			forbidUser(res, req)
-		}
-	  })
-
-	app.post('/inbox/:alt/create', async function(req, res){
-		if (!checkUUID(req.params.alt)) return;
-		if (isLoggedIn(req)){
-			// Get Alter.
-			const altInfo= await db.query(client, "SELECT alters.*, systems.* from alters INNER JOIN systems ON systems.sys_id = alters.sys_id WHERE alt_id=$1", [`${req.params.alt}`], res, req);
-			var selectedAlt= altInfo[0];
-			// Before going any further-- Check that the alter's user ID and the actual requester's user ID matches.
-			if (!idCheck(req, selectedAlt.user_id)) return res.status(404).render(`pages/404`, { session: req.session, code:"Not Found", cookies:req.cookies });
-
-			await db.query(client, "INSERT INTO messages (sender, recipient, title, msg) VALUES ($1, $2, $3, $4)", [
-				`${req.params.alt}`,
-				`${req.body.recipient}`,
-				`${encryptWithAES(req.body.fTitle)}`,
-				`${encryptWithAES(req.body.msgBody)}`
-			], res, req);
-	
-			res.redirect(`/inbox/${req.params.alt}`)
-		} else {
-			forbidUser(res, req)
-		}
-	  })
 }
   // ERROR ROUTES. DO NOT PUT NEW PAGES BENEATH THESE.
 

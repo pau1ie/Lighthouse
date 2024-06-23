@@ -63,7 +63,6 @@ td{
     <%} %>
 }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
 
@@ -103,7 +102,7 @@ td{
          } %>
         <section><ul class="breadcrumb">
                 <li><a href="/system" title=""><%= capitalise(cookies.system_term) %></a></li>
-                <% if (alterInfo.parentsys){ %><li><a href="/system/<%= alterInfo.subsys_id %>" title="Back to <%= parentSys %>"><%= parentSys %></a></li><% } %>
+                <% if (alterInfo.parentsys){ %><li><a href="/system/<%= alterInfo.parentsys %>" title="Back to <%= parentSys %>"><%= parentSys %></a></li><% } %>
                 <li><a href="/system/<%= alterInfo.sys_id %>" title="Back to <%= capitalise(Buffer.from(alterInfo.sys_alias, "base64").toString()) %>"><%= capitalise(Buffer.from(alterInfo.sys_alias, "base64").toString()) %></a></li>
                 <li><%= Buffer.from(alterInfo.name, 'base64').toString() %></li>
               </ul> 
@@ -541,22 +540,7 @@ td{
         });
 
 
-document.addEventListener("DOMContentLoaded", () => {
-    const tableElement = document.getElementById("alterInfo");
-    if (tableElement && tableElement.children.length > 0) {  // Check for existence and children
 
-        const tableRows = Array.from(tableElement.children[0].children);
-        tableRows.forEach((row)=>{
-            let rowCells = Array.from(row.children);
-            rowCells.forEach((cell)=>{
-                const existingText = cell.innerText; // Get existing text content
-                const parsedHtml = marked.parse(existingText).replace("“", "").replace("”", "");
-                cell.innerHTML = parsedHtml;  // Update with parsed HTML
-            })
-        })
-    }
-    
-});
 
 
         

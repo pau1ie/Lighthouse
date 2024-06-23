@@ -2,35 +2,56 @@
 <html lang="en" dir="ltr">
     <head>
         <%- include ("../partials/header.ejs") %>
+        <link rel="stylesheet" href="/stylesheets/details.css?v=<%- version %>">
+        <style>
+            table{
+    width: 70%;
+}
+td{
+    padding: calc(.5em);
+    border-bottom: 1px solid rgba(0,0,0,.2)
+}
+.header{
+    height: 15em;
+    width: 100%;
+    /* background: var(--page); */
+    <% if (alterInfo.header_blob){ %>
+        background-image: url('data:<%= alterInfo.header_mimetype %>;base64,<%= Buffer.from(alterInfo.header_blob).toString("base64") %>');
+        background-size: cover;
+        border-bottom: 3px solid <%= alterInfo.colour_enabled == false ? "inherit" : alterInfo.colour %>;
+        margin-bottom: 1em;
+        position: relative;
+        box-shadow: 0 -50px 70px rgba(0, 0, 0, 0.3) inset;
+    <%} %>
+}
+        </style>
     </head>
     <body>
         <%- include ("../partials/nav.ejs") %>
         <div id="wrapper">
             <ul class="breadcrumb">
-                <li><a href="/system" title=""><%= capitalise(cookies.system_term) %></a></li>
-                <li><a href="/system/<%= alterInfo.sys_id %>" title="Back to <%= capitalise(Buffer.from(alterInfo.sys_alias, "base64").toString()) %>"><%= capitalise(Buffer.from(alterInfo.sys_alias, "base64").toString()) %></a></li>
-                <li><%= Buffer.from(alterInfo.name, 'base64').toString() %></li>
+                <li><a href="/system" title=""><%- capitalise(cookies.system_term) %></a></li>
+                <li><a href="/system/<%- alterInfo.sys_id %>" title="Back to <%- capitalise(Buffer.from(alterInfo.sys_alias, "base64").toString()) %>"><%- capitalise(Buffer.from(alterInfo.sys_alias, "base64").toString()) %></a></li>
+                <li><%- Buffer.from(alterInfo.name, 'base64').toString() %></li>
               </ul> 
-            <% if (locals.messages.flash) { %>
-                <div class="splash"><%- locals.messages.flash %></div>
-            <% } %>
+              <div id="altHeader" <% if (alterInfo.header_blob) { %>class="header"<% } %>></div>
             <section>
-                <h2>About <%= Buffer.from(alterInfo.name, "base64").toString() %></h2>
-                <p><span class="material-symbols-outlined">archive</span> This <%= cookies.alter_term %> is <strong>archived</strong>. Everything is read-only.</p>
                 <% if (alterInfo.img_blob){ %> 
-                    <img class="smallimg" style="float:left; margin-right:calc(1em);" src="data:<%= alterInfo.blob_mimetype %>;base64,<%= Buffer.from(alterInfo.img_blob).toString("base64") %>"> 
+                    <img class="smallimg" style="float:left; margin-right:calc(1em);" src="data:<%- alterInfo.blob_mimetype %>;base64,<%- Buffer.from(alterInfo.img_blob).toString("base64") %>"> 
                     
                     <% } else if (distill(alterInfo.img_url)) { %>
-                    <img src="<%= Buffer.from(alterInfo.img_url, 'base64').toString() %>" class="smallimg" style="float:left; margin-right:calc(1em);">
+                    <img src="<%- Buffer.from(alterInfo.img_url, 'base64').toString() %>" class="smallimg" style="float:left; margin-right:calc(1em);">
                 <% } else { %> 
-                    <img src="https://i.ibb.co/vkwmWjF/avatar-default.jpg" class="smallimg" style="float:left; margin-right:calc(1em);" alt="<%= Buffer.from(alterInfo.name, 'base64').toString() %>'s icon">
+                    <img src="https://i.ibb.co/vkwmWjF/avatar-default.jpg" class="smallimg" style="float:left; margin-right:calc(1em);" alt="<%- Buffer.from(alterInfo.name, 'base64').toString() %>'s icon">
                 <% } %>
-                <table>
+                <h2>About <%- Buffer.from(alterInfo.name, "base64").toString() %></h2>
+                <p><span class="material-symbols-outlined">archive</span> This <%- cookies.alter_term %> is <strong>archived</strong>. Everything is read-only.</p>
+                <table id="alterInfo" style="text-indent: 0;">
                     <tbody>
                         <% if (alterInfo.agetext) { %>
                              <% if (distill(alterInfo.agetext)) { %>
                                 <tr><td>Perceived Age:</td>
-                                <td><%= Buffer.from(alterInfo.agetext, 'base64').toString() %></td></tr>
+                                <td><%- Buffer.from(alterInfo.agetext, 'base64').toString() %></td></tr>
                             <% } %>
                             <% } %>
                        
@@ -39,7 +60,7 @@
                         <% if (alterInfo.birthday) { %>
                         <% if (distill(alterInfo.birthday)) { %>
                                                     <tr><td>Perceived Birthday:</td>
-                                                    <td><%= Buffer.from(alterInfo.birthday, 'base64').toString() %></td></tr>
+                                                    <td><%- Buffer.from(alterInfo.birthday, 'base64').toString() %></td></tr>
                                                 <% } %>
                             <% } %>
                         
@@ -48,7 +69,7 @@
                         <% if (alterInfo.gender) { %>
                         <% if (distill(alterInfo.gender)) { %>
                                                     <tr><td>Gender:</td>
-                                                    <td name="gender"><%= Buffer.from(alterInfo.gender, 'base64').toString() %></td></tr>
+                                                    <td name="gender"><%- Buffer.from(alterInfo.gender, 'base64').toString() %></td></tr>
                                                 <% } %>
                             <% } %>
                         
@@ -57,7 +78,7 @@
                         <% if (alterInfo.sexuality) { %>
                         <% if (distill(alterInfo.sexuality)) { %>
                                                     <tr><td>Sexuality:</td>
-                                                    <td name="sexuality"><%= Buffer.from(alterInfo.sexuality, 'base64').toString() %></td></tr>
+                                                    <td name="sexuality"><%- Buffer.from(alterInfo.sexuality, 'base64').toString() %></td></tr>
                                                 <% } %>
                             <% } %>
                         
@@ -66,7 +87,7 @@
                         <% if (alterInfo.first_noted) { %>
                             <% if (distill(alterInfo.first_noted)) { %>
                                                         <tr><td>First Noted:</td>
-                                                        <td><%= Buffer.from(alterInfo.first_noted, 'base64').toString() %></td></tr>
+                                                        <td><%- Buffer.from(alterInfo.first_noted, 'base64').toString() %></td></tr>
                                                     <% } %>
                             <% } %>
                         
@@ -76,7 +97,7 @@
                         <% if (alterInfo.type) { %>
                         <% if (distill(alterInfo.type)) { %>
                            <tr> <td>Type:</td>
-                            <td><%= alterInfo.type %></td></tr>
+                            <td><%- alterInfo.type %></td></tr>
                         <% } %>
                             <% } %>
                         
@@ -86,7 +107,7 @@
                         <% if (alterInfo.source) { %>
                         <% if (distill(alterInfo.source)) { %>
                             <tr><td>Source:</td>
-                            <td><%= Buffer.from(alterInfo.source, 'base64').toString() %></td></tr>
+                            <td><%- Buffer.from(alterInfo.source, 'base64').toString() %></td></tr>
                         <% } %>
                             <% } %>
                         
@@ -96,7 +117,7 @@
                         <% if (alterInfo.triggers_pos) { %>
                         <% if (distill(alterInfo.triggers_pos)) { %>
                             <tr><td>Positive Triggers:</td>
-                            <td><%= Buffer.from(alterInfo.triggers_pos, 'base64').toString() %></td></tr>
+                            <td><%- Buffer.from(alterInfo.triggers_pos, 'base64').toString() %></td></tr>
                         <% } %>
                             <% } %>
     
@@ -105,7 +126,7 @@
                         <% if (alterInfo.triggers_neg) { %>
                         <% if (distill(alterInfo.triggers_neg)) { %>
                             <tr><td>Negative Triggers:</td>
-                            <td><%= Buffer.from(alterInfo.triggers_neg, 'base64').toString() %></td></tr>
+                            <td><%- Buffer.from(alterInfo.triggers_neg, 'base64').toString() %></td></tr>
                         <% } %>
                             <% } %>
     
@@ -114,7 +135,7 @@
                         <% if (alterInfo.likes) { %>
                         <% if (distill(alterInfo.likes)) { %>
                             <tr><td>Likes:</td>
-                            <td><%= Buffer.from(alterInfo.likes, 'base64').toString() %></td></tr>
+                            <td><%- Buffer.from(alterInfo.likes, 'base64').toString() %></td></tr>
                         <% } %>
                             <% } %>
     
@@ -123,7 +144,7 @@
                         <% if (alterInfo.dislikes) { %>
                         <% if (distill(alterInfo.dislikes)) { %>
                             <tr><td>Dislikes:</td>
-                            <td><%= Buffer.from(alterInfo.dislikes, 'base64').toString() %></td></tr>
+                            <td><%- Buffer.from(alterInfo.dislikes, 'base64').toString() %></td></tr>
                         <% } %>
                             <% } %>
     
@@ -133,7 +154,7 @@
                         <% if (alterInfo.job) { %>
                         <% if (distill(alterInfo.job)) { %>
                             <tr><td>Internal Job:</td>
-                            <td><%= Buffer.from(alterInfo.job, 'base64').toString() %></td></tr>
+                            <td><%- Buffer.from(alterInfo.job, 'base64').toString() %></td></tr>
                         <% } %>
                             <% } %>
     
@@ -143,7 +164,7 @@
                         <% if (alterInfo.safe_place) { %>
                         <% if (distill(alterInfo.safe_place)) { %>
                             <tr><td>Feels safest when:</td>
-                            <td><%= Buffer.from(alterInfo.safe_place, 'base64').toString() %></td></tr>
+                            <td><%- Buffer.from(alterInfo.safe_place, 'base64').toString() %></td></tr>
                         <% } %>
                             <% } %>
     
@@ -153,7 +174,7 @@
                         <% if (alterInfo.wants) { %>
                         <% if (distill(alterInfo.wants)) { %>
                             <tr><td>Wants/Wishes:</td>
-                            <td><%= Buffer.from(alterInfo.wants, 'base64').toString() %></td></tr>
+                            <td><%- Buffer.from(alterInfo.wants, 'base64').toString() %></td></tr>
                         <% } %>
                             <% } %>
     
@@ -162,7 +183,7 @@
                         <% if (alterInfo.acc) { %>
                         <% if (distill(alterInfo.acc)) { %>
                             <tr><td>Needs accommodated for:</td>
-                            <td><%= Buffer.from(alterInfo.acc, 'base64').toString() %></td></tr>
+                            <td><%- Buffer.from(alterInfo.acc, 'base64').toString() %></td></tr>
                         <% } %>
                             <% } %>
     
@@ -191,22 +212,33 @@
                     </tbody>
                     </table>
                     
-                    <a class="linkbutton" style="width:auto;" href="/archive-alter/<%= alterInfo.alt_id %>">Un-Archive <%= Buffer.from(alterInfo.name, 'base64').toString() %></a>
+                    <a class="linkbutton" style="width:auto;" href="/archive-alter/<%- alterInfo.alt_id %>">Un-Archive <%- Buffer.from(alterInfo.name, 'base64').toString() %></a>
                     <% if (archivedPosts.length > 0){ %>
                     <hr>
                     <h2>Journal Archive</h2>
-                    <section>
+                    <article>
+                        <input id="toggle0" class="toggle" type="checkbox">
+                        <label for="toggle0">
+                            Expand/Collapse
+                        </label>
+                        <div class="details">
                         <% for (i in archivedPosts){ %> 
-                            <article style="border-bottom: 1px solid var(--col1)">
-                                <% var bodyArr= (archivedPosts[i].body).replace(/\r/gi, '').split("\n").filter(function() { return true; }); %>
-                                <h3><%= archivedPosts[i].title %></h3>
-                                <p><small>Written on: <%= archivedPosts[i].created_on.toLocaleString({timezone:(Intl.DateTimeFormat().resolvedOptions().timeZone)}) %></small></p>
-                                <% for (b in bodyArr){ %>
-                                    <p><%- bodyArr[b] %></p>
-                                <% } %>
-                            </article>
+                            <section>
+                                <div style="border-bottom: 1px solid var(--col1)">
+                                    <% var bodyArr= (archivedPosts[i].body).replace(/\r/gi, '').split("\n").filter(function() { return true; }); %>
+                                    <h3><%- archivedPosts[i].title %></h3>
+                                    <p><small>Written on: <%- archivedPosts[i].created_on.toLocaleString({timezone:(Intl.DateTimeFormat().resolvedOptions().timeZone)}) %></small></p>
+                                    <% for (b in bodyArr){ %>
+                                        <p><%- bodyArr[b] %></p>
+                                    <% } %>
+                                    </div>
+                            </section>
                         <% } %>
-                    </section>
+                        </div>
+                    </article>
+                    
+                        
+                    
                     <% } %>
                     
             </section>

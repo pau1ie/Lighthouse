@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="/stylesheets/<%= cookies.skin || 'lighthouse' %>.css?v=<%- version %>"> <!-- Website skin -->
 <link rel="stylesheet" href="/stylesheets/iao-alert.css">
 <script src="/iao-alert.jquery.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <Script>
   // Set dark mode based on user preference or system setting
   const isDark = window.matchMedia("(prefers-color-scheme: dark)");
@@ -119,3 +120,22 @@ options.timeZoneName = "short";
 <link href="https://cdn.jsdelivr.net/npm/quill@2.0.1/dist/quill.snow.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js" integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const tableElement = document.getElementById("alterInfo");
+    if (tableElement && tableElement.children.length > 0) {  // Check for existence and children
+
+        const tableRows = Array.from(tableElement.children[0].children);
+        tableRows.forEach((row)=>{
+            let rowCells = Array.from(row.children);
+            rowCells.forEach((cell)=>{
+                const existingText = cell.innerText; // Get existing text content
+                const parsedHtml = marked.parse(existingText).replace("“", "").replace("”", "");
+                cell.innerHTML = parsedHtml;  // Update with parsed HTML
+            })
+        })
+    }
+    
+});
+</script>
