@@ -17,7 +17,8 @@ const { isLoggedIn, getCookies, encryptWithAES, decryptWithAES, forbidUser,
 
 
 router.get("/alter/edit-journal/:id", authUser, validateParam('id'), async (req, res)=>{
-      let journCheck = await db.query(client, "SELECT systems.user_id FROM systems INNER JOIN journals ON journals.sys_id = systems.sys_id WHERE journals.alt_id = $1;", [`${req.params.id}`], res, req);
+      let journCheck = await db.query(client, "SELECT systems.user_id FROM systems INNER JOIN journals ON journals.sys_id = systems.sys_id WHERE journals.alt_id = $1;", [`${req.params.id}`], res, req, true);
+      if (!jounCheck) return;
       if (!idCheck(req, journCheck[0].user_id)) return lostPage(res, req);
 
       let journalInfo = await db.query(client, "SELECT journals.*, alters.*, systems.* FROM journals INNER JOIN alters ON journals.alt_id = alters.alt_id INNER JOIN systems ON systems.sys_id = alters.sys_id WHERE journals.alt_id=$1", [`${req.params.id}`], res, req);
@@ -28,7 +29,8 @@ router.get("/alter/edit-journal/:id", authUser, validateParam('id'), async (req,
 
 router.post("/alter/edit-journal/:id", authUser, validateParam('id'), async (req, res)=>{
     // Is this their alter/their journal?
-    let journCheck = await db.query(client, "SELECT systems.user_id FROM systems INNER JOIN journals ON journals.sys_id = systems.sys_id WHERE journals.alt_id = $1;", [`${req.params.id}`], res, req);
+    let journCheck = await db.query(client, "SELECT systems.user_id FROM systems INNER JOIN journals ON journals.sys_id = systems.sys_id WHERE journals.alt_id = $1;", [`${req.params.id}`], res, req, true);
+    if (!jounCheck) return;
     if (!idCheck(req, journCheck[0].user_id)) return lostPage(res, req);
 
     let isPixel = req.body.ispixel ? true : false;
@@ -50,7 +52,8 @@ router.post("/alter/edit-journal/:id", authUser, validateParam('id'), async (req
   // Refactored!
   router.get("/alter/:id", authUser, validateParam('id'), async function(req, res){
       // Get Alter.
-      const altInfo= await db.query(client, `SELECT alter_moods.*, alters.*, systems.sys_alias, systems.user_id, systems.subsys_id AS "parentsys" FROM alters INNER JOIN systems ON systems.sys_id = alters.sys_id LEFT JOIN alter_moods ON alters.alt_id = alter_moods.alt_id WHERE alters.alt_id=$1`, [`${req.params.id}`], res, req);
+      const altInfo= await db.query(client, `SELECT alter_moods.*, alters.*, systems.sys_alias, systems.user_id, systems.subsys_id AS "parentsys" FROM alters INNER JOIN systems ON systems.sys_id = alters.sys_id LEFT JOIN alter_moods ON alters.alt_id = alter_moods.alt_id WHERE alters.alt_id=$1`, [`${req.params.id}`], res, req, true);
+      if (!altInfo) return;
       var selectedAlt= altInfo[0];
       // Before going any further-- Check that the alter's user ID and the actual requester's user ID matches.
       if (!idCheck(req, selectedAlt.user_id)) return res.status(404).render(`pages/404`, { session: req.session, code:"Not Found", cookies:req.cookies });
@@ -110,38 +113,27 @@ router.post("/alter/edit-journal/:id", authUser, validateParam('id'), async (req
      
     });
     router.get("/archive-alter/:id", authUser, validateParam('id'), async (req, res, next)=>{
-        client.query({text: "SELECT alters.* FROM alters INNER JOIN systems ON systems.sys_id = alters.sys_id WHERE alters.alt_id=$1",values: [`${req.params.id}`]}, (err, result) => {
-          if (err) {
-            console.log(err.stack);
-            res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", cookies:req.cookies });
-          } else {
-            let chosenAlter = result.rows[0];
-            res.render(`pages/archive-alter`, { session: req.session, cookies:req.cookies, alterTypes:alterTypes,chosenAlter:chosenAlter });
-          }
-        });
+      const altInfo = await db.query(client, "SELECT alters.* FROM alters INNER JOIN systems ON systems.sys_id = alters.sys_id WHERE alters.alt_id=$1", [`${req.params.id}`], res, req, true);
+      if (!altInfo) return;
+      res.render(`pages/archive-alter`, { session: req.session, cookies:req.cookies, alterTypes:alterTypes,chosenAlter:altInfo[0] });
      });
     
       router.get("/edit-alter/:id", authUser, validateParam('id'), async function (req, res){
         let sysInfo= await getSystems(getCookies(req)['u_id'], res, req)
-        let altInfo= await db.query(client, "SELECT alters.*, systems.sys_alias, systems.user_id FROM alters INNER JOIN systems ON systems.sys_id = alters.sys_id WHERE alters.alt_id=$1", [`${req.params.id}`], res, req);
+        let altInfo= await db.query(client, "SELECT alters.*, systems.sys_alias, systems.user_id FROM alters INNER JOIN systems ON systems.sys_id = alters.sys_id WHERE alters.alt_id=$1", [`${req.params.id}`], res, req, true);
+        if (!altInfo) return;
         let chosenAlter= altInfo[0];
         if (!idCheck(req, chosenAlter.user_id)) return res.status(404).render(`pages/404`, { session: req.session, code:"Not Found", cookies:req.cookies });
         res.render(`pages/edit_alter`, { session: req.session, cookies:req.cookies, alterTypes:alterTypes,chosenAlter:chosenAlter, sysInfo: sysInfo });
      });
 
-     router.get("/mood/:id", authUser, validateParam('id'), (req, res)=>{
-        client.query({text: "SELECT alters.name, alters.alt_id, alters.sys_id, alter_moods.* FROM alters LEFT JOIN alter_moods ON alters.alt_id = alter_moods.alt_id WHERE alters.alt_id=$1",values: [`${req.params.id}`]}, (err, result) => {
-          if (err) {
-            console.log(err.stack);
-            res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", cookies:req.cookies });
-          } else {
-            let chosenAlter = result.rows[0];
-            if (chosenAlter.reason){
-            chosenAlter.reason = `${decryptWithAES(result.rows[0].reason)}`;
-            }
-            res.render(`pages/set_mood`, { session: req.session, cookies:req.cookies, alterTypes:alterTypes,chosenAlter:chosenAlter });
-          }
-        });
+     router.get("/mood/:id", authUser, validateParam('id'), async (req, res)=>{
+      const moodInfo = await db.query(client, "SELECT alters.name, alters.alt_id, alters.sys_id, alter_moods.* FROM alters LEFT JOIN alter_moods ON alters.alt_id = alter_moods.alt_id WHERE alters.alt_id=$1", [`${req.params.id}`], res, req, false);
+      let chosenAlter = moodInfo[0];
+      if (chosenAlter.reason){
+        chosenAlter.reason = `${decryptWithAES(moodInfo[0].reason)}`;
+      }
+      res.render(`pages/set_mood`, { session: req.session, cookies:req.cookies, alterTypes:alterTypes,chosenAlter:chosenAlter });
      });
 
      router.get("/del-mood/:id", authUser, validateParam('id'), async (req, res)=>{
@@ -174,19 +166,13 @@ router.post("/alter/edit-journal/:id", authUser, validateParam('id'), async (req
       });
     
       router.get('/journal/:id/delete', authUser, validateParam('id'), (req, res)=>{
-
-          client.query({text: "SELECT * FROM posts WHERE p_id=$1;",values: [`${req.params.id}`]}, (err, result) => {
-           if (err) {
-            console.log(err.stack);
-            res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", cookies:req.cookies });
-          } else {
-            req.session.jPost= result.rows[0];
-            req.session.jPost.body= decryptWithAES(req.session.jPost.body);
-            req.session.jPost.title= decryptWithAES(req.session.jPost.title);
-            res.render(`pages/delete_post`, { session: req.session, cookies:req.cookies });
-          }
-        });
-    
+        const journalInfo = await db.query(client, "SELECT posts.*, systems.user_id FROM posts INNER JOIN journals ON posts.j_id = journals.j_id INNER JOIN alters ON journals.alt_id = alters.alt_id INNER JOIN systems ON alters.sys_id = systems.sys_id WHERE posts.p_id=$1;", [`${req.params.id}`], res, req, true);
+        if (!journalInfo) return;
+        if (!idCheck(req, journalInfo[0].user_id)) return lostPage(res, req);
+        req.session.jPost= journalInfo[0];
+        req.session.jPost.body = req.session.jPost.body ? decryptWithAES(req.session.jPost.body) : "Post Body Unavailable";
+        req.session.jPost.title = req.session.jPost.title ? decryptWithAES(req.session.jPost.title) : "Untitled Post";
+        res.render(`pages/delete_post`, { session: req.session, cookies:req.cookies });
       });
     
       router.get('/journal/:id/edit',authUser, validateParam('id'), (req, res)=>{
@@ -203,26 +189,18 @@ router.post("/alter/edit-journal/:id", authUser, validateParam('id'), async (req
       });
       
       router.get('/alter/:id/delete', authUser, validateParam('id'), (req, res)=>{
+        let alterInfo = await db.query(client, "SELECT alters.*, systems.sys_id, systems.user_id FROM alters INNER JOIN systems on alters.sys_id=systems.sys_id WHERE alters.alt_id=$1", [`${req.params.id}`], res, req, true);
+        if (!alterInfo) return;
+        if (!idCheck(req, alterInfo[0].user_id)) return lostPage(res, req);
 
-          client.query({text: "SELECT alters.*, systems.sys_id, systems.user_id FROM alters INNER JOIN systems on alters.sys_id=systems.sys_id WHERE alters.alt_id=$1;",values: [`${req.params.id}`]}, (err, result) => {
-             if (err) {
-              console.log(err.stack);
-              res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", cookies:req.cookies });
-            } else {
-              let chosenAlter= result.rows[0];
-              if (!idCheck(req, chosenAlter.user_id)) return res.status(404).render(`pages/404`, { session: req.session, code:"Not Found", cookies:req.cookies });
-              // No alter?
-              if (!result.rows[0]) return res.status(400).render('pages/400',{ session: req.session, code:"Database Error", cookies:req.cookies });
-              res.render(`pages/delete_alter`, { session: req.session, cookies:req.cookies,chosenAlter: chosenAlter});
-            }
-            
-          });
+        res.render(`pages/delete_alter`, { session: req.session, cookies:req.cookies,chosenAlter: alterInfo[0]});
     
       });
 
       router.post('/alter/:id/delete', authUser, validateParam('id'), async function (req, res){
 
-          let chosenAlt= await db.query(client, "SELECT alters.*, systems.sys_id, systems.user_id FROM alters INNER JOIN systems on alters.sys_id=systems.sys_id WHERE alters.alt_id=$1", [req.params.id], res, req);
+          let chosenAlt= await db.query(client, "SELECT alters.*, systems.sys_id, systems.user_id FROM alters INNER JOIN systems on alters.sys_id=systems.sys_id WHERE alters.alt_id=$1", [req.params.id], res, req,true);
+          if (!chosenAlt) return;
           if (!idCheck(req, chosenAlt[0].user_id)) return res.status(404).send("Not found");
 
           // Can't remember if we set these keys as On Delete Cascade. So just in case, manually cascade.
