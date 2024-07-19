@@ -30,7 +30,7 @@ router.get("/alter/edit-journal/:id", authUser, validateParam('id'), async (req,
 router.post("/alter/edit-journal/:id", authUser, validateParam('id'), async (req, res)=>{
     // Is this their alter/their journal?
     let journCheck = await db.query(client, "SELECT systems.user_id FROM systems INNER JOIN journals ON journals.sys_id = systems.sys_id WHERE journals.alt_id = $1;", [`${req.params.id}`], res, req, true);
-    if (!jounCheck) return;
+    if (!journCheck) return;
     if (!idCheck(req, journCheck[0].user_id)) return lostPage(res, req);
 
     let isPixel = req.body.ispixel ? true : false;

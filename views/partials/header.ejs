@@ -94,6 +94,9 @@ options.timeZoneName = "short";
           .replace(/\[\[ALTER\]\]/g, "<%= cookies.alter_term || session.alter_term || "alter" %>")
           // Other terms
           .replace(/\[\[PLURAL\]\]/g, "<%= cookies.plural_term || session.plural_term || "plural" %>")
+          .replace(/\[\[PLURALCAP\]\]/g, "<%= capitalise(cookies.plural_term || session.plural_term || "plural") %>")
+          .replace(/\[\[PLURALS\]\]/g, "<%= pluralize(cookies.plural_term || session.plural_term || "plural") %>")
+          .replace(/\[\[PLURALSCAP\]\]/g, "<%= capitalise(pluralize(cookies.plural_term || session.plural_term || "plural")) %>")
         )
         $(this).prop('title', $(this).prop('title')
           // Systems
