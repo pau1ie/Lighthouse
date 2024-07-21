@@ -811,7 +811,7 @@ app.get('/wish-d/:id', (req, res) => {
 		if (!(sysList.includes(req.params.id))) return res.status(404).render(`pages/404`, { session: req.session, code:"Not Found", cookies:req.cookies });
 
 		const postInfo= await db.query(client, "SELECT * FROM comm_posts WHERE id=$1", [`${req.params.id}`], res, req);
-		res.render(`pages/edit_post`, { session: req.session, cookies:req.cookies, cJourn: {id: postInfo[0].id, body: decryptWithAES(postInfo[0].body), title: decryptWithAES(postInfo[0].title), is_comm: true, date: postInfo[0].created_on, sysid: postInfo[0].system_id} });
+		res.render(`pages/edit_post`, { session: req.session, cookies:req.cookies, cJourn: {id: postInfo[0].id, body: decryptWithAES(postInfo[0].body), title: decryptWithAES(postInfo[0].title), is_comm: true, date: postInfo[0].created_on, sysid: postInfo[0].system_id, feeling: postInfo[0].feeling ? decryptWithAES(postInfo[0].feeling) : ""} });
 	} else {
 		forbidUser(res,req);
 	}

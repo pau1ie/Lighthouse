@@ -16,7 +16,8 @@ isLoggedIn,
   idCheck,
   paginate,
   checkUUID,
-  base64encode, authUser, validateParam} = require("./funcs.js")
+  base64encode, authUser, validateParam,
+  decryptWithAES} = require("./funcs.js")
 
 
 // Refactoring
@@ -87,9 +88,10 @@ router.get('/', authUser, async function(req, res) {
 router.post("/communal-journal", authUser, async function(req, res){
   let sysChoice= req.query.sys;
   let isPinned = req.body.ispinned == 'on' ? true : false;
+  let postFeeling = req.body.feeling ? encryptWithAES(req.body.feeling) : "";
   if (!sysChoice){
     // Standard Communal Journal post.
-    await db.query(client, "INSERT INTO comm_posts (u_id, title, body, is_pinned) VALUES ($1, $2, $3, $4);", [getCookies(req)['u_id'], `${encryptWithAES(req.body.title)}`, `${encryptWithAES(req.body.body)}`, `${isPinned}`], res, req);
+    await db.query(client, "INSERT INTO comm_posts (u_id, title, body, is_pinned, feeling) VALUES ($1, $2, $3, $4, $5);", [getCookies(req)['u_id'], `${encryptWithAES(req.body.title)}`, `${encryptWithAES(req.body.body)}`, `${isPinned}`, `${postFeeling}`], res, req);
     res.status(304).redirect("/system/communal-journal");
   } else {
     // ID check.
@@ -98,7 +100,7 @@ router.post("/communal-journal", authUser, async function(req, res){
     if (!(sysList.includes(sysChoice))) return res.status(404).render(`pages/404`, { session: req.session, code:"Not Found",cookies:req.cookies }); 
 
     // Passed the check, so proceed to enter the data.
-    await db.query(client, "INSERT INTO comm_posts (u_id, title, body, is_pinned, system_id) VALUES ($1, $2, $3, $4, $5);", [getCookies(req)['u_id'], `${encryptWithAES(req.body.title)}`, `${encryptWithAES(req.body.body)}`, `${isPinned}`, `${req.body.sysid}`], res, req);
+    await db.query(client, "INSERT INTO comm_posts (u_id, title, body, is_pinned, system_id, feeling) VALUES ($1, $2, $3, $4, $5, $6);", [getCookies(req)['u_id'], `${encryptWithAES(req.body.title)}`, `${encryptWithAES(req.body.body)}`, `${isPinned}`, `${req.body.sysid}`, `${postFeeling}`], res, req);
     res.status(304).redirect(`/system/communal-journal?sys=${sysChoice}`);
   }
   
