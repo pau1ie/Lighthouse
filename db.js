@@ -7,7 +7,7 @@ const { Pool, Client,pg, Query } = require('pg');
   if (process.env['environment']== "dev"){
 	console.log("⚒ Starting Lighthouse in  𝙎 𝘼 𝙉 𝘿 𝘽 𝙊 𝙓  mode. You are using an offline database.");
 	var client = new Client({
-		user: "postgres",
+		user: "dannyliehr",
 		host: "localhost",
 		database: "Sandbox",
 		password: "",

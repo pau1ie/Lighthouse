@@ -111,7 +111,7 @@ Disallow: /profile
 Disallow: /users
 Disallow: /forum
 Allow: /
-Allow: /signup
+Disallow: /signup
 Allow: /login
 Allow: /about
 Allow: /glossary

@@ -15,6 +15,7 @@ var pjson = require('./package.json');
 var flash = require('express-flash');
 const fileUpload = require('express-fileupload');
 const methodOverride = require('method-override');
+const axios = require('axios');
 
 // Local files below
 const { isLoggedIn, getCookies, apiEyesOnly, encryptWithAES, decryptWithAES, forbidUser, 
@@ -152,6 +153,7 @@ app.locals.timeOptions={
 }
 app.locals.truncateAndStringify= truncateAndStringify;
 app.locals.renderNestedList = renderNestedList;
+app.locals.isDev = process.env.environment == "dev";
 
 // Middleware...?
 app.use(async function (req, res){
@@ -1712,10 +1714,28 @@ app.get('/wish-d/:id', (req, res) => {
 
 	app.post('/signup', async function(req, res) {
 		// Bookmarks: signup post, post signup
-		return;
 	
+		
+		const secretKey = process.env.environment == "dev" ? "1x0000000000000000000000000000000AA" : process.env.cloudflareKey;
+	
+    	const response = req.body['cf-turnstile-response'];
 		if (req.body.mjl2fbbz8s) return res.send("(:"); // It's a bot. Do not let them load anything.
 	
+		try {
+			const verificationResponse = await axios.post('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+				secret: secretKey,
+				response: response,
+			});
+			if (!verificationResponse.data.success) {
+				// The Turnstile verification was successful
+				req.flash("flash", "CAPTCHA	verification unsuccessful.");
+				return res.render(`pages/signup`, { session: req.session, cookies:req.cookies });
+			}
+		} catch (error) {
+			console.error('Error verifying Turnstile:', error);
+			res.status(500).send('An error occurred while verifying Turnstile.');
+		}
+		
 		let email= (req.body.email).toLowerCase();
 	
 		const userCheck = await db.query(client, "SELECT * FROM users WHERE email=$1 OR username=$2;", [`'${Buffer.from((email).toLowerCase()).toString('base64')}'`, `'${Buffer.from(req.body.username).toString('base64')}'`], res, req);
