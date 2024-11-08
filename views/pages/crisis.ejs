@@ -2,69 +2,56 @@
 <html lang="en" dir="ltr">
     <head>
         <%- include ("../partials/header.ejs") %>
-        <style>
-            details{
-                margin: 1em auto;
-            }
-
-            details ul{
-                margin-left:3em;
-            }
-            
-        </style>
     </head>
     <body>
         <%- include ("../partials/nav.ejs") %>
         <div id="wrapper">
-            <% if (locals.messages.flash) { %>
-                <div class="splash"><%- locals.messages.flash %></div>
-            <% } %>
+            <h1>Mental Health Resources</h1>
             <section>
-                
-                <img src="/img/svg/ptsd-support.svg" class="vtinyimg"  style="display:inline-block; margin:0 auto; float: left; margin-right:1em;"><h2>International Crisis Helplines</h2>
-               <p><a href="http://togetherweare-strong.tumblr.com/helpline" target="_blank">Global List of Helplines for a variety of countries can be found here.</a></p>
-                <ul>
-                    <li>Trevor Project</li>
-                    <ul><li>“START” to 678678</li></ul>
-                    <ul><li>Call 1-866-488-7386</li></ul>
-                    <li>Trans Lifeline</li>
-                    <ul><li>Call 1-877-565-8860</li></ul>
-                    <li>LGBT National Help Center</li>
-                    <ul><li>Youth Talkline (1-800-246-7743)—Available Monday-Friday
-from 4 PM to midnight and Saturdays from 12 PM to 5 PM</li></ul>
-                    <li>Fenway Health</li>
-                    <ul><li>Peer Listening Line (ages 25 and under) (1-800-399-
-PEER)—Available Monday-Saturday from 5:30 PM to 10 PM</li></ul>
-                    <ul><li>“HOME” to 741741 (Available to US and Ontario residents)</li></ul>
+                <p>Below are resources you can use if you are in crisis. <strong>These are based primarily in the United States.</strong></p>
+                <p><a href="http://togetherweare-strong.tumblr.com/helpline" target="_blank">Global List of Helplines for a variety of countries can be found here.</a></p>
+            </section>
+            <section>
+                <h2>Hotlines</h2>
+                <p>Hotlines are phone services designed for <strong>emergencies</strong>. Please be aware that if there is an immediate risk to the safety of yourself or others, these lines might contact emergency services for intervention.</p>
+                <ul aria-label="Emergency Hotlines">
+                    <li aria-label="3-digit Emergency Number">
+                        <strong>3 digit emergency number-</strong> Call or Text <strong>988</strong>, available 24 hours.
+                    </li>
+                    <li aria-label="SAMHSA National Helpline">
+                        <strong>(SAMHSA) National Helpline- </strong>800-662-4357
+                    </li>
+                    <li aria-label="Trevor Project">
+                        <strong>Trevor Project- </strong>Call (866) 488-7386, text START to 678-678
+                    </li>
                 </ul>
             </section>
-            <!-- <details>
-                <summary>United States</summary>
-                <ul>
-                    <li>Depression Hotline: 1-630-482-9696</li>
-                    <li>Suicide Hotline: 1-800-784-8433</li>
-                    <li>NAMI Hotline: 1-800-950-6264</li>
-                    <li>“HOME” to 741741 (Available to US and Ontario residents)</li>
-                    <li>Peer Listening Line: 1-800-399-PEER</li>
+            <section>
+                <h2>Warm Lines</h2>
+                <p>Warm lines are phone services that are not for active emergencies. Because they aren't for emergencies, these lines do not contact the police. If you are in immediate danger, please do not use these lines and use the hotlines above instead.</p>
+                <ul aria-label="Non-Emergency Warm Lines">
+                    <li aria-label="Blackline">
+                        <strong>Blackline- </strong>800-604-5841<br>Focuses on BI&POC.
+                    </li>
+                    <li aria-label="StrongHearts Native Helpline">
+                        <strong>StrongHearts Native Helpline- </strong>844-762-8483<br>Focuses on Native Americans, including Alaska Native Americans.
+                    </li>
+                    <li aria-label="Trans Lifeline">
+                        <strong>Trans Lifeline US- </strong>877-565-8860<br>
+                        <strong>Trans Lifeline Canada- </strong> 877-330-6366<br>Focuses on Trans people.
+                    </li>
+                    <li aria-label="Thrive Lifeline">
+                        <strong>Thrive Lifeline- </strong>313-662-8209<br>Trans-led and operated.
+                    </li>
+                    <li aria-label="LGBT National Help Center">
+                        <strong>LGBT National Help Center- </strong>888-843-4564
+                    </li>
+                    <li aria-label="Wildflower Alliance Peer Support Line">
+                        <strong>Wildflower Alliance Peer Support Line- </strong>888-407-4515
+                    </li>
                 </ul>
-            </details>
-            <details>
-                <summary>United Kingdom</summary>
-                <ul>
-                    <li>Samaritans: 116-123</li>
-                    <li>Anxiety UK: 0844 477 5774</li>
-                    <li>Depression Alliance: 0845 123 23 20</li>
-                </ul>
-            </details>
-            <details>
-                <summary>Canada</summary>
-                <ul>
-                    <li>Helpline (Greater Vancouver): 604-872-3311</li>
-                    <li>Helpline (Ottawa and Eastern Ontario): 1-866-996-0991</li>
-                    <li>Helpline (TTY): 1-866-872-0113</li>
-                </ul>
-            </details> -->
-        </div>
-        <%- include ("../partials/footer.ejs") %>
+            </section>
+    </div>
+    <%- include ("../partials/footer.ejs") %>
     </body>
 </html>
