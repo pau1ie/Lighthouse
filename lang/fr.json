@@ -1,5 +1,7 @@
 {
     "test": "Bonjour le monde",
+    "quickleave": "Quick Leave",
+    "qlDesc": "Si vous devez quitter Lighthouse rapidement, cliquez sur « Quick Leave ».",
     "alter": {
         "created": "Persona ajouté avec succès !",
         "updated": "Persona mis à jour avec succès !",

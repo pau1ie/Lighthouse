@@ -1,5 +1,7 @@
 {
     "test": "Hello World",
+    "quickleave": "Scoir Thapa",
+    "qlDesc": "Más gá duit an suíomh Gréasáin a fhágáil go tapa, cliceáil \"Scoir Thapa\".",
     "alter": {
         "created": "[[ALTERNAME]] added successfully!",
         "updated": "[[ALTERNAME]] updated successfully!",

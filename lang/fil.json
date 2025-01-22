@@ -1,5 +1,7 @@
 {
     "test": "Hello Mundo",
+    "quickleave": "Mabilis na Umalis",
+    "qlDesc": "Kung kailangan mong umalis nang mabilis sa website, i-click ang \"Mabilis na Umalis\".",
     "alter": {
         "created": "[[ALTERNAME]] matagumpay na naidagdag!",
         "updated": "[[ALTERNAME]] matagumpay na na-update!",

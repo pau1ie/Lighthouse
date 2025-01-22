@@ -1,5 +1,7 @@
 {
     "test": "Hola Mundo",
+    "quickleave": "Salida rápida",
+    "qlDesc": "Si necesita salir de Lighthouse rápidamente, haga clic en \"Salida rápida\".",
     "alter": {
         "created": "¡[[ALTERNAME]] añadida con éxito!",
         "updated": "¡[[ALTERNAME]] actualizada con éxito!",

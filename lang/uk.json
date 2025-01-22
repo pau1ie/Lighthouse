@@ -1,5 +1,7 @@
 {
     "test": "Hello World",
+    "quickleave": "Швидкий вихід",
+    "qlDesc": "Якщо вам потрібно швидко покинути Lighthouse, натисніть \"Швидкий вихід\".",
     "alter": {
         "created": "[[ALTERNAME]] added successfully!",
         "updated": "[[ALTERNAME]] updated successfully!",

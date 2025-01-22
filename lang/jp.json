@@ -1,5 +1,7 @@
 {
     "test": "こんにちは世界",
+    "quickleave": "クイック終了",
+    "qlDesc": "ウェブサイトをすぐに終了する必要がある場合は、「クイック終了」をクリックしてください。",
     "alter": {
         "created": "[[ALTERNAME]] added successfully!",
         "updated": "[[ALTERNAME]] updated successfully!",

@@ -1,5 +1,7 @@
 {
     "test": "Hello World",
+    "quickleave": "Abbandona rapidamente",
+    "qlDesc": "Se devi abbandonare rapidamente il sito web, clicca su \"Abbandona rapidamente\".",
     "alter": {
         "created": "[[ALTERNAME]] added successfully!",
         "updated": "[[ALTERNAME]] updated successfully!",

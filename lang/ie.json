@@ -1,5 +1,7 @@
 {
     "test": "Dia duit Domhanda",
+    "quickleave": "Scoir Thapa",
+    "qlDesc": "Más gá duit an suíomh Gréasáin a fhágáil go tapa, cliceáil \"Scoir Thapa\".",
     "alter": {
         "created": "[[ALTERNAME]] curtha leis!",
         "updated": "[[ALTERNAME]] nuashonraithe!",

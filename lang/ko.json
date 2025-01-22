@@ -1,5 +1,7 @@
 {
     "test": "안녕 세상",
+    "quickleave": "즉시 닫기",
+    "qlDesc": "웹사이트를 빨리 떠나야 하는 경우 \"즉시 닫기\"를 클릭하세요.",
     "alter": {
         "created": "[[ALTERNAME]] added successfully!",
         "updated": "[[ALTERNAME]] updated successfully!",

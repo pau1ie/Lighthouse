@@ -212,17 +212,38 @@ nav .m-menu__checkbox:checked ~ .m-menu {
       <li><label id="mode" onclick="toggleMode()" ><i name="mode" class="fa fa-sun-o mode" aria-hidden="true" style="color: var(--nav-txt)"></i><span class="mode" style="font-size: .65em; color: var(--nav-txt)"> <span id="modetxt" class="mode" style="color: var(--nav-txt)"></span> Mode</span></label></li>
 
       <li><label><a href="javascript:history.back()"><%= siteLanguage[session.language || "en"].back %></a></label></li>
+
       <% if (isLoggedIn(cookies)){ %>
         <li><label><a href="/logout"><%= siteLanguage[session.language || "en"].signOut %></a></label></li>
           <% } else { %>
             <li><label><a href="/signup"><%= siteLanguage[session.language || "en"].signUp %></a></label></li>
             <li><label><a href="/login"><%= siteLanguage[session.language || "en"].signIn %></a></label></li>
           <% } %>
-
+          <li><label><a id="quickLeaveButton"><i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i> <%= strings.quickleave %> <i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i></a></label></li>
     </ul>  
+    <div style="padding:calc(0.5em)"><label><small><em><%= strings.qlDesc %></em></small></label></div>
   </div>
 </nav>
 <script>
+   const googleTLDs = {
+            'en': 'com',
+            'en-US': 'com',
+            'en-GB': 'co.uk',
+            'fr': 'fr',
+            'de': 'de',
+            'es': 'es',
+            'it': 'it',
+            'pt': 'pt',
+            'ru': 'ru',
+            'ja': 'co.jp',
+            'zh': 'cn',
+        };
+
+        document.getElementById('quickLeaveButton').addEventListener('click', function() {
+            const userLocale = navigator.language || navigator.userLanguage;
+            const tld = googleTLDs[userLocale] || googleTLDs['en']; // Default to 'com' if locale not found
+            window.location.replace(`https://www.google.${tld}`);
+        });
   if (localStorage.lighthouse_mode){
       if (localStorage.lighthouse_mode == "dark") {
         $('[name="mode"]').removeClass(`fa-sun-o`).addClass(`fa-moon-o`);

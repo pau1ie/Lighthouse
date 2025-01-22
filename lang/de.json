@@ -1,5 +1,7 @@
 {
     "test": "Hallo Welt",
+    "quickleave": "Schnelles Verlassen",
+    "qlDesc": "Wenn Sie Lighthouse schnell verlassen müssen, klicken Sie auf \"Schnelles Verlassen\".",
     "alter": {
         "created": "[[ALTERCAP]] erfolgreich hinzugefügt!",
         "updated": "[[ALTERCAP]] erfolgreich aktualisiert!",
