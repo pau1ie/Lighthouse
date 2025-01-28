@@ -176,6 +176,10 @@ var journals=[
 	{val: '114', c: "Green Heart (🎨 The Sanctums)", group:2, ext:"png"},
 	{val: '115', c: "Orange Heart (🎨 The Sanctums)", group:2, ext:"png"},
 	{val: '116', c: "Smiley Journal (🎨 Nexus Operating System)", group:2, ext:"png"},
+	{val: '117', c: "Hot Topic (Red) (🎨 Renkindle)", group:2, ext:"png"},
+	{val: '118', c: "Hot Topic (White) (🎨 Renkindle)", group:2, ext:"png"},
+	{val: '119', c: "Hot Topic (Mint) (🎨 Renkindle)", group:2, ext:"png"},
+	{val: '120', c: "Hot Topic (Progress Pride) (🎨 Renkindle)", group:2, ext:"png"},
 ]
 
 var editorColours=[
