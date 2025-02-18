@@ -67,6 +67,7 @@
     </head>
     <body>
         <%- include ("../partials/nav.ejs") %>
+        <%- include ("../partials/date-formats.ejs") %>
         <div id="wrapper">
             <ul class="breadcrumb">
                 <% if (session.chosenSystem) {%>
@@ -173,7 +174,7 @@
                                     <a href="/comm/<%= post.id %>/delete"><i class="fa fa-trash fa-2x" aria-hidden="true"></i></a>
                                     <h4>Feeling: <%= post.feeling ? decrypt(post.feeling) : "" %></h4>
                                 </div>
-                                <p><small>Posted <%= (post.created_on).toLocaleDateString(undefined, dateOptions) %> <%= (post.created_on).toLocaleDateString(undefined, timeOptions) %></small></p>
+                                <p><small>Posted <span class="date" data-timestamp="<%- post.created_on %>">Date Loading...</span></small></p>
                                 <div>
                                     <%- decrypt(post.body) %>
                                 </div>
@@ -191,7 +192,7 @@
                                     <a href="/comm/<%= post.id %>/delete"><i class="fa fa-trash fa-2x" aria-hidden="true"></i></a>
                                     <h4>Feeling: <%= post.feeling ? decrypt(post.feeling) : "" %></h4>
                                 </div>
-                                <p><small>Posted <%= (post.created_on).toLocaleDateString(undefined, dateOptions) %> <%= (post.created_on).toLocaleDateString(undefined, timeOptions) %></small></p>
+                                <p><small>Posted <span class="date" data-timestamp="<%- post.created_on %>">Date Loading...</span></small></p>
                                 <div>
                                     <%- decrypt(post.body) %>
                                 </div>

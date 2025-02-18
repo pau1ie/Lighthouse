@@ -453,6 +453,45 @@ function truncateAndStringify(array, maxLength) {
     let systems= await db.query(client, "SELECT * FROM systems WHERE user_id=$1", [userID], res, req);
     return systems;
   }
+
+  function getHourFormat(locale) {
+    // Array of locales that typically use 12-hour format
+    const twelveHourLocales = [
+        'en-US', // United States
+        'en-PH', // Philippines
+        'en-AU', // Australia (informal)
+        'en-NZ', // New Zealand (informal)
+        'en-CA', // Canada (informal)
+        // Add more locales as needed
+    ];
+
+    // Check if the supplied locale is in the array
+    return twelveHourLocales.includes(locale);
+}
+
+
+function formatGMTToLocal(gmtTimestamp) {
+    const date = new Date(gmtTimestamp);
+    const userLocale = navigator.language || 'en-US';
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    // Determine if the locale uses 12-hour format
+    const is12HourFormat = getHourFormat(userLocale);
+    console.log(is12HourFormat);
+
+    const localDateTimeString = date.toLocaleString(userLocale, {
+        timeZone: userTimezone,
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: is12HourFormat // Use the determined hour format
+    });
+
+    return localDateTimeString;
+}
 module.exports = {
     isLoggedIn,
     getCookies,
@@ -486,5 +525,7 @@ module.exports = {
     getSystems,
     authUser,
     validateParam,
-    errorPage
+    errorPage,
+    getHourFormat,
+    formatGMTToLocal
 }

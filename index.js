@@ -45,6 +45,21 @@ const messagesRouter = require('./messages');
 
 const twoWeeks = 1000 * 60 * 60 * 24 * 7 * 2;
 
+function getHourFormat(locale) {
+    // Array of locales that typically use 12-hour format
+    const twelveHourLocales = [
+        'en-US', // United States
+        'en-PH', // Philippines
+        'en-AU', // Australia (informal)
+        'en-NZ', // New Zealand (informal)
+        'en-CA', // Canada (informal)
+        // Add more locales as needed
+    ];
+
+    // Check if the supplied locale is in the array
+    return twelveHourLocales.includes(locale);
+}
+
 // const { start } = require('repl');
 
 require('dotenv').config();
@@ -154,6 +169,27 @@ app.locals.timeOptions={
 app.locals.truncateAndStringify= truncateAndStringify;
 app.locals.renderNestedList = renderNestedList;
 app.locals.isDev = process.env.environment == "dev";
+app.locals.getHourFormat = getHourFormat;
+app.locals.formatGMTToLocal = function (gmtTimestamp, userLocale, userTimezone) {
+    const date = new Date(gmtTimestamp);
+
+    // Determine if the locale uses 12-hour format
+    const is12HourFormat = getHourFormat(userLocale);
+    console.log(is12HourFormat);
+
+    const localDateTimeString = date.toLocaleString(userLocale, {
+        timeZone: userTimezone,
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: is12HourFormat // Use the determined hour format
+    });
+
+    return localDateTimeString;
+};
 
 // Middleware...?
 app.use(async function (req, res){

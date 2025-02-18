@@ -26,6 +26,7 @@
                     var timePost= timeStamp[1]
                   %>
         <%- include ("../partials/nav.ejs") %>
+        <%- include ("../partials/date-formats.ejs") %>
                                       <!-- The Modal -->
                                       <div id="myModal" class="modal">
 
@@ -174,7 +175,8 @@
                     <img src="/img/avatar-default.jpg" class="smallimg">
                   </div>
                   <div class="post">
-                      <p> <small>Posted <%- timeStamp[0] %> at <%- timeStamp[1].split(":")[0] %>:<%- timeStamp[1].split(":")[1] %></small></p>
+                      <p> <small>Posted <span class="date" data-timestamp="<%- originalPost.created_on %>">Date Loading...</span></small></p>
+                      
                       <%- originalPost.body %>
                   </div>
               </section>
@@ -217,7 +219,7 @@
                 <% } %>
                 </div>
                 <div class="post">
-                    <p> <small>Posted <%- timeStamp[0] %> at <%- timeStamp[1].split(":")[0] %>:<%- timeStamp[1].split(":")[1] %></small></p>
+                    <p> <small>Posted <span class="date" data-timestamp="<%- originalPost.created_on %>">Date Loading...</span></small></p>
                     <%- originalPost.body %>
                 </div>
             </section>
@@ -270,7 +272,8 @@
                     
                     </div>
                     <div class="post">
-                        <p><small>Posted <%- (replyArr[r].created_on).toLocaleString().split(",")[0] %><% if (!is_archived){ %><a title="Edit reply" class="editCat" href="/reply/<%- replyArr[r].id %>"><i class="fa fa-pencil" aria-hidden="true"></i></a><% } %> <a title="Delete <%- replyAuthor %>'s Reply" onclick="deleteReply('<%- replyAuthor %>','<%- replyArr[r].id %>')"><i class="fa fa-trash textless" aria-hidden="true"></i></a></small></p>
+                        <!-- <p><small>Posted <%- (replyArr[r].created_on).toLocaleString().split(",")[0] %><% if (!is_archived){ %><a title="Edit reply" class="editCat" href="/reply/<%- replyArr[r].id %>"><i class="fa fa-pencil" aria-hidden="true"></i></a><% } %> <a title="Delete <%- replyAuthor %>'s Reply" onclick="deleteReply('<%- replyAuthor %>','<%- replyArr[r].id %>')"><i class="fa fa-trash textless" aria-hidden="true"></i></a></small></p> -->
+                        <small>Posted <span class="date" data-timestamp="<%- replyArr[r].created_on %>">Date Loading...</span></small>
                         <%- replyArr[r].body %>
                     </div>
                 </section>

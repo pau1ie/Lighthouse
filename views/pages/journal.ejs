@@ -58,6 +58,7 @@
     </div>
     <%- include ("../partials/quill.ejs") %>
     <%- include ("../partials/footer.ejs") %>
+    <%- include ("../partials/date-formats.ejs") %>
 </body>
 <script>
   const controller = new AbortController();
@@ -123,7 +124,7 @@ async function pinPosts(pID){
                           var bodyArr= (journalPosts.pinned[i].body).replace(/\r/gi, '').split("\n").filter(function() { return true; });
                           var postStr= new String();
                             postStr+= `<h2><i style="color:var(--col4)" class="fa fa-thumb-tack" aria-hidden="true" title="Pinned Post"></i> ${journalPosts.pinned[i].title}</h2><a title="Edit ${journalPosts.pinned[i].title}" href="/journal/${journalPosts.pinned[i].id}/edit"><i class="fa fa-pencil" aria-hidden="true"></i></a><form method="post" style="display: inline;"><button type="submit" name="${journalPosts.pinned[i].id}" value="Remove" class="textless" onclick="deleteWarn('${journalPosts.pinned[i].title}')"><span class="material-symbols-outlined textless"> delete</span></button></form> <h4>Feeling: ${journalPosts.pinned[i].feeling}</h4> <i style="color:var(--col4)" class="fa fa-thumb-tack" title="Unpin this post from the top of your journal" aria-hidden="true" onclick="pinPosts('${journalPosts.pinned[i].id}')"></i>
-                <p><sub>Posted ${(journalPosts.pinned[i].createdon).substr(0,10)}</sub></p>`;
+                <p><sub>Posted ${formatGMTToLocal(journalPosts.pinned[i].createdon)}</sub></p>`;
                           for (i in bodyArr){
                             postStr += `<p>${bodyArr[i]}</p>`;
                           }
@@ -136,7 +137,7 @@ async function pinPosts(pID){
                           var bodyArr= (journalPosts.nonpin[i].body).replace(/\r/gi, '').split("\n").filter(function() { return true; });
                           var postStr= new String();
                             postStr+= `<h2>${journalPosts.nonpin[i].title}</h2><a title="Edit ${journalPosts.nonpin[i].title}" href="/journal/${journalPosts.nonpin[i].id}/edit"><i class="fa fa-pencil" aria-hidden="true"></i></a><form method="post" style="display: inline;"><button type="submit" name="${journalPosts.nonpin[i].id}" value="Remove" class="textless" onclick="deleteWarn('${journalPosts.nonpin[i].title}')"><span class="material-symbols-outlined textless"> delete</span></button></form> <h4>Feeling: ${journalPosts.nonpin[i].feeling}</h4> <i style="color:var(--col4)" class="fa fa-thumb-tack" title="Pin this post to the top of your journal" aria-hidden="true" onclick="pinPosts('${journalPosts.nonpin[i].id}')"></i>
-                <p><sub>Posted ${(journalPosts.nonpin[i].createdon).substr(0,10)}</sub></p>`;
+                <p><sub>Posted ${formatGMTToLocal(journalPosts.nonpin[i].createdon)}</sub></p>`;
                           for (i in bodyArr){
                             postStr += `<p>${bodyArr[i]}</p>`;
                           }
