@@ -1192,3 +1192,19 @@ a[href^="https://"]::after
   background-size: contain;
   display: inline-block;
 }
+
+.size-small {
+  font-size: 1em;
+}
+.size-med {
+  font-size: 1.5em !important;
+}
+.size-lg {
+  font-size: 3em;
+}
+.size-xl {
+  font-size: 4em;
+}
+.editCat{
+  margin: auto 1em;
+}

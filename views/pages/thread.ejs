@@ -157,13 +157,13 @@
             <h2><% if (originalPost.is_sticky== true){ %>(Pinned) <% } %><% if (originalPost.is_locked== true){ %>(Locked) <% } %><%= originalPost.title %></h2>
               <span>Moderation Panel</span>
               <div class="modpanel">
-                <a title="Edit <%- originalPost.title %>" class="editCat"><i id="tbutton" class="fa fa-pencil" aria-hidden="true"></i></a> 
+                <a title="Edit <%- originalPost.title %>" class="editCat"><i id="tbutton" class="fa fa-pencil size-med" aria-hidden="true"></i></a> 
                 
-                <a title="Delete <%- originalPost.title %>"  class="" onclick="deleteTopic('<%- originalPost.title %>', '<%- originalPost.id %>')"><i class="fa fa-trash textless" aria-hidden="true"></i></a> 
+                <a title="Delete <%- originalPost.title %>"  class="" onclick="deleteTopic('<%- originalPost.title %>', '<%- originalPost.id %>')"><i class="fa fa-trash textless size-med" aria-hidden="true"></i></a> 
                 
-                <i style="color:var(--col4)" class="fa fa-thumb-tack" title="Pin this thread to the top of its forum" aria-hidden="true" onclick="modThread('sticky', '<%= originalPost.id %>')"></i> 
+                <i style="color:var(--col4)" class="fa fa-thumb-tack size-med" title="Pin this thread to the top of its forum" aria-hidden="true" onclick="modThread('sticky', '<%= originalPost.id %>')"></i> 
                 
-                <% if (originalPost.is_locked== true) { %><i title="Unlock thread and allow replies."  onclick="modThread('lock', '<%= originalPost.id %>')" class="fa fa-unlock" aria-hidden="true"></i><% } else { %><i title="Lock thread and prevent replies." onclick="modThread('lock', '<%= originalPost.id %>')" class="fa fa-lock" aria-hidden="true"></i><% } %>
+                <% if (originalPost.is_locked== true) { %><i title="Unlock thread and allow replies."  onclick="modThread('lock', '<%= originalPost.id %>')" class="fa fa-unlock size-med" aria-hidden="true"></i><% } else { %><i title="Lock thread and prevent replies." onclick="modThread('lock', '<%= originalPost.id %>')" class="fa fa-lock size-med" aria-hidden="true"></i><% } %>
               </div>
 
             <!-- OP Post -->
@@ -172,7 +172,7 @@
                 <section class="threadpost">
                   <div class="user">
                     <h3><a>Blurry <i class='far fa-newspaper' title="Original Author" aria-hidden="false"></i></a></h3>
-                    <img src="/img/avatar-default.jpg" class="smallimg">
+                    <img src="/img/avatar-default.jpg" class="medimg">
                   </div>
                   <div class="post">
                       <p> <small>Posted <span class="date" data-timestamp="<%- originalPost.created_on %>">Date Loading...</span></small></p>
@@ -204,11 +204,11 @@
                             ><%= alterArr[i].name %> <i class='far fa-newspaper' title="Original Author" aria-hidden="false"></i></a></h3>
 
                         <% if (alterArr[i].img_blob){ %> 
-                          <img src="data:<%= alterArr[i].blob_mimetype %>;base64,<%= Buffer.from(alterArr[i].img_blob).toString("base64") %>" class="smallimg">
+                          <img src="data:<%= alterArr[i].blob_mimetype %>;base64,<%= Buffer.from(alterArr[i].img_blob).toString("base64") %>" class="medimg">
                         <% } else if (alterArr[i].avatar){ %>
-                          <img src="<%= alterArr[i].avatar %>" class="smallimg">
+                          <img src="<%= alterArr[i].avatar %>" class="medimg">
                         <% } else { %> 
-                          <img src="/img/avatar-default.jpg" class="smallimg">
+                          <img src="/img/avatar-default.jpg" class="medimg">
                         <% } %>
                             <br>
                         <% if (alterArr[i].sys_alias){ %><small><%= capitalise(cookies.system_term) %>: <%= alterArr[i].sys_alias %><br></small><% } %>
@@ -232,7 +232,7 @@
                     <!-- Time to do some alter logic. -->
                     <% if (replyArr[r].alt_id== null){ %> 
                     <!-- Blurry -->
-                    <h3 style="padding-bottom:0;"><a>Blurry <% if (alterArr[i].id == originalPost.alt_id){ %> <i class='far fa-newspaper' title="Original Author" aria-hidden="false"></i> <% } %></a></h3><img src="/img/avatar-default.jpg" class="smallimg">
+                    <h3 style="padding-bottom:0;"><a>Blurry <% if (alterArr[i].id == originalPost.alt_id){ %> <i class='far fa-newspaper' title="Original Author" aria-hidden="false"></i> <% } %></a></h3><img src="/img/avatar-default.jpg" class="medimg">
 
                     <% } else { %>
                     <!-- Not Blurry -->
@@ -254,11 +254,11 @@
                             <% if (alterArr[i].is_archived == true) { %><span><small>Archived</small><br/></span><% } %>
 
                             <% if (alterArr[i].img_blob){ %> 
-                          <img src="data:<%= alterArr[i].blob_mimetype %>;base64,<%= Buffer.from(alterArr[i].img_blob).toString("base64") %>" class="smallimg">
+                          <img src="data:<%= alterArr[i].blob_mimetype %>;base64,<%= Buffer.from(alterArr[i].img_blob).toString("base64") %>" class="medimg">
                         <% } else if (alterArr[i].avatar){ %>
-                          <img src="<%= alterArr[i].avatar %>" class="smallimg">
+                          <img src="<%= alterArr[i].avatar %>" class="medimg">
                         <% } else { %> 
-                          <img src="/img/avatar-default.jpg" class="smallimg">
+                          <img src="/img/avatar-default.jpg" class="medimg">
                         <% } %>
                             <br>
                             <% if (alterArr[i].sys_alias){ %><small><%= capitalise(cookies.system_term) %>: <%= alterArr[i].sys_alias %><br></small><% } %>
@@ -272,8 +272,12 @@
                     
                     </div>
                     <div class="post">
-                        <!-- <p><small>Posted <%- (replyArr[r].created_on).toLocaleString().split(",")[0] %><% if (!is_archived){ %><a title="Edit reply" class="editCat" href="/reply/<%- replyArr[r].id %>"><i class="fa fa-pencil" aria-hidden="true"></i></a><% } %> <a title="Delete <%- replyAuthor %>'s Reply" onclick="deleteReply('<%- replyAuthor %>','<%- replyArr[r].id %>')"><i class="fa fa-trash textless" aria-hidden="true"></i></a></small></p> -->
-                        <small>Posted <span class="date" data-timestamp="<%- replyArr[r].created_on %>">Date Loading...</span></small>
+                        <!-- <p><small>Posted <%- (replyArr[r].created_on).toLocaleString().split(",")[0] %></p> -->
+                          <div>
+                            <small>Posted <span class="date" data-timestamp="<%- replyArr[r].created_on %>">Date Loading...</span></small> • 
+                            <% if (!is_archived){ %><a title="Edit reply" class="editCat" href="/reply/<%- replyArr[r].id %>"><i class="fa fa-pencil size-med" aria-hidden="true"></i></a><% } %> <a title="Delete <%- replyAuthor %>'s Reply" onclick="deleteReply('<%- replyAuthor %>','<%- replyArr[r].id %>')"><i class="fa fa-trash textless size-med" aria-hidden="true"></i></a></small>
+                          </div>
+                        
                         <%- replyArr[r].body %>
                     </div>
                 </section>
