@@ -1,111 +1,108 @@
 {
     "test": "Hallo Welt",
-    "quickleave": "Schnelles Verlassen",
-    "qlDesc": "Wenn Sie Lighthouse schnell verlassen müssen, klicken Sie auf \"Schnelles Verlassen\".",
+    "quickleave": "Schnell verlassen",
+"qlDesc": "Wenn Sie Lighthouse schnell verlassen müssen, klicken Sie auf \"Schnell verlassen\".",
     "alter": {
-        "created": "[[ALTERCAP]] erfolgreich hinzugefügt!",
-        "updated": "[[ALTERCAP]] erfolgreich aktualisiert!",
-        "deleted": "[[ALTERCAP]] erfolgreich entfernt.",
-        "archive": "Archive"
+      "created": "[[ALTERCAP]] erfolgreich hinzugefügt!",
+      "updated": "[[ALTERCAP]] erfolgreich aktualisiert!",
+      "deleted": "[[ALTERCAP]] erfolgreich entfernt.",
+      "archive": "[[ALTERCAP]] archiviert."
     },
-    "mood":{
-        "updated": "Aktualisierte Stimmung!",
-        "deleted": "Klare Stimmung!"
+    "mood": {
+      "updated": "Stimmung aktualisiert!",
+      "deleted": "Stimmung gelöscht!"
     },
     "system": {
-        "createButton": "Erstellen",
-        "addSystem": "[[SYSTEMCAP]] hinzufügen",
-        "created": "[[SYSTEMCAP]] wurde erstellt!",
-        "updated": "[[SYSTEMCAP]] wurde aktualisiert!",
-        "deleted": "[[SYSTEMCAP]] gelöscht.",
-        "links":{
-            "search": "[[ALTERCAP]]suche",
-            "rules": "[[SYSTEMCAP]]regeln",
-            "wishlist": "Wunschzettel",
-            "worksheets": "Arbeitsblätter",
-            "tutorial": "Leitfaden",
-            "combine": "[[ALTERSCAP]] kombinieren"
+      "createButton": "Erstellen",
+      "addSystem": "[[SYSTEMCAP]] hinzufügen",
+      "created": "[[SYSTEMCAP]] wurde erstellt!",
+      "updated": "[[SYSTEMCAP]] wurde aktualisiert!",
+      "deleted": "[[SYSTEMCAP]] gelöscht.",
+      "links": {
+        "search": "[[ALTERCAP]]suche",
+        "rules": "[[SYSTEMCAP]]regeln",
+        "wishlist": "Wunschzettel",
+        "worksheets": "Arbeitsblätter",
+        "tutorial": "Anleitung",
+        "combine": "[[ALTERSCAP]] kombinieren"
+      }
+    },
+    "account": {
+      "created": "Danke, dass ihr euch Lighthouse angeschlossen habt! Ihr seid jetzt eingeloggt.",
+      "updated": "Einstellungen aktualisiert!",
+      "deleted": "Bis später. Ihr könnt jederzeit ein neues Konto erstellen.",
+      "alreadyExists": "<strong>Oh nein!</strong> Dieser Benutzername oder diese E-Mail-Adresse wird bereits verwendet. <a href='/login'>Möchtet ihr euch stattdessen anmelden?</a>",
+      "incorrect": "Die E-Mail oder das Passwort ist falsch. <a href='/forgot-password'>Passwort zurücksetzen?</a>",
+      "loggedout": "Ihr seid jetzt ausgeloggt.",
+      "loggedin": "Hallo, [[USERNAME]]! Ihr seid jetzt eingeloggt.",
+      "sessionExpired": "Eure Sitzung ist abgelaufen. Bitte erneut anmelden.",
+      "skin": "Website-Skin erfolgreich geändert!",
+      "notVerified": "Euer Konto ist noch nicht verifiziert! Bitte überprüft eure Emails und verifiziert euer Konto. ",
+      "alreadyVerified": "Euer Konto ist bereits verifiziert."
+    },
+    "wish": {
+      "created": "Wunsch erstellt!",
+      "granted": "Wunsch erfüllt!",
+      "deleted": "Wunsch gelöscht."
+    },
+    "import": {
+      "PK": {
+        "success": "Import aus Pluralkit erfolgreich!",
+        "failure": {
+          "noCheck": "Es wurden keine [[ALTERS]] zum Importieren ausgewählt.",
+          "notExists": "Dieses [[SYSTEM]] scheint nicht zu existieren.",
+          "unavailable": "Pluralkit ist zur Zeit nicht erreichbar."
         }
+      },
+      "SP": {
+        "success": "Import aus Simply Plural erfolgreich!",
+        "failure": {
+          "noCheck": "Es wurden keine [[ALTERS]] zum Importieren ausgewählt.",
+          "notExists": "Dieses [[SYSTEM]] scheint nicht zu existieren.",
+          "unavailable": "Simply Plural ist zur Zeit nicht erreichbar."
+        }
+      }
     },
-    "account":{
-        "created": "Danke shein, dass Sie sich Lighthouse angeschlossen haben! Sie sind jetzt eingeloggt.",
-        "updated": "Einstellungen aktualisiert!",
-        "deleted": "Bis später. Sie können sich jederzeit erneut anmelden.",
-        "alreadyExists": "<strong>Oh nein!</strong> Dieser Benutzername oder diese E-Mail-Adresse wird bereits verwendet. <a href='/login'>Müssen Sie sich stattdessen anmelden?</a>",
-        "incorrect": "Deine E-Mail oder dein Passwort ist falsch. <a href='/forgot-password'>Müssen Sie Ihr Passwort zurücksetzen?</a>",
-        "loggedout": "Sie sind jetzt ausgeloggt.",
-        "loggedin": "Hallo, [[USERNAME]]! Sie sind jetzt eingeloggt.",
-        "sessionExpired": "Deine Sitzung ist abgelaufen. Bitte neu anmelden.",
-        "skin": "Website-Theme erfolgreich geändert!",
-        "notVerified": "Your account isn't verified yet! Please check your email and verify your account.",
-        "alreadyVerified": "Your account is already verified."
+    "posts": {
+      "moved": "Der Journaleintrag wurde erfolgreich verschoben.",
+      "deleted": "Journaleintrag gelöscht."
     },
-    "wish":{
-        "created": "Wunsch gemacht!",
-        "granted": "Wunsch erfüllt!",
-        "deleted": "Wunsch gelöscht."
+    "journals": {
+      "updateSkin": "Journal-Skin aktualisieren"
     },
-    "import":{
-        "PK":{
-          "success": "Import aus Pluralkit erfolgreich!",
-          "failure":{
-            "noCheck": "Es wurde kein [[ALTERS]] zum Importieren ausgewählt.",
-            "notExists": "That [[SYSTEM]] doesn't seem to exist.",
-            "unavailable": "Pluralkit is currently unreachable."
-          }
-        },
-        "SP":{
-            "success": "Import from Simply Plural successful!",
-            "failure":{
-                "noCheck": "No [[ALTERS]] were selected to import.",
-                "notExists": "That [[SYSTEM]] doesn't seem to exist.",
-                "unavailable": "Simply Plural is currently unreachable."
-              }
-          }
-        
+    "actions": {
+      "rename": "Bearbeiten",
+      "delete": "Löschen",
+      "startOver": "Neu anfangen",
+      "setIcon": "Symbol aktualisieren",
+      "editAlter": "[[ALTERNAME]] bearbeiten",
+      "update": "Aktualisieren",
+      "lock": "Sperren",
+      "unlock": "Freischalten",
+      "setMood": "Stimmung aktualisieren",
+      "clearMood": "Stimmung löschen"
     },
-    "posts":{
-        "moved": "Der Journaleintrag wurde erfolgreich verschoben.",
-        "deleted": "Deleted Journal entry."
-    },
-    "journals":{
-        "updateSkin": "Update Journal Skin"
-    },
-    "actions":{
-        "rename": "Bearbeiten",
-        "delete": "Löschen",
-        "startOver": "Von anfängen",
-        "setIcon": "Symbol aktualisieren",
-        "editAlter": "Bearbeiten [[ALTERNAME]]",
-        "update": "Aktualisieren",
-        "lock": "Sperren",
-        "unlock": "Freischalten",
-        "setMood": "Stimmung aktualisieren",
-        "clearMood": "Stimmung löschen"
-    },
-    "homepage":{
-        "slogan": "Gemeinsam schreiben",
-        "helping": "We're helping [[x]] [[SYSTEMS]]!",
-        "desc": "Lighthouse is a safe and supportive space for people with PTSD and DID to explore their thoughts and feelings, identify their different [[ALTERS]], and develop healthy and positive communication internally.",
-        "disclaimer": " Lighthouse was not developed by a medical professional, and is not intended to be a substitute for professional advice, diagnosis, or treatment. Always seek the advice of your mental health professional or other qualified health provider with any questions you may have regarding your condition.",
-        "imgCredits": "Image Credits Here",
-        "author": "Designed and programmed by The Lighthouse System.",
-        "supportKoFi": "Support Us On Ko-Fi!",
-        
-        "bullet1": "Create a Space for Your [[ALTERSCAP]]",
-        "bullet1Desc": "[[ALTERSCAP]] get a private journal for their own thoughts and feelings that can be safe-guarded with a password.",
-        "bullet2": "Keep Your [[SYSTEMCAP]] Informed",
-        "bullet2desc": "Users get both a Communal Journal and an Internal Forum that can be used by all [[ALTERS]] to keep everyone up-to-date.",
-        "bullet3": "Get to the Root of Feelings",
-        "bullet3desc": "Each [[ALTER]] can set a mood with a short reason as to why they feel that way.",
-        "bullet4": "Understand Your [[ALTERSCAP]] Better",
-        "bullet4desc": "[[ALTERSCAP]] can provide basic information on themselves, but can also address what makes them feel safe, what they would want from the [[SYSTEM]], and what they would like accommodations for. Users can also create nested [[SUBSYSTEMS]], or a second standalone [[SYSTEM]], for those with complex [[SYSTEMS]].",
-        "bullet5": "Import from Pluralkit & Simply Plural",
-        "bullet5desc": "If you already use the popular Discord bot <strong>Pluralkit</strong> or the app <strong>Simply Plural</strong>, you can import your [[SYSTEM]] into Lighthouse!",
-        "bullet6": "Interactive Worksheets",
-        "bullet6desc": "If you have a trauma-based [[SYSTEM]] or would like to use trauma worksheets, Lighthouse has a growing number of interactive pages to help process emotions, make a safety plan, or prepare for an event that you know will be stressful or triggering.",
-        "bullet6disclaimer": "*These worksheets are intended for educational and informational purposes only and should not be used as a substitute for professional mental health care.",
-
-        "supporters": "Thank You to Our Supporters"
+    "homepage": {
+      "slogan": "Gemeinsam schreiben",
+      "helping": "Wir helfen [[x]] [[SYSTEMS]]!",
+      "desc": "Lighthouse ist ein sicherer Raum, der Menschen mit PTBS und DIS dabei unterstützt, ihre Gedanken und Gefühle zu erforschen, ihre [[ALTERS]] kennenzulernen und gesunde, positive Innenkommunikation zu entwickeln.",
+      "disclaimer": " Lighthouse ist nicht von medizinischen Expert:innen entwickelt worden und ist nicht als Ersatz für professionelle Ratschläge, Diagnostik oder Behandlung gedacht. Wendet euch mit Fragen zu eurer Diagnose immer an euer psychologisches Hilfeteam oder andere qualifizierte Expert:innen.",
+      "imgCredits": "Bild-Urheber:innenangabe",
+      "author": "Entworfen und programmiert vom Lighthouse System.",
+      "supportKoFi": "Unterstützt uns auf Ko-Fi!",
+      "bullet1": "Schafft einen Raum für eure [[ALTERSCAP]]",
+      "bullet1Desc": "[[ALTERSCAP]] bekommen ein privates Journal für ihre eigenen Gedanken und Gefühle, das mit einem Passwort geschützt werden kann.",
+      "bullet2": "Haltet euer [[SYSTEMCAP]] auf dem Laufenden",
+      "bullet2desc": "Nutzer:innen bekommen sowohl ein gemeinsames Journal als auch ein internes Forum, die von allen [[ALTERS]] verwendet werden können, um Informationen mit allen zu teilen.",
+      "bullet3": "Versteht den Ursprung eurer Gefühle",
+      "bullet3desc": "Jede:r [[ALTER]] kann eine Stimmung inklusive einer kurzen Erklärung posten.",
+      "bullet4": "Versteht eure [[ALTERSCAP]] besser",
+      "bullet4desc": "[[ALTERSCAP]] können einen Steckbrief über sich selbst ausfüllen, und angeben, was ihnen hilft, sich sicher zu fühlen, was sie sich von ihrem [[SYSTEM]] wünschen, und welche Unterstützung sie benötigen.\nNutzer:innen mit komplexen Systemen können auch verschachtelte [[SUBSYSTEMS]] oder weitere [[SYSTEMS]] erstellen.",
+      "bullet5": "Von Pluralkit & Simply Plural importieren",
+      "bullet5desc": "Falls ihr bereits den beliebten Discord-Bot <strong>Pluralkit</strong> oder die App <strong>Simply Plural</strong> nutzt, könnt ihr euer [[SYSTEM]] in Lighthouse importieren!",
+      "bullet6": "Interaktive Arbeitsblätter",
+      "bullet6desc": "Falls ihr ein traumabasiertes [[SYSTEM]] habt oder mit Trauma-Arbeitsblättern arbeiten wollt, hat Lighthouse eine wachsende Anzahl an interaktiven Seiten, die dabei helfen, Gefühle zu verarbeiten, einen Notfallplan zu erstellen, oder sich auf eine Situation vorzubereiten, die belastend oder triggernd werden könnte. ",
+      "bullet6disclaimer": "*Diese Arbeitsblätter sind ausschließlich zu Bildungs- und Informationszwecken gedacht und sollten nicht als Ersatz für professionelle psychologische Gesundheitsversorgung verwendet werden.",
+      "supporters": "Danke an unsere Unterstützer:innen"
     }
-}
+  }

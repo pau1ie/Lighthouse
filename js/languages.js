@@ -1,7 +1,7 @@
 const siteLanguage={
     "en":{ // English
         "name": "Language: English",
-        "title": "Lighthouse",
+        "title": "Lighthouse", // Now unused; Keeps things simple
         "greeting": "Hi, [[USER]]!",
         "signUp": "Sign Up",
         "signOut": "Log Out",
@@ -24,7 +24,7 @@ const siteLanguage={
     },
     "es":{ // Spanish
         "name": "Idioma: español",
-        "title": "Faro",
+        "title": "Lighthouse", // Now unused; Keeps things simple
         "greeting": "Hola, [[USER]]!",
         "signUp": "Regístrate",
         "signOut": "Cerrar sesión",
@@ -47,7 +47,7 @@ const siteLanguage={
     },
     "fr":{ // French
         "name": "Langue : Français",
-        "title": "Phare",
+        "title": "Lighthouse", // Now unused; Keeps things simple
         "greeting": "Salut, [[USER]]!",
         "signUp": "Inscrivez-vous",
         "signOut": "Déconnectez-vous",
@@ -70,7 +70,7 @@ const siteLanguage={
     },
     "de":{ // German
         "name": "Sprache: Deutsch",
-        "title": "Leuchtturm",
+        "title": "Lighthouse",
         "greeting": "Hallo, [[USER]]!",
         "signUp": "Melden Sie sich an",
         "signOut": "Melden Sie sich ab",
@@ -93,7 +93,7 @@ const siteLanguage={
     },
     "ko":{ // Korean
         "name": "언어: 한국어",
-        "title": "등대",
+        "title": "Lighthouse", // Now unused; Keeps things simple
         "greeting": "안녕하세요, [[USER]]님!",
         "signUp": "가입",
         "signOut": "로그아웃",
@@ -116,7 +116,7 @@ const siteLanguage={
     },
     "pl":{ // Polish
         "name": "Język: polski",
-        "title": "Latarnia Morska",
+        "title": "Lighthouse", // Now unused; Keeps things simple
         "greeting": "Witaj, [[USER]]!",
         "signUp": "Zarejestruj się",
         "signOut": "Wyloguj się",
@@ -139,7 +139,7 @@ const siteLanguage={
     },
     "fil":{ // Filipino
         "name": "Wika: Filipino",
-        "title": "Parola",
+        "title": "Lighthouse", // Now unused; Keeps things simple
         "greeting": "Kumusta, [[USER]]!",
         "signUp": "Mag-sign Up",
         "signOut": "Mag-sign Out",
@@ -162,30 +162,30 @@ const siteLanguage={
     },
     "jp":{ // Japanese
         "name": "言語: 日本語",
-        "title": "灯台",
-        "greeting": "こんにちは、[[USER]]!",
+        "title": "Lighthouse", // シンプルに保つ
+        "greeting": "こんにちは, [[USER]]!",
         "signUp": "サインアップ",
-        "signOut": "サインアウトする",
-        "signIn": "サインイン",
-        "mySys": "[[SYSTEM]]",
+        "signOut": "ログアウト",
+        "signIn": "ログイン",
+        "mySys": "私の [[SYSTEM]]",
         "settings": "設定",
-        "myForum": "フォーラム",
+        "myForum": "私のフォーラム",
         "info": "情報",
-        "about": "私たちについて",
-        "tutorial": "ガイド",
+        "about": "について",
+        "tutorial": "チュートリアル",
         "glossary": "用語集",
         "changelog": "変更履歴",
-        "crisis": "危機介入",
-        "back": "ゴーバック",
+        "crisis": "危機ですか?",
+        "back": "戻る",
         "system": "システム",
         "tos": "利用規約",
         "pp": "プライバシーポリシー",
         "phil": "哲学",
-        "comm": "共有ジャーナル"
+        "comm": "コミュニティジャーナル"
     },
     "uk":{ // Ukranian
         "name": "Мова: українська",
-        "title": "Маяк",
+        "title": "Lighthouse", // Now unused; Keeps things simple
         "greeting": "Привіт, [[USER]]!",
         "signUp": "Зареєструватися",
         "signOut": "Вихід",
@@ -208,7 +208,7 @@ const siteLanguage={
     },
     "gd":{ // Gaelic, Scotland
         "name": "Cànan: Scots Gaelic",
-        "title": "Taigh-solais",
+        "title": "Lighthouse", // Now unused; Keeps things simple
         "greeting": "Halo, [[USER]]!",
         "signUp": "Clàradh",
         "signOut": "Clàraich a-mach",
@@ -231,7 +231,7 @@ const siteLanguage={
     },
     "ie":{ // Irish
         "name": "Teanga: Gaeilge",
-        "title": "Tigh Solais",
+        "title": "Lighthouse", // Now unused; Keeps things simple
         "greeting": "Dia dhaoibh, [[USER]]!",
         "signUp": "Cláraigh",
         "signOut": "Logáil Amach",
@@ -254,7 +254,7 @@ const siteLanguage={
     },
     "it":{ // Italian
         "name": "Lingua: italiano",
-        "title": "Faro",
+        "title": "Lighthouse", // Now unused; Keeps things simple
         "greeting": "Ciao, [[USER]]!",
         "signUp": "Iscriviti",
         "signOut": "Esci",
@@ -277,7 +277,7 @@ const siteLanguage={
     },
     "eo":{ // Esperanto
         "name": "Lingvo: Esperanto",
-        "title": "Lumturo",
+        "title": "Lighthouse", // Now unused; Keeps things simple
         "greeting": "Saluton, [[USER]]!",
         "signUp": "Aliĝu",
         "signOut": "Elsaluti",
@@ -298,32 +298,32 @@ const siteLanguage={
         "phil": "Filozofio",
         "comm": "Komunuma Taglibro"
     },
-    "ru":{ // Russian
-        "name": "Language: English",
-        "title": "Lighthouse",
-        "greeting": "Hi, [[USER]]!",
-        "signUp": "Sign Up",
-        "signOut": "Log Out",
-        "signIn": "Log In",
-        "mySys": "My [[SYSTEM]]",
-        "settings": "Settings",
-        "myForum": "My Forum",
-        "info": "Information",
-        "about": "About",
-        "tutorial": "Tutorial",
-        "glossary": "Glossary",
-        "changelog": "Changelog",
-        "crisis": "In Crisis?",
-        "back": "Go Back",
-        "system": "System",
-        "tos": "Terms of Service",
-        "pp": "Privacy Policy",
-        "phil": "Философия",
-        "comm": "Общий дневник"
-    },
+"ru": { // Russian
+    "name": "Язык: Русский",
+    "title": "Lighthouse", // Сохраняем простоту
+    "greeting": "Привет, [[USER]]!",
+    "signUp": "Зарегистрироваться",
+    "signOut": "Выйти",
+    "signIn": "Войти",
+    "mySys": "Моя [[SYSTEM]]",
+    "settings": "Настройки",
+    "myForum": "Мой Форум",
+    "info": "Информация",
+    "about": "О нас",
+    "tutorial": "Учебник",
+    "glossary": "Глоссарий",
+    "changelog": "История изменений",
+    "crisis": "В кризисе?",
+    "back": "Назад",
+    "system": "Система",
+    "tos": "Условия обслуживания",
+    "pp": "Политика конфиденциальности",
+    "phil": "Философия",
+    "comm": "Общественный журнал"
+},
     "ar":{ // Arabic
         "name": "اللغة: العربية",
-        "title": "منارة",
+        "title": "Lighthouse", // Now unused; Keeps things simple
         "greeting": "مرحباً!",
         "signUp": "إنشاء حساب",
         "signOut": "تسجيل خروج",
@@ -343,7 +343,31 @@ const siteLanguage={
         "pp": "سياسة الخصوصية",
         "phil": "فلسفة",
         "comm": "يوميات جماعية"
-    }
+    },
+    "zh": { // Chinese
+    "name": "语言: 中文",
+    "title": "Lighthouse", // 保持简单
+    "greeting": "你好, [[USER]]!",
+    "signUp": "注册",
+    "signOut": "登出",
+    "signIn": "登录",
+    "mySys": "我的 [[SYSTEM]]",
+    "settings": "设置",
+    "myForum": "我的论坛",
+    "info": "信息",
+    "about": "关于",
+    "tutorial": "教程",
+    "glossary": "术语表",
+    "changelog": "更新日志",
+    "crisis": "遇到危机吗?",
+    "back": "返回",
+    "system": "系统",
+    "tos": "服务条款",
+    "pp": "隐私政策",
+    "phil": "哲学",
+    "comm": "社区日志"
+}
+
 }
 
 
