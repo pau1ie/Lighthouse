@@ -224,6 +224,7 @@ var journals=[
 	{val: '161', c: "Paint Spill, Green (🎨 neoteric wilds)", group:2, ext:"png"},
 	{val: '162', c: "Icing and Sprinkles (🎨 neoteric wilds)", group:2, ext:"png"},
 	{val: '163', c: "In da Jungle (🎨 The Saturniid System)", group:2, ext:"png"},
+	{val: '164', c: "A Sunny Day (🎨 The Ethereal System)", group:2, ext:"png"},
 ]
 
 var editorColours=[
