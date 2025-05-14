@@ -128,7 +128,7 @@ async function pinPosts(pID){
                           for (i in bodyArr){
                             postStr += `<p>${bodyArr[i]}</p>`;
                           }
-          $("#posts").append(`<article>${postStr}</article>`);
+          $("#posts").append(`<article class="md-support">${postStr}</article>`);
                         }
                         
             }
@@ -141,14 +141,32 @@ async function pinPosts(pID){
                           for (i in bodyArr){
                             postStr += `<p>${bodyArr[i]}</p>`;
                           }
-          $("#posts").append(`<article>${postStr}</article>`);
+          $("#posts").append(`<article class="md-support">${postStr}</article>`);
                         }
                         
             }
 }
 $(document).ready(function(){
-  fetchPosts();
+  fetchPosts().then(()=>{
+    const markdownSupp = $(".md-support");
+  
+    // Iterate over each element with the class .md-support
+    markdownSupp.each(function() {
+      const b = $(this); // Current .md-support element
+
+      // Iterate over each child of the current .md-support element
+      b.children().each(function() {
+        const a = $(this); // Current child element
+        const existingText = a.text(); // Get existing text content
+        
+        // Parse the existing text and replace quotes
+        const parsedHtml = marked.parse(existingText).replace("“", "").replace("”", "");
+        a.html(parsedHtml); // Set the new HTML content
+      });
+    });
+  });
 });
+
 </script>
 
 </html>

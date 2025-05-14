@@ -193,7 +193,7 @@
                                     <h4>Feeling: <%= post.feeling ? decrypt(post.feeling) : "" %></h4>
                                 </div>
                                 <p><small>Posted <span class="date" data-timestamp="<%- post.created_on %>">Date Loading...</span></small></p>
-                                <div>
+                                <div class="md-support">
                                     <%- decrypt(post.body) %>
                                 </div>
                             </div>
@@ -219,7 +219,24 @@
           window.location= `/system/communal-journal?pg=${$("#page").val()}`
         })
         <% } %>
-        
+        $(document).ready(()=>{
+            const markdownSupp = $(".md-support");
+  
+            // Iterate over each element with the class .md-support
+            markdownSupp.each(function() {
+            const b = $(this); // Current .md-support element
+
+            // Iterate over each child of the current .md-support element
+            b.children().each(function() {
+                const a = $(this); // Current child element
+                const existingText = a.text(); // Get existing text content
+                
+                // Parse the existing text and replace quotes
+                const parsedHtml = marked.parse(existingText).replace("“", "").replace("”", "");
+                a.html(parsedHtml); // Set the new HTML content
+            });
+            });
+        })
     </script>
     </body>
 </html>

@@ -176,8 +176,10 @@
                   </div>
                   <div class="post">
                       <p> <small>Posted <span class="date" data-timestamp="<%- originalPost.created_on %>">Date Loading...</span></small></p>
+                      <div class="md-support">
+                        <%- originalPost.body %>
+                      </div>
                       
-                      <%- originalPost.body %>
                   </div>
               </section>
               <% } else { %>
@@ -220,7 +222,10 @@
                 </div>
                 <div class="post">
                     <p> <small>Posted <span class="date" data-timestamp="<%- originalPost.created_on %>">Date Loading...</span></small></p>
-                    <%- originalPost.body %>
+                    <div class="md-support">
+                      <%- originalPost.body %>
+                    </div>
+                    
                 </div>
             </section>
               <% } %>
@@ -277,8 +282,10 @@
                             <small>Posted <span class="date" data-timestamp="<%- replyArr[r].created_on %>">Date Loading...</span></small> • 
                             <% if (!is_archived){ %><a title="Edit reply" class="editCat" href="/reply/<%- replyArr[r].id %>"><i class="fa fa-pencil size-med" aria-hidden="true"></i></a><% } %> <a title="Delete <%- replyAuthor %>'s Reply" onclick="deleteReply('<%- replyAuthor %>','<%- replyArr[r].id %>')"><i class="fa fa-trash textless size-med" aria-hidden="true"></i></a></small>
                           </div>
+                        <div class="md-support">
+                          <%- replyArr[r].body %>
+                        </div>
                         
-                        <%- replyArr[r].body %>
                     </div>
                 </section>
             <% } %>
@@ -511,6 +518,24 @@ $("#hidden-text").text(editor)
           window.location= `/topic/<%= topic %>/${$("#page").val()}`
         })
         
+        $(document).ready(()=>{
+          const markdownSupp = $(".md-support");
+  
+          // Iterate over each element with the class .md-support
+          markdownSupp.each(function() {
+            const b = $(this); // Current .md-support element
+
+            // Iterate over each child of the current .md-support element
+            b.children().each(function() {
+              const a = $(this); // Current child element
+              const existingText = a.text(); // Get existing text content
+              
+              // Parse the existing text and replace quotes
+              const parsedHtml = marked.parse(existingText).replace("“", "").replace("”", "");
+              a.html(parsedHtml); // Set the new HTML content
+            });
+          });
+        })
     </script>
     <%- include ("../partials/footer.ejs") %>
     </body>

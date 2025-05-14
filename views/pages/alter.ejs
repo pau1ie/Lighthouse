@@ -402,7 +402,7 @@ td{
                     <% } else { %>
                         <a href="/journal/<%- (altJournal.alt_id) %>"><img src="<%= decrypt(altJournal.img_url) %>" width="400px" id="login" alt="<%= decode(alterInfo.name) %>'s Journal." <% if (altJournal.is_pixelart == true){ %>class="pixelart"<% } %>></a>
                     <% } %>
-                <% } else /* Ir's a preset */ { %> 
+                <% } else /* It's a preset */ { %> 
                     <% if (altJournal.is_private == true){ %>
                         <img class="pixelart" src="/img/<%- skin.val %>.<%- skin.ext %>" width="400px" id="login" onclick="blogPopup()" alt="<%= decode(alterInfo.name) %>'s Journal.">
                     <% } else { %>
