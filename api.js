@@ -220,99 +220,77 @@ router.get('/journals/:id', async function (req, res){
 
 });
 
-
-  // router.get("/user/auth", async function(req, res){
-  //   // Grab user info. This is for logging in.
-  //   let userCheck = await db.query(client, 
-  //     "SELECT * FROM users WHERE email=$1 AND pass=$2;", 
-  //     [
-  //       `'${Buffer.from((req.headers.email).toLowerCase()).toString('base64')}'`, 
-  //       `'${CryptoJS.SHA3(req.headers.tok)}'`,
-  //     ], res, req);
-  //   if (userCheck.length > 0){
-
-  //     req.session.alter_term= userCheck[0].alter_term;
-  //     req.session.system_term= userCheck[0].system_term;
-  //     req.session.subsystem_term= userCheck[0].subsystem_term;
-  //     req.session.innerworld_term= userCheck[0].innerworld_term;
-  //     req.session.plural_term= userCheck[0].plural_term;
-  //     req.session.loggedin = true;
-  //     req.session.u_id= userCheck[0].id;
-  //     req.session.username = Buffer.from(userCheck[0].username, 'base64').toString();
-  //     req.session.is_legacy= userCheck[0].is_legacy;
-  //     req.session.textsize= userCheck[0].textsize;
-  //     req.session.worksheets_enabled= userCheck[0].worksheets_enabled;
-
-  //     // Cookies.
-  //     res
-  //     .cookie('loggedin', true, { maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
-  //     .cookie('username',  Buffer.from(userCheck[0].username, 'base64').toString(),{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
-  //     .cookie('u_id', userCheck[0].id,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
-  //     .cookie('alter_term', userCheck[0].alter_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
-  //     .cookie('system_term', userCheck[0].system_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
-  //     .cookie('is_legacy', userCheck[0].is_legacy,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
-  //     .cookie('skin', userCheck[0].skin,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
-  //     .cookie('subsystem_term', userCheck[0].subsystem_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
-  //     .cookie('innerworld_term', userCheck[0].innerworld_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
-  //     .cookie('plural_term', userCheck[0].plural_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
-  //     .cookie('textsize', userCheck[0].textsize,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
-  //     .cookie('worksheets_enabled', userCheck[0].worksheets_enabled,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true });
-
-  //     // Retroactively salt passwords that aren't salted.
-  //     if (userCheck[0].salt == null){
-  //       let newsalt= crypto.randomBytes(32).toString('hex');
-  //       let newpass= CryptoJS.SHA3(req.headers.tok + newsalt);
-  //       await db.query(client, "UPDATE users SET pass=$1, salt=$2 WHERE id=$3;", [newpass, newsalt, userCheck[0].id], res, req);
-  //     }
-
-  //     return res.status(200).json({
-  //       name: Buffer.from(userCheck[0].username, 'base64').toString()
-  //     });
-  //   }  else {
-  //     return res.status(401).send("???");
-  //   }
-  // })
   router.get("/user/auth", async function(req, res){
     // Grab user info. This is for logging in.
     let userCheck = await db.query(client, 
       "SELECT * FROM users WHERE email=$1;", 
-      [`${Buffer.from((req.headers.email).toLowerCase()).toString('base64')}`], res, req);
+      [`'${Buffer.from((req.headers.email).toLowerCase()).toString('base64')}'`], res, req);
 
     if (userCheck.length > 0){
-      console.log(`User found. Verifying password...`);
       let storedHash = userCheck[0].pass;
       let storedSalt = userCheck[0].salt;
       let inputHash;
 
-      if (storedSalt) {
+      if (storedSalt !== null) {
+        console.log(`Salt found. Decrypting salt and hashing input password with salt...`);
+        // Decrypt the stored salt and use to compare.
         storedSalt = decryptWithAES(storedSalt, process.env.SALT_KEY);
         inputHash = CryptoJS.SHA3(req.headers.tok + storedSalt).toString();
       } else {
+        console.log(`No salt found. Using legacy hashing method...`);
         // Legacy: no salt, hash as before
         inputHash = CryptoJS.SHA3(req.headers.tok).toString();
       }
 
-      console.log(`Input Hash: ${inputHash}`);
-      console.log(`Stored Hash: ${storedHash}`);
-
-      if (inputHash === storedHash) {
-        // ...existing session and cookie code...
-
+      if (inputHash === storedHash.replace(/'/g, "")) {
         // Retroactively salt passwords that aren't salted.
         if (userCheck[0].salt == null){
-          let newsalt= encryptWithAES(crypto.randomBytes(32).toString('hex'), process.env.SALT_KEY);
-          let newpass= CryptoJS.SHA3(req.headers.tok + newsalt).toString();
+          let rawSalt = crypto.randomBytes(32).toString('hex');
+          let newsalt = encryptWithAES(rawSalt, process.env.SALT_KEY);
+          let newpass = CryptoJS.SHA3(req.headers.tok + rawSalt).toString();
           await db.query(client, "UPDATE users SET pass=$1, salt=$2 WHERE id=$3;", [newpass, newsalt, userCheck[0].id], res, req);
         }
 
+        // #region set req.session and cookies.
+        req.session.alter_term= userCheck[0].alter_term;
+        req.session.system_term= userCheck[0].system_term;
+        req.session.subsystem_term= userCheck[0].subsystem_term;
+        req.session.innerworld_term= userCheck[0].innerworld_term;
+        req.session.plural_term= userCheck[0].plural_term;
+        req.session.loggedin = true;
+        req.session.u_id= userCheck[0].id;
+        req.session.username = Buffer.from(userCheck[0].username, 'base64').toString();
+        req.session.is_legacy= userCheck[0].is_legacy;
+        req.session.textsize= userCheck[0].textsize;
+        req.session.worksheets_enabled= userCheck[0].worksheets_enabled;
+
+        // Cookies.
+        res
+        .cookie('loggedin', true, { maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+        .cookie('username',  Buffer.from(userCheck[0].username, 'base64').toString(),{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+        .cookie('u_id', userCheck[0].id,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+        .cookie('alter_term', userCheck[0].alter_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+        .cookie('system_term', userCheck[0].system_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+        .cookie('is_legacy', userCheck[0].is_legacy,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+        .cookie('skin', userCheck[0].skin,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+        .cookie('subsystem_term', userCheck[0].subsystem_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+        .cookie('innerworld_term', userCheck[0].innerworld_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+        .cookie('plural_term', userCheck[0].plural_term,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+        .cookie('textsize', userCheck[0].textsize,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true })
+        .cookie('worksheets_enabled', userCheck[0].worksheets_enabled,{ maxAge: 1000 * 60 * 60 * 24 * 7 * 2, httpOnly: true });
+        // #endregion
         return res.status(200).json({
           name: Buffer.from(userCheck[0].username, 'base64').toString()
         });
       } else {
-        return res.status(401).send("???");
+        console.log(`Password mismatch for user with email: ${req.headers.email}`);
+        // Not sending through response to prevent oracle attacks.
+        return res.status(401).send("Incorrect credentials.");
       }
     }  else {
-      return res.status(401).send("???");
+      console.log(`No user found with that email. Attempted email: ${req.headers.email}`);
+      // Not sending through response to prevent oracle attacks.
+      return res.status(401).send("Incorrect credentials.");
     }
 })
 

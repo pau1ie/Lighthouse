@@ -128,20 +128,5 @@ options.timeZoneName = "short";
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const tableElement = document.getElementById("alterInfo");
-    if (tableElement && tableElement.children.length > 0) {  // Check for existence and children
-
-        const tableRows = Array.from(tableElement.children[0].children);
-        tableRows.forEach((row)=>{
-            let rowCells = Array.from(row.children);
-            rowCells.forEach((cell)=>{
-                const existingText = cell.innerText; // Get existing text content
-                const parsedHtml = marked.parse(existingText).replace("“", "").replace("”", "");
-                cell.innerHTML = parsedHtml;  // Update with parsed HTML
-            });
-        });
-    }
-});
 console.log("Oh, hello there! We hope you're doing alright.\n\n- Lighthouse System");
 </script>

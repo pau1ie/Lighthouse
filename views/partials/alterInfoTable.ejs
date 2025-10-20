@@ -1,0 +1,100 @@
+<% 
+    const keyMap = {
+        // key: display name. value: what it's in the alterInfo object
+        "Name": "name",
+        "Gender": "gender",
+        "Sexuality": "sexuality",
+        "Age": "agetext",
+        "Birthday": "birthday",
+        "Hobbies": "hobbies",
+        "Positive Triggers": "triggers_pos",
+        "Negative Triggers": "triggers_neg",
+        [decode((alterInfo.nickname).replace(/'/g, "")) + " is out if..."] : "fronttells",
+        "First Noted": "first_noted",
+        "Likes": "likes",
+        "Dislikes": "dislikes",
+        "Role": "job",
+        "Type": "type",
+        "Source": "source",
+        "Accommodations": "accommodations",
+        "Wishes": "wants",
+        "Feels Safest When...": "safe_place",
+        "Relationships": "relationships",
+        "Additional Info": "notes",
+        "Appearance": "appearance",
+    };
+
+    function stripQuotes(str) {
+        return str.replace(/^'|'$/g, "");
+    }
+%>
+
+<div class="alter-info-cards">
+  <% Object.keys(keyMap).forEach(function(key) { %>
+    <% let val = alterInfo[keyMap[key]]; %>
+    <% if (!(val === undefined || val === null || val === "" || val === "''" || val === "null")) { %>
+      <% val = val.replace(/^'|'$/g, ""); %>
+      <% if (key !== "Type") { try { val = Buffer.from(val, 'base64').toString(); } catch(e) {} } %>
+      <div class="alter-info-card">
+        <div class="alter-info-key"><%= key %></div>
+        <div class="alter-info-value"><%- val %></div>
+      </div>
+    <% } %>
+  <% }); %>
+</div>
+
+<style>
+
+.alter-info-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1em;
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .alter-info-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .alter-info-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.alter-info-card {
+  border-radius: 4px;
+  padding: 1em;
+  min-width: 0;
+}
+
+.alter-info-key {
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+.alter-info-value {
+  margin: 0;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const tableElement = document.getElementById("alterTable");
+    if (tableElement && tableElement.children.length > 0) {
+        const tableRows = Array.from(tableElement.children[0].children);
+        tableRows.forEach((row) => {
+            if (row.children.length > 1) {
+                const valueCell = row.children[1];
+                let existingText = valueCell.innerHTML;
+                if (!existingText || existingText === "''" || existingText === "null") {
+                    valueCell.innerHTML = "<em>(empty)</em>";
+                } else {
+                    valueCell.innerHTML = marked.parse(existingText);
+                }
+            }
+        });
+    }
+});
+</script>
