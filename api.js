@@ -227,22 +227,20 @@ router.get('/journals/:id', async function (req, res){
       [`'${Buffer.from((req.headers.email).toLowerCase()).toString('base64')}'`], res, req);
 
     if (userCheck.length > 0){
-      let storedHash = userCheck[0].pass;
-      let storedSalt = userCheck[0].salt;
+      let storedHash = (userCheck[0].pass).replace(/'/g, "");
+      let storedSalt;
       let inputHash;
 
       if (storedSalt !== null) {
-        console.log(`Salt found. Decrypting salt and hashing input password with salt...`);
         // Decrypt the stored salt and use to compare.
-        storedSalt = decryptWithAES(storedSalt, process.env.SALT_KEY);
+        storedSalt = decryptWithAES(userCheck[0].salt, process.env.SALT_KEY);
         inputHash = CryptoJS.SHA3(req.headers.tok + storedSalt).toString();
       } else {
-        console.log(`No salt found. Using legacy hashing method...`);
         // Legacy: no salt, hash as before
         inputHash = CryptoJS.SHA3(req.headers.tok).toString();
       }
 
-      if (inputHash === storedHash.replace(/'/g, "")) {
+      if (inputHash === storedHash) {
         // Retroactively salt passwords that aren't salted.
         if (userCheck[0].salt == null){
           let rawSalt = crypto.randomBytes(32).toString('hex');
@@ -306,7 +304,6 @@ router.get('/journals/:id', async function (req, res){
 router.put("/tokens", async function (req, res){
   if (apiEyesOnly(req)){
     // Do not let the program take a template literal. Could become an SQL injection.
-    // return console.log(req.body)
     let request= req.body;
     let userToks= await db.query(client, "SELECT * FROM tokens WHERE u_id=$1", [getCookies(req)['u_id']], res, req);
     userToks.every(async function(token){

@@ -97,19 +97,27 @@ function apiEyesOnly(req) {
 }
 
 
-  function encryptWithAES(text){
-    const passphrase = process.env.cryptkey;
-    return CryptoJS.AES.encrypt(text, passphrase).toString();
-    }
+/**
+ * Encrypts a string using AES encryption. DO NOT USE FOR PASSWORDS.
+ * @param {String} text - The text to encrypt.
+ * @param {String} passphrase - The passphrase to use for encryption.
+ * @returns {String} The encrypted text.
+ */
+function encryptWithAES(text, passphrase = process.env.cryptkey){
+  return CryptoJS.AES.encrypt(text, passphrase).toString();
+}
 
-     
-    function decryptWithAES(ciphertext){
-    const passphrase = process.env.cryptkey;
-    const bytes = CryptoJS.AES.decrypt(ciphertext, passphrase);
-    const originalText = bytes.toString(CryptoJS.enc.Utf8);
-    return originalText;
-    }
-
+/**
+ * Decrypts a string using AES encryption. DO NOT USE FOR PASSWORDS.
+ * @param {String} ciphertext - The encrypted text to decrypt.
+ * @param {String} passphrase - The passphrase to use for decryption.
+ * @returns {String} The decrypted text.
+ */
+function decryptWithAES(ciphertext, passphrase = process.env.cryptkey){
+  const bytes = CryptoJS.AES.decrypt(ciphertext, passphrase);
+  const originalText = bytes.toString(CryptoJS.enc.Utf8);
+  return originalText;
+}
 /**
  * Renders a 403 error page.
  * @param {object} res ExpressJS API response.

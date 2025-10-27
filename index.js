@@ -1271,8 +1271,7 @@ app.get('/wish-d/:id', (req, res) => {
 					let rawSalt = crypto.randomBytes(32).toString('hex');
 					let newsalt = encryptWithAES(rawSalt, process.env.SALT_KEY);
 					let newpass = CryptoJS.SHA3(req.body.newPass1 + rawSalt).toString();
-					// await db.query(client, "UPDATE users SET pass=$1, salt=$2 WHERE id=$3;", [newpass, newsalt, userCheck[0].id], res, req);
-					client.query({text: 'UPDATE users SET pass=$1, salt=$3 WHERE id=$2', values: [newpass, getCookies(req)['u_id'], newsalt]}, async (err, result)=>{
+					client.query({text: 'UPDATE users SET pass=$1, salt=$2 WHERE id=$3', values: [newpass, newsalt, getCookies(req)['u_id']]}, async (err, result)=>{
 						if (err) {
 						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", cookies:req.cookies });
 						} else {
@@ -1373,35 +1372,22 @@ app.get('/wish-d/:id', (req, res) => {
 		});
 	});
 	
-	app.post('/reset/:id', (req, res)=>{
-		// if (!checkUUID(req.params.id)) return lostPage(res, req);
-		// Reset password
-		client.query({text: 'SELECT * FROM users WHERE email_link=$1', values: [`'${req.params.id}'`]}, (err, result)=>{
-		  if (err) {
-		    res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", cookies:req.cookies });
-		  } else {
-		     // Does the PIN match the one in the DB?
-				 if (result.rows[0].email_pin == req.body.pin){
-					let rawSalt = crypto.randomBytes(32).toString('hex');
-					let newsalt = encryptWithAES(rawSalt, process.env.SALT_KEY);
-					let newpass = CryptoJS.SHA3(req.body.newpass + rawSalt).toString();
-					// await db.query(client, "UPDATE users SET pass=$1, salt=$2 WHERE id=$3;", [newpass, newsalt, userCheck[0].id], res, req);
-					 client.query({text: 'UPDATE users SET pass=$1, salt=$3 WHERE email_link=$2', values: [newpass,`'${req.params.id}'`, newsalt]}, (err, result)=>{
-					   if (err) {
-							 console.log(err.stack);
-					     res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", cookies:req.cookies });
-					   } else {
-					      // Code here
-								req.flash("flash","Updated your password. You can now log in!");
-								res.redirect("/login");
-					   }
-					 });
+	app.post('/reset/:id', async (req, res)=>{
+		const userInfo = await db.query(client, "SELECT id, email_pin, email, username, email_link FROM users WHERE email_link=$1", [`'${req.params.id}'`], res, req);
+		if (userInfo.length==0) return lostPage(res, req);
 
-				 } else {
-					 res.render('pages/new_pass',{ session: req.session, code:"Forbidden",cookies:req.cookies });
-				 }
-		  }
-		});
+		if (userInfo[0].email_pin == req.body.pin){
+			// Pin matches! Let them reset their password.
+			let rawSalt = crypto.randomBytes(32).toString('hex');
+			let newsalt = encryptWithAES(rawSalt, process.env.SALT_KEY);
+			let newpass = CryptoJS.SHA3(req.body.newpass + rawSalt).toString();
+			await db.query(client, "UPDATE users SET pass=$1, salt=$2 WHERE id=$3;", [newpass, newsalt, userInfo[0].id], res, req);
+			res.redirect("/login");
+		} else {
+			console.log("Pin doesn't match!");
+			console.log(`User entered: ${req.body.pin} | Actual pin: ${userInfo[0].email_pin}`);
+			res.render('pages/new_pass',{ session: req.session, code:"Forbidden",cookies:req.cookies });
+		}
 	});
 
 	app.post('/forgot-password', (req, res)=>{
@@ -1791,20 +1777,22 @@ app.get('/wish-d/:id', (req, res) => {
 			return res.render(`pages/signup`, { session: req.session, cookies:req.cookies });
 		} 
 			// Write to the db
-			const salt = crypto.randomBytes(32).toString('hex');
+			let rawSalt = crypto.randomBytes(32).toString('hex');
+			let newsalt = encryptWithAES(rawSalt, process.env.SALT_KEY);
+			let newpass = CryptoJS.SHA3(req.body.password + rawSalt).toString();
 			await db.query(
 				client,
 				"INSERT INTO users (email, username, pass, email_link, worksheets_enabled, system_term, alter_term, email_pin, salt) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
 				[
 					`'${base64encode(email)}'`,
 					`'${base64encode(req.body.username)}'`,
-					`'${CryptoJS.SHA3(req.body.password + salt)}'`, // Hash password with salt
+					newpass, // Hash password with salt
 					`'${Math.random().toString(36).substr(2, 16)}'`,
 					req.body.ws || true,
 					req.body.system_term || "system",
 					req.body.alter_term || "alter",
 					getRandomInt(1111,9999),
-					`${salt}`
+					newsalt
 				],
 				res,
 				req
@@ -1851,133 +1839,6 @@ app.get('/wish-d/:id', (req, res) => {
 			
 			
 	  });
-
-  app.post('/', function(req, res) {
-	if (req.body.loggingin){
-		var query = {
-			text: "SELECT * FROM users WHERE email=$1 AND pass=$2;",
-			values: [`'${Buffer.from((req.body.email).toLowerCase()).toString('base64')}'`, `'${CryptoJS.SHA3(req.body.password)}'`]
-		  }
-		  client.query(query, (err, result) => {
-			  if (err) {
-				console.log(err.stack);
-				res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", cookies:req.cookies });
-			} else {
-				if (result.rows.length == 0){
-					req.flash("flash", strings.account.incorrect);
-					res.redirect("/");
-				} /* else if(result.rows[0].verified== false){
-					req.flash("flash", strings.account.notVerified);
-					res.redirect("/");
-				} */ else {
-					req.session.alter_term= result.rows[0].alter_term;
-					req.session.system_term= result.rows[0].system_term;
-					req.session.subsystem_term= result.rows[0].subsystem_term;
-					req.session.innerworld_term= result.rows[0].innerworld_term;
-					req.session.plural_term= result.rows[0].plural_term;
-					req.session.loggedin = true;
-					req.session.u_id= result.rows[0].id;
-					req.session.username = Buffer.from(result.rows[0].username, 'base64').toString();
-					req.session.is_legacy= result.rows[0].is_legacy;
-					req.session.textsize= result.rows[0].textsize;
-					req.session.worksheets_enabled= result.rows[0].worksheets_enabled;
-			  // getCookies(req)['u_id']= result.rows[0].id;
-					  // Add to cookies
-					  res.cookie('loggedin', true, { maxAge: twoWeeks, httpOnly: true })
-					  .cookie('username',  Buffer.from(result.rows[0].username, 'base64').toString(),{ maxAge: twoWeeks, httpOnly: true })
-					  .cookie('u_id', result.rows[0].id,{ maxAge: twoWeeks, httpOnly: true })
-					  .cookie('alter_term', result.rows[0].alter_term,{ maxAge: twoWeeks, httpOnly: true })
-					  .cookie('system_term', result.rows[0].system_term,{ maxAge: twoWeeks, httpOnly: true })
-					  .cookie('is_legacy', result.rows[0].is_legacy,{ maxAge: twoWeeks, httpOnly: true })
-					  .cookie('skin', result.rows[0].skin,{ maxAge: twoWeeks, httpOnly: true })
-					  .cookie('subsystem_term', result.rows[0].subsystem_term,{ maxAge: twoWeeks, httpOnly: true })
-					  .cookie('innerworld_term', result.rows[0].innerworld_term,{ maxAge: twoWeeks, httpOnly: true })
-					  .cookie('plural_term', result.rows[0].plural_term,{ maxAge: twoWeeks, httpOnly: true })
-					  .cookie('textsize', result.rows[0].textsize,{ maxAge: twoWeeks, httpOnly: true })
-					  .cookie('worksheets_enabled', result.rows[0].worksheets_enabled,{ maxAge: twoWeeks, httpOnly: true });
-			  		req.flash("flash", strings.account.loggedin);
-				 	res.redirect(302, '/');
-				}
-			}
-		});
-	} else if (req.body.signingup) {
-		
-      var query = {
-        text: "SELECT * FROM users WHERE email=$1 OR username=$2;",
-        values: [`'${Buffer.from(req.body.email).toString('base64')}'`, `'${Buffer.from(req.body.username).toString('base64')}'`]
-      }
-      client.query(query, (err, result) => {
-          if (err) {
-            console.log(err.stack);
-            res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", cookies:req.cookies });
-          } else {
-            // console.log(res.rows)
-            if (result.rows.length > 0){
-                console.log("Already exists.");
-                res.render(`pages/signup`, { session: req.session, cookies:req.cookies });
-            } else {
-                // Write to the db
-                console.log(`Writing...`)
-                var query = {
-                  text: "INSERT INTO users (email, username, pass, email_link) VALUES ($1, $2, $3, $4)",
-                  values: [`'${Buffer.from(req.body.email).toString('base64')}'`, `'${Buffer.from(req.body.username).toString('base64')}'`, `'${CryptoJS.SHA3(req.body.password)}'`, `'${Math.random().toString(36).substr(2, 16)}'`]
-                }
-                client.query(query, (err, result) => {
-                    if (err) {
-                      console.log(err.stack);
-                      res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", cookies:req.cookies });
-                  } else {
-					ejs.renderFile(__dirname + '/views/pages/email-welcome.ejs', { alias: req.body.username || randomise(["Buddy", "Friend", "Pal"]) }, (err, data) => {
-						if (err) {
-						  console.log(err);
-						} else {
-						  var mailOptions = {
-							from: '"Lighthouse" <dee_deyes@writelighthouse.com>',
-							to: req.body.email,
-							subject: `Welcome to Lighthouse, ${req.body.username}!`,
-							html: data
-						  };
-					
-						  transporter.sendMail(mailOptions, (error, info) => {
-							if (error) {
-							  return console.log(error);
-							}
-							// console.log('Message sent: %s', info.messageId);
-						  });
-						}
-					  });
-					/*
-					  req.session.alt_term= result.rows[0].alter_term;
-				req.session.sys_term= result.rows[0].system_term;
-			   req.session.loggedin = true;
-			   req.session.username = Buffer.from(result.rows[0].username, 'base64').toString();
-					*/
-					// res.redirect("/");
-                    //   res.render(`pages/registered`, { session: req.session, cookies:req.cookies });
-					client.query({text: "SELECT * FROM users WHERE email=$1;", values: [`'${Buffer.from(req.body.email).toString('base64')}'`]}, (err, result) => {
-						if (err) {
-						  console.log(err.stack);
-						  res.status(400).render('pages/400',{ session: req.session, code:"Bad Request", cookies:req.cookies });
-					  } else {
-						req.session.alter_term= result.rows[0].alter_term;
-						req.session.system_term= result.rows[0].system_term;
-						req.session.loggedin = true;
-						req.session.username = Buffer.from(result.rows[0].username, 'base64').toString();
-						
-					  }
-					});
-						res.redirect("/");
-                  }
-              });
-            }
-          }
-        });
-
-	}
-	
-});
-
-
 
  /*
 
