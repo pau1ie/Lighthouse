@@ -1383,6 +1383,7 @@ app.get('/wish-d/:id', (req, res) => {
 			let newpass = CryptoJS.SHA3(req.body.newpass + rawSalt).toString();
 			await db.query(client, "UPDATE users SET pass=$1, salt=$2 WHERE id=$3;", [newpass, newsalt, userInfo[0].id], res, req);
 			res.redirect("/login");
+			return;
 		} else {
 			console.log("Pin doesn't match!");
 			console.log(`User entered: ${req.body.pin} | Actual pin: ${userInfo[0].email_pin}`);

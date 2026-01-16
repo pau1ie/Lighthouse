@@ -66,10 +66,6 @@
                     <% if (((new Date().getMonth()+1)== 7) && (new Date().getDate()) == 15) { %>
                         <p class="alert alert-info">👥 Today is Plural Pride Day!</p>
                    <% } %>
-
-                   <% if (((new Date().getMonth()+1)== 12) && (new Date().getDate()) == 15) { %>
-                    <p class="alert alert-info">🎂 Today is Lighthouse's <%= new Date().getFullYear() - 2021 %><%= getOrdinal(new Date().getFullYear() - 2021) %> Anniversary! Thank you for supporting us this long!</p>
-               <% } %>
                
              </div>  
 
@@ -80,7 +76,6 @@
                 <!-- Login -->
                 <form method="post" style="float: left; height: auto;">
                     <h2>Log In</h2>
-                    <small>No Account? <a id="signup" href="/signup">Signing Up takes only a minute!</a></small><br/>
                     <label for="email">Email: </label>
                     <input type="email" placeholder="something@mail.com" name="email" id="email"></br>
                     <label for="password">Password: </label>
@@ -122,7 +117,7 @@
                
             </section>
             <article style="float:none;border:0;">
-            <p class="dyn"><%- strings.homepage.desc %><%  if (!cookies.loggedin){ %> <a href="/signup">Sign up today and start your journey.</a><% } %></p>
+            <p class="dyn"><%- strings.homepage.desc %></p>
                 <p><small>
                     <i class="fa fa-anchor" aria-hidden="true"></i><%- strings.homepage.disclaimer %></small></p>
                     <p><a href="/about#credits"><%- strings.homepage.imgCredits %></a></p>
@@ -130,7 +125,7 @@
             </article>
             
         <hr>
-        <section id="features">
+        <!-- <section id="features">
             <div>
                 <div><h2 class="dyn"><%- strings.homepage.bullet1 %></h2>
                     <p class="dyn"><%- strings.homepage.bullet1Desc %></p></div>
@@ -163,7 +158,7 @@
                     <p class="dyn"><small><%- strings.homepage.bullet6disclaimer %></small></p></div>
                 
             </div>
-        </section>
+        </section> -->
         <% if (donators.length > 0){ %>
             <hr>
             <section>

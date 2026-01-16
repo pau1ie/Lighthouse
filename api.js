@@ -6,6 +6,8 @@ const client= db.client;
 const crypto= require('crypto');
 const CryptoJS = require("crypto-js");
 var strings= require("./lang/en.json");
+const archiver = require('archiver');
+const { Readable } = require('stream');
 
 
 function checkUUID(str){
@@ -72,6 +74,7 @@ function encryptWithAES(text, passphrase = process.env.cryptkey){
  * @returns {String} The decrypted text.
  */
 function decryptWithAES(ciphertext, passphrase = process.env.cryptkey){
+  if (ciphertext == null || ciphertext == undefined || ciphertext === "") return "";
   const bytes = CryptoJS.AES.decrypt(ciphertext, passphrase);
   const originalText = bytes.toString(CryptoJS.enc.Utf8);
   return originalText;
@@ -231,12 +234,13 @@ router.get('/journals/:id', async function (req, res){
       let storedSalt;
       let inputHash;
 
-      if (userCheck[0].salt != null && userCheck[0].salt !== undefined) {
+      if (typeof userCheck[0].salt === 'string' && userCheck[0].salt.length > 0){ 
         // Decrypt the stored salt and use to compare.
         try {
           storedSalt = decryptWithAES(userCheck[0].salt, process.env.SALT_KEY);
           inputHash = CryptoJS.SHA3(req.headers.tok + storedSalt).toString();
         } catch (err) {
+          console.error("Error decrypting salt: ", err);
           return res.status(500).send("Internal server error.");
         }
       } else {
@@ -393,6 +397,227 @@ router.post("/user/create", async function(req, res){
     } else {
       res.status(404).render('pages/404',{ session: req.session, code:"Not Found", splash:splash,cookies:req.cookies });
     }
+});
+
+// Next route: Download data and send it to the user as a zip file.
+router.get("/user/export/:id", async function(req, res){
+  if (!checkUUID(req.params.id)) return res.status(400).send("Bad Request");
+  /* Things to export:
+    - User info (username, terms, settings)
+    - Systems
+    - Alters
+    - Journals
+    - Journal Posts
+    - Worksheets
+    - Threads
+    - Thread Posts
+    - Forum posts
+    - BDA plan
+    - Inner worlds
+    - Rules
+    - Wishlist
+    - Communal Journal Entries
+    Compile these into a zip and send to user?
+  */
+  if (apiEyesOnly(req)){
+    const userInfo = await db.query(client, "SELECT * FROM users WHERE id=$1;", [req.params.id], res, req);
+    const systems = await db.query(client, "SELECT * FROM systems WHERE user_id=$1;", [req.params.id], res, req);
+    const alters = await db.query(client, "SELECT * FROM alters WHERE sys_id IN (SELECT sys_id FROM systems WHERE user_id=$1);", [req.params.id], res, req);
+    const journals = await db.query(client, "SELECT * FROM journals WHERE sys_id IN (SELECT sys_id FROM systems WHERE user_id=$1);", [req.params.id], res, req);
+    const categories = await db.query(client, "SELECT * FROM categories WHERE u_id=$1;", [req.params.id], res, req);
+    const threads = await db.query(client, "SELECT * FROM threads WHERE u_id=$1;", [req.params.id], res, req);
+    const threadPosts = await db.query(client, "SELECT * FROM thread_posts WHERE thread_id IN (SELECT thread_id FROM threads WHERE u_id=$1);", [req.params.id], res, req);
+    const posts = await db.query(client, "SELECT * FROM posts WHERE j_id IN (SELECT j_id FROM journals WHERE sys_id IN (SELECT sys_id FROM systems WHERE user_id=$1));", [req.params.id], res, req);
+    const bdaPlan = await db.query(client, "SELECT * FROM bda_plans WHERE u_id=$1;", [req.params.id], res, req);
+    const innerWorlds = await db.query(client, "SELECT * FROM inner_worlds WHERE u_id=$1;", [req.params.id], res, req);
+    const rules = await db.query(client, "SELECT * FROM sys_rules WHERE u_id=$1;", [req.params.id], res, req);
+    const wishlist = await db.query(client, "SELECT * FROM wishlist WHERE user_id=$1;", [req.params.id], res, req);
+    const communalJournals = await db.query(client, "SELECT * FROM comm_posts WHERE u_id=$1;", [req.params.id], res, req);
+    // Now to de-encode base64 fields.
+    let exportData = {
+      userInfo: {
+        id: userInfo[0].id,
+        username: Buffer.from(userInfo[0].username, "base64").toString(),
+        alter_term: userInfo[0].alter_term,
+        system_term: userInfo[0].system_term,
+        subsystem_term: userInfo[0].subsystem_term,
+        innerworld_term: userInfo[0].innerworld_term,
+        plural_term: userInfo[0].plural_term,
+        textsize: userInfo[0].textsize,
+        worksheets_enabled: userInfo[0].worksheets_enabled
+      },
+      systems: systems.map(system=>({
+        sys_id: system.sys_id,
+        user_id: system.user_id,
+        desc: decryptWithAES(system.desc),
+        sys_alias: Buffer.from(system.sys_alias, "base64").toString(),
+        icon: system.icon,
+        subsys_id: system.subsys_id
+      })),
+      alters: alters.map(alter=>({
+        alt_id: alter.alt_id,
+        sys_id: alter.sys_id,
+        name: alter.name != null ? Buffer.from(alter.name, "base64").toString() : "",
+        pronouns: alter.pronouns != null ? Buffer.from(alter.pronouns, "base64").toString() : "",
+        agetext: alter.agetext != null ? Buffer.from(alter.agetext, "base64").toString() : "",
+        triggers_pos: alter.triggers_pos != null ? Buffer.from(alter.triggers_pos, "base64").toString() : "",
+        triggers_neg: alter.triggers_neg != null ? Buffer.from(alter.triggers_neg, "base64").toString() : "",
+        likes: alter.likes != null ? Buffer.from(alter.likes, "base64").toString() : "",
+        dislikes: alter.dislikes != null ? Buffer.from(alter.dislikes, "base64").toString() : "",
+        job: alter.job != null ? Buffer.from(alter.job, "base64").toString() : "",
+        safe_place: alter.safe_place != null ? Buffer.from(alter.safe_place, "base64").toString() : "",
+        wants: alter.wants != null ? Buffer.from(alter.wants, "base64").toString() : "",
+        acc: alter.acc != null ? Buffer.from(alter.acc, "base64").toString() : "",
+        notes: alter.notes != null ? Buffer.from(alter.notes, "base64").toString() : "",
+        img_url: alter.img_url != null ? Buffer.from(alter.img_url, "base64").toString() : "",
+        type: alter.type,
+        birthday: alter.birthday != null ? Buffer.from(alter.birthday, "base64").toString() : "",
+        first_noted: alter.first_noted != null ? Buffer.from(alter.first_noted, "base64").toString() : "",
+        gender: alter.gender != null ? Buffer.from(alter.gender, "base64").toString() : "",
+        sexuality: alter.sexuality != null ? Buffer.from(alter.sexuality, "base64").toString() : "",
+        source: alter.source != null ? Buffer.from(alter.source, "base64").toString() : "",
+        fronttells: alter.fronttells != null ? Buffer.from(alter.fronttells, "base64").toString() : "",
+        relationships: alter.relationships != null ? Buffer.from(alter.relationships, "base64").toString() : "",
+        hobbies: alter.hobbies != null ? Buffer.from(alter.hobbies, "base64").toString() : "",
+        appearance: alter.appearance != null ? Buffer.from(alter.appearance, "base64").toString() : "",
+        colour: alter.colour,
+        outline: alter.outline,
+        is_archived: alter.is_archived
+      })),
+      journals: journals.map(journal=>({
+        j_id: journal.j_id,
+        sys_id: journal.sys_id,
+        alt_id: journal.alt_id,
+        is_private: journal.is_private,
+        is_pinned: journal.is_pinned,
+        skin: journal.skin,
+        created_on: journal.created_on,
+        title: decryptWithAES(journal.title),
+        body: decryptWithAES(journal.body)
+      })),
+      posts: posts.map(post=>({
+        post_id: post.post_id,
+        j_id: post.j_id,
+        created_on: post.created_on,
+        title: decryptWithAES(post.title),
+        body: decryptWithAES(post.body)
+      })),
+      bdaPlan: bdaPlan.map(plan=>({
+        id: plan.id,
+        u_id: plan.u_id,
+        before: decryptWithAES(plan.before),
+        during: decryptWithAES(plan.during),
+        after: decryptWithAES(plan.after),
+        is_active: plan.is_active,
+        alias: decryptWithAES(plan.alias),
+        timestamp: plan.timestamp
+      })),
+      innerWorlds: innerWorlds.map(iw=>({
+        id: iw.id,
+        u_id: iw.u_id,
+        key: Buffer.from(iw.key, "base64").toString(),
+        value: Buffer.from(iw.value, "base64").toString()
+      })),
+      rules: rules.map(rule=>({
+        id: rule.id,
+        u_id: rule.u_id,
+        rule: Buffer.from(rule.rule, "base64").toString(),
+        created: rule.created
+      })),
+      wishlist: wishlist.map(item=>({
+        id: item.uuid,
+        user_id: item.user_id,
+        wish: item.wish ? Buffer.from(item.wish, "base64").toString() : "",
+        is_fulfilled: item.is_filled
+      })),
+      communalJournals: communalJournals.map(cj=>({
+        id: cj.id,
+        u_id: cj.u_id,
+        created_on: cj.created_on,
+        title: decryptWithAES(cj.title),
+        body: decryptWithAES(cj.body),
+        is_pinned: cj.is_pinned,
+        system_id: cj.system_id,
+        feeling: decryptWithAES(cj.feeling)
+      })),
+      categories: categories.map(cat=>({
+        id: cat.id,
+        u_id: cat.u_id,
+        name: decryptWithAES(cat.name),
+        description: decryptWithAES(cat.description),
+        icon: cat.icon,
+        last_post_id: cat.last_post_id,
+        last_post_date: cat.last_post_date,
+        created_on: cat.created_on,
+        f_order: cat.f_order
+      })),
+      threads: threads.map(thread=>({
+        id: thread.id,
+        u_id: thread.u_id,
+        alt_id: thread.alt_id,
+        topic_id: thread.topic_id,
+        title: decryptWithAES(thread.title),
+        body: decryptWithAES(thread.body),
+        created_on: thread.created_on,
+        is_sticky: thread.is_sticky,
+        is_locked: thread.is_locked,
+        is_popular: thread.is_popular
+      })),
+      threadPosts: threadPosts.map(tpost=>({
+        id: tpost.id,
+        thread_id: tpost.thread_id,
+        alt_id: tpost.alt_id,
+        created_on: tpost.created_on,
+        title: decryptWithAES(tpost.title),
+        body: decryptWithAES(tpost.body)
+      }))
+    };
+    // Make into a bunch of CSVs for each section. Zip and send.
+    // Helper to convert array of objects to CSV string
+    function arrayToCSV(arr) {
+      if (!arr || arr.length === 0) return '';
+      const keys = Object.keys(arr[0]);
+      const escape = v => `"${String(v).replace(/"/g, '""')}"`;
+      const header = keys.join(',');
+      const rows = arr.map(obj => keys.map(k => escape(obj[k] ?? '')).join(','));
+      return [header, ...rows].join('\n');
+    }
+
+    // Prepare CSVs
+    const csvFiles = {
+      userInfo: arrayToCSV([exportData.userInfo]),
+      systems: arrayToCSV(exportData.systems),
+      alters: arrayToCSV(exportData.alters),
+      journals: arrayToCSV(exportData.journals),
+      posts: arrayToCSV(exportData.posts),
+      bdaPlan: arrayToCSV(exportData.bdaPlan),
+      innerWorlds: arrayToCSV(exportData.innerWorlds),
+      rules: arrayToCSV(exportData.rules),
+      wishlist: arrayToCSV(exportData.wishlist),
+      communalJournals: arrayToCSV(exportData.communalJournals),
+      categories: arrayToCSV(exportData.categories),
+      threads: arrayToCSV(exportData.threads),
+      threadPosts: arrayToCSV(exportData.threadPosts)
+    };
+
+    // Set response headers for zip download
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', 'attachment; filename="export.zip"');
+
+    // Create archive and pipe to response
+    const archive = archiver('zip', { zlib: { level: 9 } });
+    archive.pipe(res);
+
+    // Append each CSV as a file
+    for (const [name, csv] of Object.entries(csvFiles)) {
+      archive.append(Readable.from([csv]), { name: `${name}.csv` });
+    }
+
+    archive.finalize();
+
+  } else {
+    return res.status(404).render('pages/404',{ session: req.session, code:"Not Found", splash:splash,cookies:req.cookies });
+  }
 });
 
 console.log(`Public API Router Loaded.`);

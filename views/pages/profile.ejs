@@ -157,6 +157,12 @@
 			</section>
 
 			<section>
+				<h3>Download Your Data</h3>
+				<p>You can download all of your data from Lighthouse in CSV format. This includes all data associated with your account.</p>
+				<p><button id="download-data" data-userid="<%= cookies.u_id %>">Download Data</button></p>
+			</section>
+
+			<section>
 				<h2><span class="material-symbols-outlined">dangerous</span> Danger Zone <span class="material-symbols-outlined">dangerous</span></h2>
 				<h3>Developer Section</h3>
 				<a href="/profile/tokens">API Tokens</a>
@@ -372,6 +378,34 @@
 			}
 		});
 		
-	</script>
+		$("#download-data").click(function(){
+			// console.log("Downloading data for user ID: ", $(this).data("userid"));
+			$(this).prop("disabled", true).text("Preparing download...");
+			fetch(`/api/user/export/${$(this).data("userid")}`, {
+				headers: {
+					"api-lh-call": "api-lh-call"
+				}
+			}).then(response => {
+				if (!response.ok) {
+					throw new Error('Network response was not ok ' + response.statusText);
+				}
+				return response.blob();
+			})
+			.then(blob => {
+				const url = window.URL.createObjectURL(new Blob([blob]));
+				const link = document.createElement('a');
+				link.href = url;
+				link.setAttribute('download', 'Lighthouse-<%= cookies.u_id %>_export.zip');
+				document.body.appendChild(link);
+				link.click();
+				link.parentNode.removeChild(link);
+				window.URL.revokeObjectURL(url);
+				$("#download-data").prop("disabled", false).text("Download Data");
+			})
+			.catch(error => {
+				console.error('There was a problem with the fetch operation:', error);
+			});
+		})
+		</script>
     </body>
 </html>

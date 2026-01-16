@@ -315,6 +315,7 @@ router.post("/alter/edit-journal/:id", authUser, validateParam('id'), async (req
                 let chosenAlter= altInfo[0];
                 if (!idCheck(req, chosenAlter.user_id)) return res.status(404).render(`pages/404`, { session: req.session, code:"Not Found", cookies:req.cookies });
                 res.render(`pages/edit_alter`, { session: req.session, cookies:req.cookies, alterTypes:alterTypes,chosenAlter:chosenAlter, sysInfo: sysInfo });
+                return;
             } else {
               await db.query(client, "UPDATE alters SET img_blob=$2, blob_mimetype=$3 WHERE alt_id=$1", [ `${req.params.id}`, req.body.clear ? null : req.files.imgupload.data, req.body.clear ? null : req.files.imgupload.mimetype,], res, req); 
               await db.query(client, "UPDATE alters SET img_url=null WHERE alt_id=$1", [ `${req.params.id}`], res, req); 
@@ -417,7 +418,7 @@ router.post("/alter/edit-journal/:id", authUser, validateParam('id'), async (req
           
           
           
-          
+
           req.flash("flash","Page updated!");
           res.redirect(`/alter/${req.params.id}`);
     
