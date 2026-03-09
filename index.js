@@ -69,15 +69,18 @@ const PORT = process.env.PORT;
 
 // #endregion ------------------------------------------------------------------
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
-  auth: {
-    user: 'dee_deyes@writelighthouse.com',
-    pass: process.env.gmail_pass,
-  },
-});
+const hasMailConfig = Boolean(process.env.gmail_pass);
+const transporter = hasMailConfig
+  ? nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: 'dee_deyes@writelighthouse.com',
+        pass: process.env.gmail_pass,
+      },
+    })
+  : null; // Not letting just anyone send emails through this account. Sorry!
 
 
 console.log( `${"-".repeat(10)}\n
@@ -212,7 +215,10 @@ app.use(async function (req, res){
 					req.session.innerworld_term= truncate(results.innerworld_term || getCookies(req)['innerworld_term'] || "inner world",16);
 					req.session.plural_term= truncate(results.plural_term || getCookies(req)['plural_term'] || "plural",16);
 					req.session.language= results.language || "en";
-					req.session.is_dev=([process.env.dev1, process.env.dev2,process.env.dev3].includes(results.id));
+					req.session.is_dev = Boolean(
+						results?.id &&
+						[process.env.dev1, process.env.dev2, process.env.dev3].includes(results.id)
+					); // <-- So if ID is not defined, they can't access dev features. Hoo boy that's a scary hole.
 					req.session.textsize= results.textsize;
 					req.session.worksheets_enabled= results.worksheets_enabled;
 					req.session.font= results.font;
@@ -385,11 +391,15 @@ app.get('/combine/:item', (req, res) => {
 				html: `<p>A user has attempted to enter the mod panel!</p><p>User: ID: ${getCookies(req)['u_id'] || "Guest/Logged Out User"}</p><p>Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}</p><p>IP Address: ${req.socket.remoteAddress}</p>`
 			  };
 		
-			  transporter.sendMail(mailOptions, (error, info) => {
-				if (error) {
-				  return console.log(error);
-				}
-			  });
+			if (transporter) {
+				transporter.sendMail(mailOptions, (error)=> {
+					if (error) {
+						return console.log(error);
+					}
+				});
+			} else {
+				console.log("Email skipped: gmail_pass is not configured.");
+			}
 			console.log(`An attempt to enter the mod panel was made.\n Attempt made by: ${getCookies(req)['u_id'] || "Guest/Logged Out User"} | Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}. IP Address: ${req.socket.remoteAddress}`);
 			res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", cookies:req.cookies });
 			}
@@ -400,12 +410,16 @@ app.get('/combine/:item', (req, res) => {
 			subject: `Unauthorised attempt to access mod panel.`,
 			html: `<p>A user has attempted to enter the mod panel!</p><p>User: ID: ${getCookies(req)['u_id'] || "Guest/Logged Out User"}</p><p>Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}</p><p>IP Address: ${req.socket.remoteAddress}</p>`
 		  };
-	
-		  transporter.sendMail(mailOptions, (error) => {
-			if (error) {
-			  return console.log(error);
+
+		if (transporter) {
+				transporter.sendMail(mailOptions, (error)=> {
+					if (error) {
+						return console.log(error);
+					}
+				});
+			} else {
+				console.log("Email skipped: gmail_pass is not configured.");
 			}
-		  });
 		console.log(`An attempt to enter the mod panel was made.\n Attempt made by: ${getCookies(req)['u_id'] || "Guest/Logged Out User"} | Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}. IP Address: ${req.socket.remoteAddress}`);
 		res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", cookies:req.cookies });
 	}
@@ -1050,11 +1064,15 @@ app.get('/wish-d/:id', (req, res) => {
 					html: `<p>A user has attempted to POST to the mod panel!</p><p>User: ID: ${getCookies(req)['u_id'] || "Guest/Logged Out User"}</p><p>Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}</p><p>IP Address: ${req.socket.remoteAddress}</p>`
 				  };
 			
-				  transporter.sendMail(mailOptions, (error, info) => {
-					if (error) {
-					  return console.log(error);
-					}
-				  });
+				if (transporter) {
+					transporter.sendMail(mailOptions, (error)=> {
+						if (error) {
+							return console.log(error);
+						}
+					});
+				} else {
+					console.log("Email skipped: gmail_pass is not configured.");
+				}
 				console.log(`An attempt to POST to the mod panel was made.\n Attempt made by: ${getCookies(req)['u_id'] || "Guest/Logged Out User"} | Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"} | IP Address: ${req.socket.remoteAddress}`);
 		res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", cookies:req.cookies});
 			}
@@ -1067,11 +1085,15 @@ app.get('/wish-d/:id', (req, res) => {
 				html: `<p>A user has attempted to POST to the mod panel!</p><p>User: ID: ${getCookies(req)['u_id'] || "Guest/Logged Out User"}</p><p>Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}</p><p>IP Address: ${req.socket.remoteAddress}</p>`
 			  };
 		
-			  transporter.sendMail(mailOptions, (error, info) => {
-				if (error) {
-				  return console.log(error);
-				}
-			  });
+			  if (transporter) {
+				transporter.sendMail(mailOptions, (error)=> {
+					if (error) {
+						return console.log(error);
+					}
+				});
+			} else {
+				console.log("Email skipped: gmail_pass is not configured.");
+			}
 			console.log(`An attempt to POST to the mod panel was made.\n Attempt made by: ${getCookies(req)['u_id'] || "Guest/Logged Out User"} | Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"} | IP Address: ${req.socket.remoteAddress}`);
 	res.status(403).render('pages/403',{ session: req.session, code:"Forbidden", cookies:req.cookies});
 		}
@@ -1134,12 +1156,15 @@ app.get('/wish-d/:id', (req, res) => {
 							html: data
 						  };
 					
-						  transporter.sendMail(mailOptions, (error, info) => {
-							if (error) {
-							  return console.log(error);
+						  if (transporter) {
+								transporter.sendMail(mailOptions, (error)=> {
+									if (error) {
+										return console.log(error);
+									}
+								});
+							} else {
+								console.log("Email skipped: gmail_pass is not configured.");
 							}
-							// console.log('Message sent: %s', info.messageId);
-						  });
 						}
 					  });
 					   client.query({text: "DELETE FROM inner_worlds WHERE u_id=$1;",values: [getCookies(req)['u_id']]}, (err, result) => {
@@ -1419,12 +1444,15 @@ app.get('/wish-d/:id', (req, res) => {
 								html: data
 							  };
 						
-							  transporter.sendMail(mailOptions, (error, info) => {
-								if (error) {
-								  return console.log(error);
+							  if (transporter) {
+									transporter.sendMail(mailOptions, (error)=> {
+										if (error) {
+											return console.log(error);
+										}
+									});
+								} else {
+									console.log("Email skipped: gmail_pass is not configured.");
 								}
-								// console.log('Message sent: %s', info.messageId);
-							  });
 							}
 						  });
 					});
@@ -1809,11 +1837,15 @@ app.get('/wish-d/:id', (req, res) => {
 					console.log(err);
 				} else {
 					var mailOptions = { from: '"Lighthouse" <dee_deyes@writelighthouse.com>', to: req.body.email, subject: `Welcome to Lighthouse, ${req.body.username}!`, html: data };
-					transporter.sendMail(mailOptions, (error, info) => {
-					if (error) {
-						return console.log(error);
+					if (transporter) {
+						transporter.sendMail(mailOptions, (error)=> {
+							if (error) {
+								return console.log(error);
+							}
+						});
+					} else {
+						console.log("Email skipped: gmail_pass is not configured.");
 					}
-					});
 				}
 				});
 			

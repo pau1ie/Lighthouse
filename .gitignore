@@ -4,3 +4,5 @@ snippets.txt
 old-nav-2.ejs
 /node_modules
 .DS_Store
+**/.DS_Store
+*.log
