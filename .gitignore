@@ -6,3 +6,4 @@ old-nav-2.ejs
 .DS_Store
 **/.DS_Store
 *.log
+.notes
