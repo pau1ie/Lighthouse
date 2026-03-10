@@ -2,6 +2,8 @@
 
 Lighthouse is a plural tool for folks to track their alters, systems, and get access to resources. Built with ExpressJS, using EJS for templating and PostgreSQL for the database. With the recent shutdown of Simply Plural, Lighthouse's code is now being made public for the community to use and keep options alive for plural folks.
 
+Developers of any skill level are welcome to join.
+
 ## A quick "Constitution" for Lighthouse
 1. Personally Identifiable Information (PII) needs to be a bare minimum. Our userbase, while not exclusively, is made up of people who are vulnerable, in actively abusive situations, or are otherwise at risk. We want to minimize the amount of information that could be used to identify or locate our users. If your feature needs a name, an address, a demographic or a form of payment information, it will be rejected immediately.
 2. Inclusivity needs to be a foundation in everything Lighthouse has. Not every plural system is the same. Some have no memories of trauma. Some have lots. Some have none at all. If someone has decided that Lighthouse will help them, we as the community are not in a position to deny that. 
@@ -21,7 +23,7 @@ Setting up Lighthouse is fairly straightforward.
     - `DB_PORT`: The port for your PostgreSQL database.
     - `DB_NAME`: The name of your PostgreSQL database.
     - `dev1`, `dev2`, `dev3`: The IDs of users who should have access to development features (optional).
-    - `environment`: Set this to `dev`. Since you won't have access to the live database, it will crash if you try to run it in production mode.
+    - `environment`: Set this to `prod` for now. We will update this when the `dev` environment no longer points to a hard-coded localhost address for the database.
     - `maintenance`: Set this to false. Not entirely necessary, because you probably won't need to put the site in maintenance mode on the dev environment, but it's here since you might see it in the code and wonder what it does.
     - `sec`: Secret for session management. This should also be a long, random string.
     - `PORT`: The port you want the server to run on.
