@@ -6,7 +6,7 @@ const client= db.client;
 const crypto= require('crypto');
 const CryptoJS = require("crypto-js");
 var strings= require("./lang/en.json");
-const {errorPage} = require("./funcs.js");
+const {errorPage, isLoggedIn} = require("./funcs.js");
 
   router.get('/philosophy', (req, res, next) => { res.render(`pages/phil`, { session: req.session, cookies:req.cookies })});
   
@@ -71,25 +71,25 @@ router.get("/lighthouse-system", (req, res)=>{
  * GET /combine/item
  * Moved here until the combine function is expanded.
  */
-app.get('/combine/:item', (req, res) => {
+router.get('/combine/:item', (req, res) => {
   if (isLoggedIn(req)) {
     res.render(`pages/combine-alters`, { session: req.session, cookies: req.cookies });
   } else { res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies }); }
 });
 
-app.get('/simply-plural', (req, res) => {
+router.get('/simply-plural', (req, res) => {
 	if (isLoggedIn(req)) {
 		res.render(`pages/sp-import`, { session: req.session, cookies: req.cookies });
 	} else { forbidUser(res, req) }
 });
 
-app.get("/pluralkit", (req, res) => {
+router.get("/pluralkit", (req, res) => {
 	if (isLoggedIn(req)) {
 		res.render(`pages/pluralkit`, { session: req.session, cookies: req.cookies, lang: req.acceptsLanguages()[0] });
 	}
 });
 
-app.get('/reset/:id', (req, res) => {
+router.get('/reset/:id', (req, res) => {
 	res.render("pages/new_pass", { session: req.session, cookies: req.cookies });
 });
 
