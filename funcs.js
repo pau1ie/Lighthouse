@@ -115,8 +115,12 @@ function encryptWithAES(text, passphrase = process.env.cryptkey){
  */
 function decryptWithAES(ciphertext, passphrase = process.env.cryptkey){
   const bytes = CryptoJS.AES.decrypt(ciphertext, passphrase);
-  const originalText = bytes.toString(CryptoJS.enc.Utf8);
-  return originalText;
+  try {
+    const originalText = bytes.toString(CryptoJS.enc.Utf8);
+    return originalText;
+  } catch(e){
+    return ciphertext; // <-- Might not be encrypted.
+  }
 }
 /**
  * Renders a 403 error page.

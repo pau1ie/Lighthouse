@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <%- include ("../partials/header-error.ejs") %>
+    </head>
+    <body>
+        <script>0</script>
+        <%- include ("../partials/nav.ejs") %>
+        <div id="wrapper">
+            <% if (locals.messages.flash) { %>
+                <div class="splash"><%- locals.messages.flash %></div>
+            <% } %>
+            <img src="/img/svg/broken_anchor.svg" style="height:calc(24em); float: left;">
+            <h2>Error 500- Internal Server Error</h2>
+            <p>We ran into an error of some sort. You can try your request again, or if this isn't the first time you've seen this screen, <a href="https://www.tumblr.com/lighthouse-app" target="_blank">Please send us an ask on Tumblr.</a> Please try to include as much detail as possible, and what you did to make this error occur.</p>
+        </div>
+        <%- include ("../partials/footer.ejs") %>
+    </body>
+</html>
