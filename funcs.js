@@ -30,11 +30,13 @@ var strings= require("./lang/en.json");
  * @returns 
  */
 function authUser (req, res, next){
-  if (req.cookies.u_id){
+  const userId = req.cookies?.u_id;
+
+  if (userId && userId.trim().length > 0) {
     return next();
-  } else {
-    return forbidUser(res, req);
   }
+
+  return forbidUser(res, req);
 }
 
 /**
@@ -56,11 +58,8 @@ const validateParam = (paramName) => (req, res, next) => {
  * @returns {boolean} true or false
  */
 function isLoggedIn(req){
-    if (!req.cookies.u_id){
-      return false;
-    } else {
-      return true;
-    }
+    const uId = req.cookies?.u_id?.trim();
+    return !!uId;
   }
 
 /**
@@ -69,8 +68,9 @@ function isLoggedIn(req){
  * @returns {object} Collected of cookies associated by request. Retrieve with object['key'].
  */
 const getCookies = (req) => {
+
   // We extract the raw cookies from the request headers
-  if (!req.headers.cookie) return 'undefined';
+  if (!req.headers.cookie) return {}; // <-- This should have been {} and not 'undefined', since {} has keys and 'undefined' does not. Causes errors down the line.
   const rawCookies = req.headers.cookie.split('; ');
  
   const parsedCookies = {};
@@ -79,6 +79,12 @@ const getCookies = (req) => {
   // parsedCookie = ['myapp', 'secretcookie'], ['analytics_cookie', 'beacon']
    parsedCookies[parsedCookie[0]] = parsedCookie[1];
   });
+  if (parsedCookies == undefined){
+    // Look in req.session? Is the value in there?
+    req.session.forEach((value, key) => {
+      parsedCookies[key] = value;
+    });
+  }
   return parsedCookies;
  };
 
