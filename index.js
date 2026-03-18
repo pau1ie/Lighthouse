@@ -19,7 +19,7 @@ const locals = require("./config/locals")
 let strings = require("./lang/en.json");
 const db = require("./db");
 
-const {client} = db;
+const { client } = db;
 
 const apiRouter = require('./routes/api');
 const systemRouter = require('./routes/system');
@@ -37,7 +37,7 @@ const twoWeeks = 1000 * 60 * 60 * 24 * 7 * 2;
 
 require('dotenv').config();
 
-const {PORT} = process.env;
+const { PORT } = process.env;
 
 // #endregion ------------------------------------------------------------------
 
@@ -73,7 +73,7 @@ const app = express();
 Object.assign(app.locals, locals);
 
 // #region App Middleware ------------------------------------------------------
-app.use('/', express.static(`${__dirname  }/public`))
+app.use('/', express.static(`${__dirname}/public`))
 app.use(session({
 	name: "session",
 	secure: true,
@@ -330,12 +330,12 @@ app.get('/glossary', async (req, res) => {
 });
 
 app.get('/logout', (req, res) => {
-    req.session = null;
+	req.session = null;
 
 	// Delete *all* cookies.
-    Object.keys(req.cookies).forEach(cookie => res.clearCookie(cookie));
+	Object.keys(req.cookies).forEach(cookie => res.clearCookie(cookie));
 
-    res.redirect("/");
+	res.redirect("/");
 });
 
 app.get('/wish', (req, res) => {
@@ -492,15 +492,13 @@ app.post('/pluralkit', (req, res) => {
 		}
 		return res.redirect(307, "/system");
 
-	} 
-		res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies })
-	
+	}
+	res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies })
+
 });
 
 app.post('/signup', async (req, res) => {
 	// Bookmarks: signup post, post signup
-
-
 	const secretKey = process.env.environment == "dev" ? "1x0000000000000000000000000000000AA" : process.env.cloudflareKey;
 
 	const response = req.body['cf-turnstile-response'];
@@ -552,7 +550,7 @@ app.post('/signup', async (req, res) => {
 
 	const userDat = await db.query(client, "SELECT * FROM users WHERE email=$1;", [`'${base64encode(email)}'`], res, req);
 
-	ejs.renderFile(`${__dirname  }/views/pages/email-welcome.ejs`, { alias: req.body.username || randomise(["Buddy", "Friend", "Pal"]), userid: userDat[0].id }, (err, data) => {
+	ejs.renderFile(`${__dirname}/views/pages/email-welcome.ejs`, { alias: req.body.username || randomise(["Buddy", "Friend", "Pal"]), userid: userDat[0].id }, (err, data) => {
 		if (err) {
 			console.log(err);
 		} else {
@@ -603,217 +601,217 @@ For some reason, these routes wouldn't behave in the systemRouter. So I'm puttin
 */
 app.get("/editsys/:alt", validateParam("alt"), (req, res, next) => {
 	if (isLoggedIn(req)) {
-	  client.query(
-		{text: "SELECT * FROM systems WHERE sys_id=$1", values: [`${req.params.alt}`]},
-		(err, result) => {
-		  if (err) {
-			console.log(err.stack);
-			res
-			  .status(400)
-			  .render("pages/400", {
-				session: req.session,
-				code: "Bad Request",
-				cookies: req.cookies,
-			  });
-		  } else {
-			req.session.chosenSys = result.rows[0];
-			client.query(
-			  {
-				text: "SELECT alters.name, alters.alt_id, alters.sys_id, systems.sys_alias FROM alters INNER JOIN systems ON systems.sys_id = alters.sys_id WHERE systems.sys_id=$1;",
-				values: [`${req.params.alt}`],
-			  },
-			  (err, result) => {
+		client.query(
+			{ text: "SELECT * FROM systems WHERE sys_id=$1", values: [`${req.params.alt}`] },
+			(err, result) => {
 				if (err) {
-				  console.log(err.stack);
-				  res
-					.status(400)
-					.render("pages/400", {
-					  session: req.session,
-					  code: "Bad Request",
-					  cookies: req.cookies,
-					});
+					console.log(err.stack);
+					res
+						.status(400)
+						.render("pages/400", {
+							session: req.session,
+							code: "Bad Request",
+							cookies: req.cookies,
+						});
 				} else {
-				  // console.table(result.rows);
-				  req.session.alters = result.rows;
-				  res.render(`pages/edit_sys`, {
-					session: req.session,
-					alt: req.session.chosenSys,
-					alters: result.rows,
-					cookies: req.cookies,
-				  });
+					req.session.chosenSys = result.rows[0];
+					client.query(
+						{
+							text: "SELECT alters.name, alters.alt_id, alters.sys_id, systems.sys_alias FROM alters INNER JOIN systems ON systems.sys_id = alters.sys_id WHERE systems.sys_id=$1;",
+							values: [`${req.params.alt}`],
+						},
+						(err, result) => {
+							if (err) {
+								console.log(err.stack);
+								res
+									.status(400)
+									.render("pages/400", {
+										session: req.session,
+										code: "Bad Request",
+										cookies: req.cookies,
+									});
+							} else {
+								// console.table(result.rows);
+								req.session.alters = result.rows;
+								res.render(`pages/edit_sys`, {
+									session: req.session,
+									alt: req.session.chosenSys,
+									alters: result.rows,
+									cookies: req.cookies,
+								});
+							}
+						}
+					);
 				}
-			  }
-			);
-		  }
-		  // res.render(`pages/edit_sys`, { session: req.session, alt:req.session.chosenSys });
-		}
-	  );
+				// res.render(`pages/edit_sys`, { session: req.session, alt:req.session.chosenSys });
+			}
+		);
 	} else {
-	  res
-		.status(403)
-		.render("pages/403", {
-		  session: req.session,
-		  code: "Forbidden",
-		  cookies: req.cookies,
-		});
+		res
+			.status(403)
+			.render("pages/403", {
+				session: req.session,
+				code: "Forbidden",
+				cookies: req.cookies,
+			});
 	}
 	// res.render(`pages/edit_sys`, { session: req.session, alt:req.params.alt });
-  });
-  
+});
+
 app.get("/deletesys/:alt", validateParam("alt"), async (req, res) => {
 	if (isLoggedIn(req)) {
-	  try {
-		const systemDat = await db.query(
-		  client,
-		  "SELECT * FROM systems WHERE sys_id=$1 AND user_id=$2",
-		  [`${req.params.alt}`, getCookies(req).u_id],
-		  res,
-		  req
-		);
-		req.session.chosenSys = systemDat[0];
-		res.render(`pages/delete_sys`, {
-		  session: req.session,
-		  alt: req.session.chosenSys,
-		  cookies: req.cookies,
-		});
-	  } catch (e) {
-		lostPage(res, req);
-	  }
+		try {
+			const systemDat = await db.query(
+				client,
+				"SELECT * FROM systems WHERE sys_id=$1 AND user_id=$2",
+				[`${req.params.alt}`, getCookies(req).u_id],
+				res,
+				req
+			);
+			req.session.chosenSys = systemDat[0];
+			res.render(`pages/delete_sys`, {
+				session: req.session,
+				alt: req.session.chosenSys,
+				cookies: req.cookies,
+			});
+		} catch (e) {
+			lostPage(res, req);
+		}
 	} else {
-	  res
-		.status(403)
-		.render("pages/403", {
-		  session: req.session,
-		  code: "Forbidden",
-		  cookies: req.cookies,
-		});
+		res
+			.status(403)
+			.render("pages/403", {
+				session: req.session,
+				code: "Forbidden",
+				cookies: req.cookies,
+			});
 	}
 	// res.render(`pages/edit_sys`, { session: req.session, alt:req.params.alt });
-  });
-  
+});
+
 app.post("/deletesys/:alt", validateParam("alt"), async (req, res) => {
 	const sysData = await db.query(
-	  client,
-	  "SELECT * FROM systems WHERE sys_id=$1",
-	  [`${req.params.alt}`],
-	  res,
-	  req
+		client,
+		"SELECT * FROM systems WHERE sys_id=$1",
+		[`${req.params.alt}`],
+		res,
+		req
 	);
 	if (sysData.length == 0) return lostPage(res, req);
 	if (getCookies(req).u_id == sysData[0].user_id) {
-	  await db.query(
-		client,
-		"DELETE FROM systems WHERE sys_id=$1",
-		[`${req.params.alt}`],
-		res,
-		req
-	  );
-	  await db.query(
-		client,
-		"DELETE FROM systems WHERE subsys_id=$1",
-		[`${req.params.alt}`],
-		res,
-		req
-	  );
-	  req.session.chosenSys = null;
-	  res.redirect("/system");
+		await db.query(
+			client,
+			"DELETE FROM systems WHERE sys_id=$1",
+			[`${req.params.alt}`],
+			res,
+			req
+		);
+		await db.query(
+			client,
+			"DELETE FROM systems WHERE subsys_id=$1",
+			[`${req.params.alt}`],
+			res,
+			req
+		);
+		req.session.chosenSys = null;
+		res.redirect("/system");
 	} else {
-	  forbidUser(res, req);
+		forbidUser(res, req);
 	}
-  });
-  
+});
+
 app.post("/editsys/:alt", validateParam("alt"), (req, res) => {
 	client.query(
-	  {
-		text: "UPDATE systems SET sys_alias=$1, description=$3 WHERE sys_id=$2;",
-		values: [
-		  `'${base64encode(req.body.sysname)}'`,
-		  `${req.params.alt}`,
-		  `${encryptWithAES(req.body.sysdesc)}`,
-		],
-	  },
-	  (err, result) => {
-		if (err) {
-		  console.log(err.stack);
-		  res
-			.status(400)
-			.render("pages/400", {
-			  session: req.session,
-			  code: "Bad Request",
-			  cookies: req.cookies,
-			});
-		} else {
-		  req.flash("flash", strings.system.updated);
-		  res.redirect(`/system/${req.params.alt}`);
-		}
-	  }
-	);
-  });
-
-  app.get("/rules", (req, res, next) => {
-	if (isLoggedIn(req)) {
-	  client.query(
 		{
-		  text: "SELECT * FROM sys_rules WHERE u_id=$1 ORDER BY created DESC;",
-		  values: [getCookies(req).u_id],
+			text: "UPDATE systems SET sys_alias=$1, description=$3 WHERE sys_id=$2;",
+			values: [
+				`'${base64encode(req.body.sysname)}'`,
+				`${req.params.alt}`,
+				`${encryptWithAES(req.body.sysdesc)}`,
+			],
 		},
 		(err, result) => {
-		  if (err) {
-			console.log(err.stack);
-			res
-			  .status(400)
-			  .render("pages/400", {
-				session: req.session,
-				code: "Bad Request",
-				cookies: req.cookies,
-			  });
-		  } else {
-			req.session.sys_rules = result.rows;
-		  }
-		  res.render(`pages/sys_rules`, {
-			session: req.session,
-			cookies: req.cookies,
-		  });
+			if (err) {
+				console.log(err.stack);
+				res
+					.status(400)
+					.render("pages/400", {
+						session: req.session,
+						code: "Bad Request",
+						cookies: req.cookies,
+					});
+			} else {
+				req.flash("flash", strings.system.updated);
+				res.redirect(`/system/${req.params.alt}`);
+			}
 		}
-	  );
+	);
+});
+
+app.get("/rules", (req, res, next) => {
+	if (isLoggedIn(req)) {
+		client.query(
+			{
+				text: "SELECT * FROM sys_rules WHERE u_id=$1 ORDER BY created DESC;",
+				values: [getCookies(req).u_id],
+			},
+			(err, result) => {
+				if (err) {
+					console.log(err.stack);
+					res
+						.status(400)
+						.render("pages/400", {
+							session: req.session,
+							code: "Bad Request",
+							cookies: req.cookies,
+						});
+				} else {
+					req.session.sys_rules = result.rows;
+				}
+				res.render(`pages/sys_rules`, {
+					session: req.session,
+					cookies: req.cookies,
+				});
+			}
+		);
 	} else {
-	  res
-		.status(403)
-		.render("pages/403", {
-		  session: req.session,
-		  code: "Forbidden",
-		  cookies: req.cookies,
-		});
+		res
+			.status(403)
+			.render("pages/403", {
+				session: req.session,
+				code: "Forbidden",
+				cookies: req.cookies,
+			});
 	}
-  });
-  
-  app.post('/rules', async (req, res) => {
-	  if (isLoggedIn(req)) {
-		  if (req.body.create) {
-			  // Create rule.
-			  client.query({ text: `INSERT INTO sys_rules (u_id, rule) VALUES ($1, $2)`, values: [getCookies(req).u_id, `'${Buffer.from(req.body.rule).toString('base64')}'`] }, (err, result) => {
-				  if (err) {
-					  console.log(err.stack);
-					  res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
-				  }
-			  });
-		  } else if (req.body.edit) {
-			  await db.query(client, "UPDATE sys_rules SET rule=$1 WHERE id=$2 AND u_id=$3", [`'${Buffer.from(req.body.edit).toString('base64')}'`, req.body.ruleid, getCookies(req).u_id], res, req);
-		  } else {
-			  // Delete Rule
-			  client.query({ text: `DELETE FROM sys_rules WHERE id=$1;`, values: [getKeyByValue(req.body, "Remove")] }, (err, result) => {
-				  if (err) {
-					  console.log(err.stack);
-					  res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
-				  }
-			  });
-		  }
-		  res.redirect(req.get('referer'));
-  
-	  } else {
-		  res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies });
-	  }
-  });
+});
+
+app.post('/rules', async (req, res) => {
+	if (isLoggedIn(req)) {
+		if (req.body.create) {
+			// Create rule.
+			client.query({ text: `INSERT INTO sys_rules (u_id, rule) VALUES ($1, $2)`, values: [getCookies(req).u_id, `'${Buffer.from(req.body.rule).toString('base64')}'`] }, (err, result) => {
+				if (err) {
+					console.log(err.stack);
+					res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
+				}
+			});
+		} else if (req.body.edit) {
+			await db.query(client, "UPDATE sys_rules SET rule=$1 WHERE id=$2 AND u_id=$3", [`'${Buffer.from(req.body.edit).toString('base64')}'`, req.body.ruleid, getCookies(req).u_id], res, req);
+		} else {
+			// Delete Rule
+			client.query({ text: `DELETE FROM sys_rules WHERE id=$1;`, values: [getKeyByValue(req.body, "Remove")] }, (err, result) => {
+				if (err) {
+					console.log(err.stack);
+					res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
+				}
+			});
+		}
+		res.redirect(req.get('referer'));
+
+	} else {
+		res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies });
+	}
+});
 
 // DEV MODE PAGES
 if (process.env.environment == "dev") {
