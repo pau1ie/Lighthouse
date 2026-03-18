@@ -1,13 +1,14 @@
 // Journals Router
 const express = require("express");
 const router = express.Router();
-const { getCookies, encryptWithAES, decryptWithAES, idCheck, authUser, validateParam } = require("../funcs.js");
+const db = require("../db.js");
+const client = db.client;
+const { getCookies, encryptWithAES, decryptWithAES, idCheck, authUser, validateParam, isLoggedIn } = require("../funcs.js");
 
 /**
  * Updates a journal post. Note to self: This should be a router.patch().
  */
-router.post("/journal/:id/edit", (req, res) => {
-  if (!checkUUID(req.params.id)) return lostPage(res, req);
+router.post("/journal/:id/edit", validateParam("id"), (req, res) => {
 
   if (isLoggedIn(req)) {
     client.query(
@@ -100,8 +101,7 @@ router.post("/journal/:id/edit", (req, res) => {
 /**
  * Adds a journal post.
  */
-router.post("/journal/:id", (req, res) => {
-  if (!checkUUID(req.params.id)) return lostPage(res, req);
+router.post("/journal/:id", validateParam("id"), (req, res) => {
   if (isLoggedIn(req)) {
     if (req.body.submit) {
       client.query(
@@ -278,8 +278,8 @@ router.get('/clearalter', (req, res, next) => {
 	res.redirect('/system');
 });
 
-router.get('/comm/:id/edit', async function (req, res) {
-	if (!checkUUID(req.params.id)) return lostPage(res, req);
+router.get('/comm/:id/edit', validateParam("id"), async function (req, res) {
+
 	if (isLoggedIn(req)) {
 		const sysCheck = await db.query(client, "SELECT id FROM comm_posts WHERE u_id=$1", [getCookies(req)['u_id']], res, req);
 		const sysList = sysCheck.map(obj => obj.id);
@@ -294,8 +294,7 @@ router.get('/comm/:id/edit', async function (req, res) {
 
 });
 
-router.get('/comm/:id/delete', async function (req, res) {
-	if (!checkUUID(req.params.id)) return lostPage(res, req);
+router.get('/comm/:id/delete', validateParam("id"), async function (req, res) {
 	if (isLoggedIn(req)) {
 		client.query({ text: "SELECT * FROM comm_posts WHERE id=$1;", values: [`${req.params.id}`] }, async function (err, result) {
 			if (err) {
@@ -320,8 +319,7 @@ router.get('/comm/:id/delete', async function (req, res) {
 
 });
 
-router.post('/comm/:id/delete', (req, res) => {
-	if (!checkUUID(req.params.id)) return lostPage(res, req);
+router.post('/comm/:id/delete', validateParam("id"), (req, res) => {
 	if (isLoggedIn(req)) {
 		client.query({ text: "DELETE FROM comm_posts WHERE id=$1; ", values: [`${req.params.id}`] }, (err, result) => {
 			if (err) {
@@ -342,8 +340,7 @@ router.post('/comm/:id/delete', (req, res) => {
 	}
 });
 
-router.post('/comm/:id/edit', (req, res) => {
-	if (!checkUUID(req.params.id)) return lostPage(res, req);
+router.post('/comm/:id/edit', validateParam("id"), (req, res) => {
 	if (isLoggedIn(req)) {
 		client.query({
 			text: "UPDATE comm_posts SET title=$1, body=$2, created_on=$4 WHERE id=$3; ",

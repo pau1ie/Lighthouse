@@ -1,48 +1,45 @@
 // System Router
 const express = require("express");
+
 const router = express.Router();
-const db = require("../db.js");
-const client = db.client;
-const crypto = require("crypto");
-const CryptoJS = require("crypto-js");
-var strings = require("../lang/en.json");
+const db = require("../db");
+
+const {client} = db;
+const strings = require("../lang/en.json");
 const {
   isLoggedIn,
   getCookies,
   encryptWithAES,
-  forbidUser,
   lostPage,
   idCheck,
   paginate,
-  checkUUID,
   authUser,
   validateParam,
-  decryptWithAES,
   base64encode,
   base64decode,
 } = require("../funcs.js");
 
 // Refactoring
-router.get("/", authUser, async function (req, res) {
+router.get("/", authUser, async (req, res) => {
   // If they have inner worlds enabled or not.
-  const innerWorlds = await db.query( client, "SELECT inner_worlds from USERS WHERE id=$1;", [getCookies(req)["u_id"]], res, req );
+  const innerWorlds = await db.query( client, "SELECT inner_worlds from USERS WHERE id=$1;", [getCookies(req).u_id], res, req );
   req.session.innerworld = innerWorlds[0].inner_worlds || false; 
 
   // If they have worksheets enabled or not
-  const worksheets = await db.query( client, "SELECT worksheets_enabled from USERS WHERE id=$1;", [getCookies(req)["u_id"]], res, req );
+  const worksheets = await db.query( client, "SELECT worksheets_enabled from USERS WHERE id=$1;", [getCookies(req).u_id], res, req );
   req.session.worksheets_enabled = worksheets[0].worksheets_enabled || false;
 
-  const systemData = await db.query(client, "SELECT * FROM systems WHERE user_id=$1", [getCookies(req)["u_id"]], res, req);
+  const systemData = await db.query(client, "SELECT * FROM systems WHERE user_id=$1", [getCookies(req).u_id], res, req);
 
   const alterData = await db.query(
     client,
     "SELECT alters.name, systems.sys_id FROM alters INNER JOIN systems ON alters.sys_id = systems.sys_id WHERE systems.user_id = $1;",
-    [getCookies(req)["u_id"]],
+    [getCookies(req).u_id],
     res,
     req
   );
 
-  let systemMap = new Array();
+  const systemMap = new Array();
   systemData.forEach((sys) => {
     systemMap.push({
       id: sys.sys_id,
@@ -64,19 +61,19 @@ router.get("/", authUser, async function (req, res) {
     });
 });
 
-router.get("/communal-journal", authUser, async function (req, res) {
+router.get("/communal-journal", authUser, async (req, res) => {
   // If there's an id provided, it's a system communal journal. Grab based on user id AND sys_id
   // If no id provided, just grab from their user id.
   let commJournInfo;
   let pinnedComm;
-  let sysChoice = req.query.sys || null;
+  const sysChoice = req.query.sys || null;
   let pageNumber = req.query.pg || 1;
   if (!sysChoice) {
     // This is the regular communal journal.
     commJournInfo = await db.query(
       client,
       "SELECT * FROM comm_posts WHERE u_id=$1 AND is_pinned=false AND system_id IS NULL ORDER BY created_on DESC;",
-      [getCookies(req)["u_id"]],
+      [getCookies(req).u_id],
       res,
       req
     );
@@ -84,7 +81,7 @@ router.get("/communal-journal", authUser, async function (req, res) {
     pinnedComm = await db.query(
       client,
       "SELECT * FROM comm_posts WHERE u_id=$1 AND is_pinned=true AND system_id IS NULL ORDER BY created_on DESC;",
-      [getCookies(req)["u_id"]],
+      [getCookies(req).u_id],
       res,
       req
     );
@@ -93,7 +90,7 @@ router.get("/communal-journal", authUser, async function (req, res) {
     const sysCheck = await db.query(
       client,
       "SELECT sys_id FROM systems WHERE user_id=$1",
-      [getCookies(req)["u_id"]],
+      [getCookies(req).u_id],
       res,
       req
     );
@@ -133,8 +130,8 @@ router.get("/communal-journal", authUser, async function (req, res) {
     );
     req.session.chosenSystem = sysInfo[0];
   }
-  let entries = paginate(commJournInfo, 25);
-  let finalPage = entries.length;
+  const entries = paginate(commJournInfo, 25);
+  const finalPage = entries.length;
   // Now... Is the requested page higher than the final page?
   if (pageNumber > finalPage) pageNumber = finalPage;
   res
@@ -145,23 +142,23 @@ router.get("/communal-journal", authUser, async function (req, res) {
       posts: entries,
       pinned: pinnedComm,
       pageNum: pageNumber,
-      sysChoice: sysChoice,
-      finalPage: finalPage,
+      sysChoice,
+      finalPage,
     });
   // res.send("<h1>Communal Journal</h1>")
 });
 
-router.post("/communal-journal", authUser, async function (req, res) {
-  let sysChoice = req.query.sys;
-  let isPinned = req.body.ispinned == "on" ? true : false;
-  let postFeeling = req.body.feeling ? encryptWithAES(req.body.feeling) : "";
+router.post("/communal-journal", authUser, async (req, res) => {
+  const sysChoice = req.query.sys;
+  const isPinned = req.body.ispinned == "on";
+  const postFeeling = req.body.feeling ? encryptWithAES(req.body.feeling) : "";
   if (!sysChoice) {
     // Standard Communal Journal post.
     await db.query(
       client,
       "INSERT INTO comm_posts (u_id, title, body, is_pinned, feeling) VALUES ($1, $2, $3, $4, $5);",
       [
-        getCookies(req)["u_id"],
+        getCookies(req).u_id,
         `${encryptWithAES(req.body.title)}`,
         `${encryptWithAES(req.body.body)}`,
         `${isPinned}`,
@@ -176,7 +173,7 @@ router.post("/communal-journal", authUser, async function (req, res) {
     const sysInfo = await db.query(
       client,
       "SELECT sys_id FROM systems WHERE user_id=$1",
-      [getCookies(req)["u_id"]],
+      [getCookies(req).u_id],
       res,
       req
     );
@@ -195,7 +192,7 @@ router.post("/communal-journal", authUser, async function (req, res) {
       client,
       "INSERT INTO comm_posts (u_id, title, body, is_pinned, system_id, feeling) VALUES ($1, $2, $3, $4, $5, $6);",
       [
-        getCookies(req)["u_id"],
+        getCookies(req).u_id,
         `${encryptWithAES(req.body.title)}`,
         `${encryptWithAES(req.body.body)}`,
         `${isPinned}`,
@@ -212,13 +209,13 @@ router.post("/communal-journal", authUser, async function (req, res) {
 router.get("/:id/:pg?",
   authUser,
   validateParam("id"),
-  async function (req, res, next) {
+  async (req, res, next) => {
     if (!req.session.worksheets_enabled) {
       // Quick, add that.
       const wsEn = await db.query(
         client,
         "SELECT worksheets_enabled FROM users WHERE id=$1;",
-        [getCookies(req)["u_id"]],
+        [getCookies(req).u_id],
         res,
         req
       );
@@ -253,14 +250,14 @@ router.get("/:id/:pg?",
       );
       if (subsysInf.length > 0) {
         req.session.chosenSys.subsys_alias =
-          subsysInf[0].sys_alias || getCookies(req)["system_term"];
+          subsysInf[0].sys_alias || getCookies(req).system_term;
       }
     }
 
     const numUp = await db.query(
       client,
       "SELECT altupnum FROM users WHERE id=$1;",
-      [getCookies(req)["u_id"]],
+      [getCookies(req).u_id],
       res,
       req
     );
@@ -292,7 +289,7 @@ router.get("/:id/:pg?",
         outline: alter.outline,
       });
     });
-    let altCount = req.session.alters.length;
+    const altCount = req.session.alters.length;
     req.session.alters.sort((a, b) => a.name.localeCompare(b.name));
     req.session.alters = paginate(
       req.session.alters,
@@ -304,7 +301,7 @@ router.get("/:id/:pg?",
       cookies: req.cookies,
       sys_id: req.params.id,
       pgCount: req.session.alters.length,
-      altCount: altCount,
+      altCount,
       curPage: req.params.pg || 1,
       numup: Number(numUp[0].altupnum),
       currentSys: req.params.id,
@@ -312,11 +309,11 @@ router.get("/:id/:pg?",
   }
 );
 
-router.post("/:alt/:pg?", authUser, validateParam("alt"), function (req, res) {
+router.post("/:alt/:pg?", authUser, validateParam("alt"), (req, res) => {
   // Post system
   if (isLoggedIn(req)) {
     if (req.body.sysid) {
-      let sysId = req.body.sysid == "none" ? null : req.body.sysid;
+      const sysId = req.body.sysid == "none" ? null : req.body.sysid;
       // Setting this in case they want to release a subsystem into a normal system.
       client.query(
         {
@@ -395,15 +392,15 @@ router.post("/:alt/:pg?", authUser, validateParam("alt"), function (req, res) {
   }
 });
 
-router.post("/", authUser, async function (req, res) {
+router.post("/", authUser, async (req, res) => {
   if (req.body.sysname) {
-    let subsysID = req.body.subsys == "None" ? null : req.body.subsys;
+    const subsysID = req.body.subsys == "None" ? null : req.body.subsys;
     await db.query(
       client,
       "INSERT INTO systems (sys_alias, user_id, subsys_id, description) VALUES ($1, $2, $3, $4)",
       [
         `'${base64encode(req.body.sysname)}'`,
-        `${getCookies(req)["u_id"]}`,
+        `${getCookies(req).u_id}`,
         subsysID,
         `${encryptWithAES(req.body.sysdesc)}`,
       ],
@@ -411,14 +408,14 @@ router.post("/", authUser, async function (req, res) {
       req
     );
     return res.redirect(`/system`);
-  } else if (req.body.post) {
+  } if (req.body.post) {
     // Comm journal.
     // id | u_id | created_on | title | body
     client.query(
       {
         text: "INSERT INTO comm_posts (u_id, created_on, title, body) VALUES ($1, to_timestamp($2 / 1000.0), $3, $4)",
         values: [
-          `${getCookies(req)["u_id"]}`,
+          `${getCookies(req).u_id}`,
           `${Date.now()}`,
           `${encryptWithAES(req.body.cTitle)}`,
           `${encryptWithAES(req.body.cBody)}`,
@@ -465,200 +462,6 @@ router.post("/", authUser, async function (req, res) {
   }
 });
 
-router.get("/rules", (req, res, next) => {
-  if (isLoggedIn(req)) {
-    client.query(
-      {
-        text: "SELECT * FROM sys_rules WHERE u_id=$1 ORDER BY created DESC;",
-        values: [getCookies(req)["u_id"]],
-      },
-      (err, result) => {
-        if (err) {
-          console.log(err.stack);
-          res
-            .status(400)
-            .render("pages/400", {
-              session: req.session,
-              code: "Bad Request",
-              cookies: req.cookies,
-            });
-        } else {
-          req.session.sys_rules = result.rows;
-        }
-        res.render(`pages/sys_rules`, {
-          session: req.session,
-          cookies: req.cookies,
-        });
-      }
-    );
-  } else {
-    res
-      .status(403)
-      .render("pages/403", {
-        session: req.session,
-        code: "Forbidden",
-        cookies: req.cookies,
-      });
-  }
-});
-
-router.get("/editsys/:alt", (req, res, next) => {
-  if (!checkUUID(req.params.alt)) return;
-  if (isLoggedIn(req)) {
-    client.query(
-      {
-        text: "SELECT * FROM systems WHERE sys_id=$1",
-        values: [`${req.params.alt}`],
-      },
-      (err, result) => {
-        if (err) {
-          console.log(err.stack);
-          res
-            .status(400)
-            .render("pages/400", {
-              session: req.session,
-              code: "Bad Request",
-              cookies: req.cookies,
-            });
-        } else {
-          req.session.chosenSys = result.rows[0];
-          client.query(
-            {
-              text: "SELECT alters.name, alters.alt_id, alters.sys_id, systems.sys_alias FROM alters INNER JOIN systems ON systems.sys_id = alters.sys_id WHERE systems.sys_id=$1;",
-              values: [`${req.params.alt}`],
-            },
-            (err, result) => {
-              if (err) {
-                console.log(err.stack);
-                res
-                  .status(400)
-                  .render("pages/400", {
-                    session: req.session,
-                    code: "Bad Request",
-                    cookies: req.cookies,
-                  });
-              } else {
-                // console.table(result.rows);
-                req.session.alters = result.rows;
-                res.render(`pages/edit_sys`, {
-                  session: req.session,
-                  alt: req.session.chosenSys,
-                  alters: result.rows,
-                  cookies: req.cookies,
-                });
-              }
-            }
-          );
-        }
-        // res.render(`pages/edit_sys`, { session: req.session, alt:req.session.chosenSys });
-      }
-    );
-  } else {
-    res
-      .status(403)
-      .render("pages/403", {
-        session: req.session,
-        code: "Forbidden",
-        cookies: req.cookies,
-      });
-  }
-  // res.render(`pages/edit_sys`, { session: req.session, alt:req.params.alt });
-});
-
-router.get("/deletesys/:alt", async (req, res) => {
-  // if (!checkUUID(req.params.alt)) return;
-  if (isLoggedIn(req)) {
-    try {
-      const systemDat = await db.query(
-        client,
-        "SELECT * FROM systems WHERE sys_id=$1 AND user_id=$2",
-        [`${req.params.alt}`, getCookies(req)["u_id"]],
-        res,
-        req
-      );
-      req.session.chosenSys = systemDat[0];
-      res.render(`pages/delete_sys`, {
-        session: req.session,
-        alt: req.session.chosenSys,
-        cookies: req.cookies,
-      });
-    } catch (e) {
-      lostPage(res, req);
-    }
-  } else {
-    res
-      .status(403)
-      .render("pages/403", {
-        session: req.session,
-        code: "Forbidden",
-        cookies: req.cookies,
-      });
-  }
-  // res.render(`pages/edit_sys`, { session: req.session, alt:req.params.alt });
-});
-
-
-
-router.post("/deletesys/:alt", async function (req, res) {
-  if (!checkUUID(req.params.alt)) return lostPage(res, req);
-  const sysData = await db.query(
-    client,
-    "SELECT * FROM systems WHERE sys_id=$1",
-    [`${req.params.alt}`],
-    res,
-    req
-  );
-  if (sysData.length == 0) return lostPage(res, req);
-  if (getCookies(req)["u_id"] == sysData[0].user_id) {
-    await db.query(
-      client,
-      "DELETE FROM systems WHERE sys_id=$1",
-      [`${req.params.alt}`],
-      res,
-      req
-    );
-    await db.query(
-      client,
-      "DELETE FROM systems WHERE subsys_id=$1",
-      [`${req.params.alt}`],
-      res,
-      req
-    );
-    req.session.chosenSys = null;
-    res.redirect("/system");
-  } else {
-    forbidUser(res, req);
-  }
-});
-
-router.post("/editsys/:alt", function (req, res) {
-  if (!checkUUID(req.params.alt)) return;
-  client.query(
-    {
-      text: "UPDATE systems SET sys_alias=$1, description=$3 WHERE sys_id=$2;",
-      values: [
-        `'${base64encode(req.body.sysname)}'`,
-        `${req.params.alt}`,
-        `${encryptWithAES(req.body.sysdesc)}`,
-      ],
-    },
-    (err, result) => {
-      if (err) {
-        console.log(err.stack);
-        res
-          .status(400)
-          .render("pages/400", {
-            session: req.session,
-            code: "Bad Request",
-            cookies: req.cookies,
-          });
-      } else {
-        req.flash("flash", strings.system.updated);
-        res.redirect(`/system/${req.params.alt}`);
-      }
-    }
-  );
-});
 
 console.log(`System Router Loaded.`);
 module.exports = router;

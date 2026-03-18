@@ -1,29 +1,25 @@
 // #region Import Packages, Variables, Files -----------------------------------
 // NPM and external packages.
 const express = require('express');
-var bodyParser = require("body-parser");
-var cookieParser = require('cookie-parser');
+const bodyParser = require("body-parser");
+const cookieParser = require('cookie-parser');
 const session = require('cookie-session');
 const path = require('path');
-const CryptoJS = require("crypto-js");
-const crypto = require('crypto');
-const fs = require('fs');
-var pdf = require("html-pdf");
 const nodemailer = require('nodemailer');
 const ejs = require('ejs');
-var pluralize = require('pluralize');
-var pjson = require('./package.json');
-var flash = require('express-flash');
+const flash = require('express-flash');
 const fileUpload = require('express-fileupload');
 const methodOverride = require('method-override');
 const axios = require('axios');
+const pjson = require('./package.json');
 
 // Local files below
-const { isLoggedIn, getCookies, encryptWithAES, decryptWithAES, lostPage, checkUUID, truncate, getKeyByValue, randomise, getRandomInt, base64encode, errorPage, createPassword } = require("./funcs.js")
-const locals = require("./config/locals.js")
-var strings = require("./lang/en.json");
+const { isLoggedIn, getCookies, encryptWithAES, decryptWithAES, lostPage, truncate, validateParam, randomise, getRandomInt, base64encode, errorPage, createPassword } = require("./funcs")
+const locals = require("./config/locals")
+let strings = require("./lang/en.json");
 const db = require("./db");
-const client = db.client;
+
+const {client} = db;
 
 const apiRouter = require('./routes/api');
 const systemRouter = require('./routes/system');
@@ -41,7 +37,7 @@ const twoWeeks = 1000 * 60 * 60 * 24 * 7 * 2;
 
 require('dotenv').config();
 
-const PORT = process.env.PORT;
+const {PORT} = process.env;
 
 // #endregion ------------------------------------------------------------------
 
@@ -73,11 +69,11 @@ console.log(`${"-".repeat(10)}\n
 𝑀𝒶𝒹𝑒 𝒷𝓎 𝒯𝒽𝑒 𝐿𝒾𝑔𝒽𝓉𝒽𝑜𝓊𝓈𝑒 𝒮𝓎𝓈𝓉𝑒𝓂
 `);
 
-var app = express();
+const app = express();
 Object.assign(app.locals, locals);
 
 // #region App Middleware ------------------------------------------------------
-app.use('/', express.static(__dirname + '/public'))
+app.use('/', express.static(`${__dirname  }/public`))
 app.use(session({
 	name: "session",
 	secure: true,
@@ -89,7 +85,7 @@ app.use(flash());
 app.use(bodyParser.json()).use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(fileUpload());
-app.use(function (req, res, next) {
+app.use((req, res, next) => {
 	res.setHeader('Access-Control-Allow-Origin', '*');
 	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
 	res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -101,27 +97,27 @@ app.use(express.static(path.join(__dirname, "node_modules/tabulator-tables/dist/
 app.use(methodOverride('_method'))
 
 // Middleware...?
-app.use(async function (req, res) {
+app.use(async (req, res) => {
 	// Loads before all other routes.
 	if (isLoggedIn(req)) {
 		// Let's only grab the database if we need to.
-		const userData = await db.query(client, "SELECT * FROM users WHERE id=$1;", [getCookies(req)['u_id']], res, req);
-		let results = userData[0];
+		const userData = await db.query(client, "SELECT * FROM users WHERE id=$1;", [getCookies(req).u_id], res, req);
+		const results = userData[0];
 		try {
 			req.session.u_id = results.id;
 			req.session.is_legacy = results.is_legacy;
 			req.session.username = results.username;
 			req.session.email = results.email;
 			req.session.skin = results.skin;
-			req.session.system_term = truncate(results.system_term || getCookies(req)['system_term'] || "system", 16);
-			req.session.alter_term = truncate(results.alter_term || getCookies(req)['alter_term'] || "alter", 16);
-			req.session.subsystem_term = truncate(results.subsystem_term || getCookies(req)['subsystem_term'] || "subsystem", 16);
+			req.session.system_term = truncate(results.system_term || getCookies(req).system_term || "system", 16);
+			req.session.alter_term = truncate(results.alter_term || getCookies(req).alter_term || "alter", 16);
+			req.session.subsystem_term = truncate(results.subsystem_term || getCookies(req).subsystem_term || "subsystem", 16);
 			req.session.inner_worlds = results.inner_worlds || false;
-			req.session.innerworld_term = truncate(results.innerworld_term || getCookies(req)['innerworld_term'] || "inner world", 16);
-			req.session.plural_term = truncate(results.plural_term || getCookies(req)['plural_term'] || "plural", 16);
+			req.session.innerworld_term = truncate(results.innerworld_term || getCookies(req).innerworld_term || "inner world", 16);
+			req.session.plural_term = truncate(results.plural_term || getCookies(req).plural_term || "plural", 16);
 			req.session.language = results.language || "en";
 			req.session.is_dev = Boolean(
-				results?.id &&
+				results.id &&
 				[process.env.dev1, process.env.dev2, process.env.dev3].includes(results.id)
 			); // <-- So if ID is not defined, they can't access dev features. Hoo boy that's a scary hole.
 			req.session.textsize = results.textsize;
@@ -174,11 +170,9 @@ app.use("/inbox", messagesRouter); // For the messages routes.
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs');
 
-if (process.env.maintenance == "true") {
+if (process.env.maintenance === "true") {
 	// Maintenance mode on.
-	app.use(function (req, res) {
-		return res.render(`pages/maintenance`, { session: req.session, cookies: req.cookies });
-	});
+	app.use((req, res) => res.render(`pages/maintenance`, { session: req.session, cookies: req.cookies }));
 
 }
 
@@ -193,14 +187,14 @@ app.get('/search', (req, res) => {
 app.get('/mod', (req, res) => {
 	// console.log(req.socket.remoteAddress);
 	if (isLoggedIn(req)) {
-		if ([process.env.dev1, process.env.dev2, process.env.dev3].includes(getCookies(req)['u_id'])) {
+		if ([process.env.dev1, process.env.dev2, process.env.dev3].includes(getCookies(req).u_id)) {
 			res.render(`pages/mod-panel`, { session: req.session, cookies: req.cookies });
 		} else {
-			var mailOptions = {
+			const mailOptions = {
 				from: '"Lighthouse" <dee_deyes@writelighthouse.com>',
 				to: 'dee_deyes@writelighthouse.com',
 				subject: `Unauthorised attempt to access mod panel.`,
-				html: `<p>A user has attempted to enter the mod panel!</p><p>User: ID: ${getCookies(req)['u_id'] || "Guest/Logged Out User"}</p><p>Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}</p><p>IP Address: ${req.socket.remoteAddress}</p>`
+				html: `<p>A user has attempted to enter the mod panel!</p><p>User: ID: ${getCookies(req).u_id || "Guest/Logged Out User"}</p><p>Email: ${Buffer.from(getCookies(req).email, "base64").toString() || "N/A"}</p><p>IP Address: ${req.socket.remoteAddress}</p>`
 			};
 
 			if (transporter) {
@@ -212,15 +206,15 @@ app.get('/mod', (req, res) => {
 			} else {
 				console.log("Email skipped: gmail_pass is not configured.");
 			}
-			console.log(`An attempt to enter the mod panel was made.\n Attempt made by: ${getCookies(req)['u_id'] || "Guest/Logged Out User"} | Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}. IP Address: ${req.socket.remoteAddress}`);
+			console.log(`An attempt to enter the mod panel was made.\n Attempt made by: ${getCookies(req).u_id || "Guest/Logged Out User"} | Email: ${Buffer.from(getCookies(req).email, "base64").toString() || "N/A"}. IP Address: ${req.socket.remoteAddress}`);
 			res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies });
 		}
 	} else {
-		var mailOptions = {
+		const mailOptions = {
 			from: '"Lighthouse" <dee_deyes@writelighthouse.com>',
 			to: 'dee_deyes@writelighthouse.com',
 			subject: `Unauthorised attempt to access mod panel.`,
-			html: `<p>A user has attempted to enter the mod panel!</p><p>User: ID: ${getCookies(req)['u_id'] || "Guest/Logged Out User"}</p><p>Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}</p><p>IP Address: ${req.socket.remoteAddress}</p>`
+			html: `<p>A user has attempted to enter the mod panel!</p><p>User: ID: ${getCookies(req).u_id || "Guest/Logged Out User"}</p><p>Email: ${Buffer.from(getCookies(req).email, "base64").toString() || "N/A"}</p><p>IP Address: ${req.socket.remoteAddress}</p>`
 		};
 
 		if (transporter) {
@@ -232,7 +226,7 @@ app.get('/mod', (req, res) => {
 		} else {
 			console.log("Email skipped: gmail_pass is not configured.");
 		}
-		console.log(`An attempt to enter the mod panel was made.\n Attempt made by: ${getCookies(req)['u_id'] || "Guest/Logged Out User"} | Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}. IP Address: ${req.socket.remoteAddress}`);
+		console.log(`An attempt to enter the mod panel was made.\n Attempt made by: ${getCookies(req).u_id || "Guest/Logged Out User"} | Email: ${Buffer.from(getCookies(req).email, "base64").toString() || "N/A"}. IP Address: ${req.socket.remoteAddress}`);
 		res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies });
 	}
 
@@ -252,11 +246,11 @@ app.get('/changelog', (req, res) => {
 
 app.post('/mod', (req, res) => {
 	if (isLoggedIn(req)) {
-		if ([process.env.dev1, process.env.dev2, process.env.dev3].includes(getCookies(req)['u_id'])) {
-			//This is a developer account; let them in.
+		if ([process.env.dev1, process.env.dev2, process.env.dev3].includes(getCookies(req).u_id)) {
+			// This is a developer account; let them in.
 			if (req.body.donor) {
 				// Add a donor!
-				client.query({ text: "INSERT INTO donators (nickname) VALUES ($1)", values: [req.body.donor] }, (err, result) => {
+				client.query({ text: "INSERT INTO donators (nickname) VALUES ($1)", values: [req.body.donor] }, (err) => {
 					if (err) {
 						console.log(err.stack);
 						res.status(400).json({ code: 400, message: err.stack });
@@ -267,7 +261,7 @@ app.post('/mod', (req, res) => {
 			}
 			if (req.body.pbody) {
 				// Add a donor!
-				client.query({ text: "INSERT INTO changelog (title, body) VALUES ($1, $2)", values: [req.body.ptitle, req.body.pbody] }, (err, result) => {
+				client.query({ text: "INSERT INTO changelog (title, body) VALUES ($1, $2)", values: [req.body.ptitle, req.body.pbody] }, (err) => {
 					if (err) {
 						console.log(err.stack);
 						res.status(400).json({ code: 400, message: err.stack });
@@ -278,11 +272,11 @@ app.post('/mod', (req, res) => {
 				});
 			}
 		} else {
-			var mailOptions = {
+			const mailOptions = {
 				from: '"Lighthouse" <dee_deyes@writelighthouse.com>',
 				to: 'dee_deyes@writelighthouse.com',
 				subject: `Unauthorised attempt to POST to mod panel.`,
-				html: `<p>A user has attempted to POST to the mod panel!</p><p>User: ID: ${getCookies(req)['u_id'] || "Guest/Logged Out User"}</p><p>Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}</p><p>IP Address: ${req.socket.remoteAddress}</p>`
+				html: `<p>A user has attempted to POST to the mod panel!</p><p>User: ID: ${getCookies(req).u_id || "Guest/Logged Out User"}</p><p>Email: ${Buffer.from(getCookies(req).email, "base64").toString() || "N/A"}</p><p>IP Address: ${req.socket.remoteAddress}</p>`
 			};
 
 			if (transporter) {
@@ -294,16 +288,16 @@ app.post('/mod', (req, res) => {
 			} else {
 				console.log("Email skipped: gmail_pass is not configured.");
 			}
-			console.log(`An attempt to POST to the mod panel was made.\n Attempt made by: ${getCookies(req)['u_id'] || "Guest/Logged Out User"} | Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"} | IP Address: ${req.socket.remoteAddress}`);
+			console.log(`An attempt to POST to the mod panel was made.\n Attempt made by: ${getCookies(req).u_id || "Guest/Logged Out User"} | Email: ${Buffer.from(getCookies(req).email, "base64").toString() || "N/A"} | IP Address: ${req.socket.remoteAddress}`);
 			res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies });
 		}
 
 	} else {
-		var mailOptions = {
+		const mailOptions = {
 			from: '"Lighthouse" <dee_deyes@writelighthouse.com>',
 			to: 'dee_deyes@writelighthouse.com',
 			subject: `Unauthorised attempt to POST to mod panel.`,
-			html: `<p>A user has attempted to POST to the mod panel!</p><p>User: ID: ${getCookies(req)['u_id'] || "Guest/Logged Out User"}</p><p>Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}</p><p>IP Address: ${req.socket.remoteAddress}</p>`
+			html: `<p>A user has attempted to POST to the mod panel!</p><p>User: ID: ${getCookies(req).u_id || "Guest/Logged Out User"}</p><p>Email: ${Buffer.from(getCookies(req).email, "base64").toString() || "N/A"}</p><p>IP Address: ${req.socket.remoteAddress}</p>`
 		};
 
 		if (transporter) {
@@ -315,24 +309,24 @@ app.post('/mod', (req, res) => {
 		} else {
 			console.log("Email skipped: gmail_pass is not configured.");
 		}
-		console.log(`An attempt to POST to the mod panel was made.\n Attempt made by: ${getCookies(req)['u_id'] || "Guest/Logged Out User"} | Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"} | IP Address: ${req.socket.remoteAddress}`);
+		console.log(`An attempt to POST to the mod panel was made.\n Attempt made by: ${getCookies(req).u_id || "Guest/Logged Out User"} | Email: ${Buffer.from(getCookies(req).email, "base64").toString() || "N/A"} | IP Address: ${req.socket.remoteAddress}`);
 		res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies });
 	}
 });
 
 // Refactored!
-app.get('/glossary', async function (req, res) {
+app.get('/glossary', async (req, res) => {
 	const terms = await db.query(client, "SELECT * FROM glossary ORDER BY term ASC;", [], res, req);
 
 	if (isLoggedIn(req)) {
-		const glossEn = await db.query(client, "SELECT glossary_enabled FROM users WHERE id=$1;", [getCookies(req)['u_id']], res, req);
+		const glossEn = await db.query(client, "SELECT glossary_enabled FROM users WHERE id=$1;", [getCookies(req).u_id], res, req);
 
 		if (glossEn[0].glossary_enabled == false) {
 			// Show the disabled page.
 			return res.render(`pages/glossary-disabled`, { session: req.session, cookies: req.cookies, });
 		}
 	}
-	res.render(`pages/glossary`, { session: req.session, cookies: req.cookies, terms: terms, lang: req.acceptsLanguages()[0] });
+	res.render(`pages/glossary`, { session: req.session, cookies: req.cookies, terms, lang: req.acceptsLanguages()[0] });
 });
 
 app.get('/logout', (req, res) => {
@@ -345,10 +339,10 @@ app.get('/logout', (req, res) => {
 });
 
 app.get('/wish', (req, res) => {
-	var filledWishes = [];
-	var wishArr = [];
+	const filledWishes = [];
+	const wishArr = [];
 	if (isLoggedIn(req)) {
-		client.query({ text: 'SELECT * FROM wishlist WHERE user_id=$1 AND is_filled=false;', values: [getCookies(req)['u_id']] }, (err, result) => {
+		client.query({ text: 'SELECT * FROM wishlist WHERE user_id=$1 AND is_filled=false;', values: [getCookies(req).u_id] }, (err, result) => {
 			if (err) {
 				console.log(err.stack);
 				res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
@@ -357,7 +351,7 @@ app.get('/wish', (req, res) => {
 				wishArr.push({ text: decryptWithAES(result.rows[i].wish), checked: result.rows[i].is_filled, uuid: result.rows[i].uuid });
 			}
 
-			client.query({ text: 'SELECT * FROM wishlist WHERE user_id=$1 AND is_filled=true;', values: [getCookies(req)['u_id']] }, (err, result) => {
+			client.query({ text: 'SELECT * FROM wishlist WHERE user_id=$1 AND is_filled=true;', values: [getCookies(req).u_id] }, (err, result) => {
 				if (err) {
 					console.log(err.stack);
 					res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
@@ -365,7 +359,7 @@ app.get('/wish', (req, res) => {
 				for (i in result.rows) {
 					filledWishes.push({ text: decryptWithAES(result.rows[i].wish), checked: result.rows[i].is_filled, uuid: result.rows[i].uuid });
 				}
-				res.render(`pages/wishlist`, { session: req.session, cookies: req.cookies, wishArr: wishArr, filledWishes: filledWishes });
+				res.render(`pages/wishlist`, { session: req.session, cookies: req.cookies, wishArr, filledWishes });
 
 			});
 
@@ -374,8 +368,7 @@ app.get('/wish', (req, res) => {
 	} else { res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies }); }
 });
 
-app.get('/wish/:id', (req, res) => {
-	if (!checkUUID(req.params.id)) return lostPage(res, req);
+app.get('/wish/:id', validateParam("id"), (req, res) => {
 	if (isLoggedIn(req)) {
 		client.query({ text: 'UPDATE wishlist SET is_filled=true WHERE uuid=$1', values: [`${req.params.id}`] }, (err, result) => {
 			if (err) {
@@ -388,8 +381,7 @@ app.get('/wish/:id', (req, res) => {
 	} else { res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies }); }
 });
 
-app.get('/wish-d/:id', (req, res) => {
-	if (!checkUUID(req.params.id)) return lostPage(res, req);
+app.get('/wish-d/:id', validateParam("id"), (req, res) => {
 	if (isLoggedIn(req)) {
 		client.query({ text: 'DELETE FROM wishlist WHERE uuid=$1', values: [`${req.params.id}`] }, (err, result) => {
 			if (err) {
@@ -402,38 +394,10 @@ app.get('/wish-d/:id', (req, res) => {
 	} else { res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies }); }
 });
 
-app.post('/rules', async function (req, res) {
-	if (isLoggedIn(req)) {
-		if (req.body.create) {
-			// Create rule.
-			client.query({ text: `INSERT INTO sys_rules (u_id, rule) VALUES ($1, $2)`, values: [getCookies(req)['u_id'], `'${Buffer.from(req.body.rule).toString('base64')}'`] }, (err, result) => {
-				if (err) {
-					console.log(err.stack);
-					res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
-				}
-			});
-		} else if (req.body.edit) {
-			await db.query(client, "UPDATE sys_rules SET rule=$1 WHERE id=$2 AND u_id=$3", [`'${Buffer.from(req.body.edit).toString('base64')}'`, req.body.ruleid, getCookies(req)['u_id']], res, req);
-		} else {
-			// Delete Rule
-			client.query({ text: `DELETE FROM sys_rules WHERE id=$1;`, values: [getKeyByValue(req.body, "Remove")] }, (err, result) => {
-				if (err) {
-					console.log(err.stack);
-					res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
-				}
-			});
-		}
-		res.redirect(req.get('referer'));
-
-	} else {
-		res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies });
-	}
-});
-
 app.post('/wish', (req, res) => {
 	if (isLoggedIn(req)) {
 		if (req.body.createWish) {
-			client.query({ text: "INSERT INTO wishlist (user_id, wish) VALUES ($1, $2);", values: [getCookies(req)['u_id'], `${encryptWithAES(req.body.wish)}`] }, (err, result) => {
+			client.query({ text: "INSERT INTO wishlist (user_id, wish) VALUES ($1, $2);", values: [getCookies(req).u_id, `${encryptWithAES(req.body.wish)}`] }, (err, result) => {
 				if (err) {
 					console.log(err.stack);
 					res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
@@ -448,13 +412,13 @@ app.post('/wish', (req, res) => {
 
 app.post('/pluralkit', (req, res) => {
 	if (isLoggedIn(req)) {
-		var splitList = new Array();
-		if (typeof req.body.alterChoice == "string") {
+		let splitList = new Array();
+		if (typeof req.body.alterChoice === "string") {
 			splitList = [JSON.parse(req.body.alterChoice)];
 			if (splitList[0].img == null) splitList[0].img = 'https://www.writelighthouse.com/img/avatar-default.jpg';
 			if (splitList[0].pronouns == null) splitList[0].pronouns = '';
 			if (splitList[0].birthday == null) splitList[0].birthday = '';
-		} else if (typeof req.body.alterChoice == "undefined") {
+		} else if (typeof req.body.alterChoice === "undefined") {
 			req.flash("flash", strings.import.PK.failure.noCheck);
 			return res.redirect("/pluralkit");
 		} else {
@@ -465,10 +429,10 @@ app.post('/pluralkit', (req, res) => {
 				if (splitList[i].birthday == null) splitList[i].birthday = '';
 			}
 		}
-		var newSys = "Imported from Pluralkit";
+		let newSys = "Imported from Pluralkit";
 		if (req.body.sysLoc == "new") {
 			// Check for an existing "Imported from Pluralkit" system
-			client.query({ text: "SELECT sys_id FROM systems WHERE sys_alias=$1 AND user_id=$2;", values: [`'${Buffer.from(newSys).toString('base64')}'`, `${getCookies(req)['u_id']}`] }, (err, result) => {
+			client.query({ text: "SELECT sys_id FROM systems WHERE sys_alias=$1 AND user_id=$2;", values: [`'${Buffer.from(newSys).toString('base64')}'`, `${getCookies(req).u_id}`] }, (err, result) => {
 				if (err) {
 					console.log(err.stack);
 					res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
@@ -477,13 +441,13 @@ app.post('/pluralkit', (req, res) => {
 						newSys += ` ${result.rows.length + 1}`;
 					}
 					// Create a new system
-					client.query({ text: "INSERT INTO systems (sys_alias, user_id) VALUES ($1, $2)", values: [`'${Buffer.from(newSys).toString('base64')}'`, `${getCookies(req)['u_id']}`] }, (err, result) => {
+					client.query({ text: "INSERT INTO systems (sys_alias, user_id) VALUES ($1, $2)", values: [`'${Buffer.from(newSys).toString('base64')}'`, `${getCookies(req).u_id}`] }, (err, result) => {
 						if (err) {
 							console.log(err.stack);
 							res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
 						} else {
 							// Grab its ID.
-							client.query({ text: "SELECT * FROM systems WHERE sys_alias=$1 AND user_id=$2;", values: [`'${Buffer.from(newSys).toString('base64')}'`, `${getCookies(req)['u_id']}`] }, (err, result) => {
+							client.query({ text: "SELECT * FROM systems WHERE sys_alias=$1 AND user_id=$2;", values: [`'${Buffer.from(newSys).toString('base64')}'`, `${getCookies(req).u_id}`] }, (err, result) => {
 								if (err) {
 									console.log(err.stack);
 									res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
@@ -491,7 +455,7 @@ app.post('/pluralkit', (req, res) => {
 									req.session.sys = new Array();
 									// Add this system to the session.
 									req.session.sys.push({ name: Buffer.from(result.rows[0].sys_alias, "base64").toString(), id: result.rows[0].sys_id, icon: null })
-									let newSysID = result.rows[0].sys_id;
+									const newSysID = result.rows[0].sys_id;
 									// Insert each alter into this new system.
 									for (i in splitList) {
 										// console.log(splitList[i].img);
@@ -528,12 +492,12 @@ app.post('/pluralkit', (req, res) => {
 		}
 		return res.redirect(307, "/system");
 
-	} else {
+	} 
 		res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies })
-	}
+	
 });
 
-app.post('/signup', async function (req, res) {
+app.post('/signup', async (req, res) => {
 	// Bookmarks: signup post, post signup
 
 
@@ -545,7 +509,7 @@ app.post('/signup', async function (req, res) {
 	try {
 		const verificationResponse = await axios.post('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
 			secret: secretKey,
-			response: response,
+			response,
 		});
 		if (!verificationResponse.data.success) {
 			// The Turnstile verification was successful
@@ -557,7 +521,7 @@ app.post('/signup', async function (req, res) {
 		res.status(500).send('An error occurred while verifying Turnstile.');
 	}
 
-	let email = (req.body.email).toLowerCase();
+	const email = (req.body.email).toLowerCase();
 
 	const userCheck = await db.query(client, "SELECT * FROM users WHERE email=$1 OR username=$2;", [`'${Buffer.from((email).toLowerCase()).toString('base64')}'`, `'${Buffer.from(req.body.username).toString('base64')}'`], res, req);
 
@@ -567,7 +531,7 @@ app.post('/signup', async function (req, res) {
 		return res.render(`pages/signup`, { session: req.session, cookies: req.cookies });
 	}
 	// Write to the db
-	let { hash: newpass, salt: newsalt } = createPassword(req.body.password);
+	const { hash: newpass, salt: newsalt } = createPassword(req.body.password);
 	await db.query(
 		client,
 		"INSERT INTO users (email, username, pass, email_link, worksheets_enabled, system_term, alter_term, email_pin, salt) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
@@ -588,11 +552,11 @@ app.post('/signup', async function (req, res) {
 
 	const userDat = await db.query(client, "SELECT * FROM users WHERE email=$1;", [`'${base64encode(email)}'`], res, req);
 
-	ejs.renderFile(__dirname + '/views/pages/email-welcome.ejs', { alias: req.body.username || randomise(["Buddy", "Friend", "Pal"]), userid: userDat[0].id }, (err, data) => {
+	ejs.renderFile(`${__dirname  }/views/pages/email-welcome.ejs`, { alias: req.body.username || randomise(["Buddy", "Friend", "Pal"]), userid: userDat[0].id }, (err, data) => {
 		if (err) {
 			console.log(err);
 		} else {
-			var mailOptions = { from: '"Lighthouse" <dee_deyes@writelighthouse.com>', to: req.body.email, subject: `Welcome to Lighthouse, ${req.body.username}!`, html: data };
+			const mailOptions = { from: '"Lighthouse" <dee_deyes@writelighthouse.com>', to: req.body.email, subject: `Welcome to Lighthouse, ${req.body.username}!`, html: data };
 			if (transporter) {
 				transporter.sendMail(mailOptions, (error) => {
 					if (error) {
@@ -632,15 +596,234 @@ app.post('/signup', async function (req, res) {
 
 });
 
+/*
+
+For some reason, these routes wouldn't behave in the systemRouter. So I'm putting them back, to my chagrin.
+
+*/
+app.get("/editsys/:alt", validateParam("alt"), (req, res, next) => {
+	if (isLoggedIn(req)) {
+	  client.query(
+		{text: "SELECT * FROM systems WHERE sys_id=$1", values: [`${req.params.alt}`]},
+		(err, result) => {
+		  if (err) {
+			console.log(err.stack);
+			res
+			  .status(400)
+			  .render("pages/400", {
+				session: req.session,
+				code: "Bad Request",
+				cookies: req.cookies,
+			  });
+		  } else {
+			req.session.chosenSys = result.rows[0];
+			client.query(
+			  {
+				text: "SELECT alters.name, alters.alt_id, alters.sys_id, systems.sys_alias FROM alters INNER JOIN systems ON systems.sys_id = alters.sys_id WHERE systems.sys_id=$1;",
+				values: [`${req.params.alt}`],
+			  },
+			  (err, result) => {
+				if (err) {
+				  console.log(err.stack);
+				  res
+					.status(400)
+					.render("pages/400", {
+					  session: req.session,
+					  code: "Bad Request",
+					  cookies: req.cookies,
+					});
+				} else {
+				  // console.table(result.rows);
+				  req.session.alters = result.rows;
+				  res.render(`pages/edit_sys`, {
+					session: req.session,
+					alt: req.session.chosenSys,
+					alters: result.rows,
+					cookies: req.cookies,
+				  });
+				}
+			  }
+			);
+		  }
+		  // res.render(`pages/edit_sys`, { session: req.session, alt:req.session.chosenSys });
+		}
+	  );
+	} else {
+	  res
+		.status(403)
+		.render("pages/403", {
+		  session: req.session,
+		  code: "Forbidden",
+		  cookies: req.cookies,
+		});
+	}
+	// res.render(`pages/edit_sys`, { session: req.session, alt:req.params.alt });
+  });
+  
+app.get("/deletesys/:alt", validateParam("alt"), async (req, res) => {
+	if (isLoggedIn(req)) {
+	  try {
+		const systemDat = await db.query(
+		  client,
+		  "SELECT * FROM systems WHERE sys_id=$1 AND user_id=$2",
+		  [`${req.params.alt}`, getCookies(req).u_id],
+		  res,
+		  req
+		);
+		req.session.chosenSys = systemDat[0];
+		res.render(`pages/delete_sys`, {
+		  session: req.session,
+		  alt: req.session.chosenSys,
+		  cookies: req.cookies,
+		});
+	  } catch (e) {
+		lostPage(res, req);
+	  }
+	} else {
+	  res
+		.status(403)
+		.render("pages/403", {
+		  session: req.session,
+		  code: "Forbidden",
+		  cookies: req.cookies,
+		});
+	}
+	// res.render(`pages/edit_sys`, { session: req.session, alt:req.params.alt });
+  });
+  
+app.post("/deletesys/:alt", validateParam("alt"), async (req, res) => {
+	const sysData = await db.query(
+	  client,
+	  "SELECT * FROM systems WHERE sys_id=$1",
+	  [`${req.params.alt}`],
+	  res,
+	  req
+	);
+	if (sysData.length == 0) return lostPage(res, req);
+	if (getCookies(req).u_id == sysData[0].user_id) {
+	  await db.query(
+		client,
+		"DELETE FROM systems WHERE sys_id=$1",
+		[`${req.params.alt}`],
+		res,
+		req
+	  );
+	  await db.query(
+		client,
+		"DELETE FROM systems WHERE subsys_id=$1",
+		[`${req.params.alt}`],
+		res,
+		req
+	  );
+	  req.session.chosenSys = null;
+	  res.redirect("/system");
+	} else {
+	  forbidUser(res, req);
+	}
+  });
+  
+app.post("/editsys/:alt", validateParam("alt"), (req, res) => {
+	client.query(
+	  {
+		text: "UPDATE systems SET sys_alias=$1, description=$3 WHERE sys_id=$2;",
+		values: [
+		  `'${base64encode(req.body.sysname)}'`,
+		  `${req.params.alt}`,
+		  `${encryptWithAES(req.body.sysdesc)}`,
+		],
+	  },
+	  (err, result) => {
+		if (err) {
+		  console.log(err.stack);
+		  res
+			.status(400)
+			.render("pages/400", {
+			  session: req.session,
+			  code: "Bad Request",
+			  cookies: req.cookies,
+			});
+		} else {
+		  req.flash("flash", strings.system.updated);
+		  res.redirect(`/system/${req.params.alt}`);
+		}
+	  }
+	);
+  });
+
+  app.get("/rules", (req, res, next) => {
+	if (isLoggedIn(req)) {
+	  client.query(
+		{
+		  text: "SELECT * FROM sys_rules WHERE u_id=$1 ORDER BY created DESC;",
+		  values: [getCookies(req).u_id],
+		},
+		(err, result) => {
+		  if (err) {
+			console.log(err.stack);
+			res
+			  .status(400)
+			  .render("pages/400", {
+				session: req.session,
+				code: "Bad Request",
+				cookies: req.cookies,
+			  });
+		  } else {
+			req.session.sys_rules = result.rows;
+		  }
+		  res.render(`pages/sys_rules`, {
+			session: req.session,
+			cookies: req.cookies,
+		  });
+		}
+	  );
+	} else {
+	  res
+		.status(403)
+		.render("pages/403", {
+		  session: req.session,
+		  code: "Forbidden",
+		  cookies: req.cookies,
+		});
+	}
+  });
+  
+  app.post('/rules', async (req, res) => {
+	  if (isLoggedIn(req)) {
+		  if (req.body.create) {
+			  // Create rule.
+			  client.query({ text: `INSERT INTO sys_rules (u_id, rule) VALUES ($1, $2)`, values: [getCookies(req).u_id, `'${Buffer.from(req.body.rule).toString('base64')}'`] }, (err, result) => {
+				  if (err) {
+					  console.log(err.stack);
+					  res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
+				  }
+			  });
+		  } else if (req.body.edit) {
+			  await db.query(client, "UPDATE sys_rules SET rule=$1 WHERE id=$2 AND u_id=$3", [`'${Buffer.from(req.body.edit).toString('base64')}'`, req.body.ruleid, getCookies(req).u_id], res, req);
+		  } else {
+			  // Delete Rule
+			  client.query({ text: `DELETE FROM sys_rules WHERE id=$1;`, values: [getKeyByValue(req.body, "Remove")] }, (err, result) => {
+				  if (err) {
+					  console.log(err.stack);
+					  res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
+				  }
+			  });
+		  }
+		  res.redirect(req.get('referer'));
+  
+	  } else {
+		  res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies });
+	  }
+  });
+
 // DEV MODE PAGES
-if (process.env["environment"] == "dev") {
-	app.get("/dev-test", function (req, res) {
+if (process.env.environment == "dev") {
+	app.get("/dev-test", (req, res) => {
 		res.send("Congrats! You found a dev-only page.")
 	})
 
 }
 
-app.use(function (err, req, res, next) {
+app.use((err, req, res, next) => {
 	// set locals, only providing error in development
 	res.locals.message = err.message;
 	res.locals.error = req.app.get('env') === 'development' ? err : {};
@@ -651,13 +834,13 @@ app.use(function (err, req, res, next) {
 	next(err)
 });
 
-app.use(function (req, res) {
+app.use((req, res) => {
 	res.status(404).render(`pages/404`, { session: req.session, code: "Not Found", cookies: req.cookies });
 });
 
 // End pages.
-app.listen(PORT, async function (res, req) {
-	let rn = await db.query(client, "SELECT NOW();", [], res, req);
+app.listen(PORT, async (res, req) => {
+	const rn = await db.query(client, "SELECT NOW();", [], res, req);
 	console.log(`⚓ Docked at Port ${PORT}. The time is ${(rn[0].now).toLocaleString('en-GB', { timeZone: 'EST' })}\nOpen in browser: http://localhost:${PORT}/`)
 });
 

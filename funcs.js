@@ -422,7 +422,7 @@ function truncateAndStringify(array, maxLength) {
         <a class="dyn" href="/editsys/${item.id}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
         <a href="/deletesys/${item.id}" name="${item.id}" class="dyn"><i class="fa fa-trash" aria-hidden="true"></i></a>
         <a href="/system/communal-journal?sys=${item.id}"><i class="fa fa-book" aria-hidden="true"></i></a>
-        <span class="item-name"><a href="/system/${item.id}">${base64decode(item.alias)}</a></span>`;
+        <span class="item-name"><a href="/system/${item.id}">${item.alias}</a></span>`;
     
         // Add icon
         if (item.icon){
