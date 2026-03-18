@@ -1,14 +1,14 @@
 // API routes.
 const express = require('express');
 const router = express.Router();
-const db = require('./db');
+const db = require('../db');
 const client = db.client;
 const crypto = require('crypto');
 const CryptoJS = require("crypto-js");
-var strings = require("./lang/en.json");
+var strings = require("../lang/en.json");
 const archiver = require('archiver');
 const { Readable } = require('stream');
-const { getCookies, checkUUID, apiEyesOnly, generateToken, encryptWithAES, decryptWithAES, createPassword } = require('./funcs');
+const { getCookies, checkUUID, apiEyesOnly, generateToken, encryptWithAES, decryptWithAES, createPassword } = require('../funcs');
 
 /*
 

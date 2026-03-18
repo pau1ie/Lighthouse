@@ -91,7 +91,7 @@
                       <select name="subsys" id="subdrop">
                         <option checked>None</option>
                         <% system.forEach((sys)=>{ %> 
-                          <option value="<%= sys.id %>"><%= Buffer.from(sys.alias, "base64").toString() %></option>
+                          <option value="<%= sys.id %>"><%= sys.alias %></option>
                       <% }) %>
                       </select>
                       <br><small>Nesting a <%= cookies.system_term %> creates a <%= cookies.subsystem_term %>.</small>

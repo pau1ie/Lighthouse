@@ -537,6 +537,7 @@ function createPassword(plainTextPassword) {
     };
 }
 
+
 module.exports = {
     isLoggedIn,
     getCookies,
