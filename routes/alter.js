@@ -8,112 +8,22 @@ const client = db.client;
 const CryptoJS = require("crypto-js");
 
 const {
-    isLoggedIn,
-    getCookies,
-    encryptWithAES,
-    decryptWithAES,
-    lostPage,
-    idCheck,
-    checkUUID,
-    base64encode,
-    getSystems,
-    authUser,
-    validateParam,
+  isLoggedIn,
+  getCookies,
+  encryptWithAES,
+  decryptWithAES,
+  lostPage,
+  idCheck,
+  checkUUID,
+  base64encode,
+  getSystems,
+  authUser,
+  validateParam,
 } = require("../funcs.js");
 
-router.get(
-  "/alter/edit-journal/:id",
-  authUser,
-  validateParam("id"),
-  async (req, res) => {
-    let journCheck = await db.query(
-      client,
-      "SELECT systems.user_id FROM systems INNER JOIN journals ON journals.sys_id = systems.sys_id WHERE journals.alt_id = $1;",
-      [`${req.params.id}`],
-      res,
-      req,
-      true
-    );
-    if (!journCheck) return;
-    if (!idCheck(req, journCheck[0].user_id)) return lostPage(res, req);
+// #region GET routes
 
-    let journalInfo = await db.query(
-      client,
-      "SELECT journals.*, alters.*, systems.* FROM journals INNER JOIN alters ON journals.alt_id = alters.alt_id INNER JOIN systems ON systems.sys_id = alters.sys_id WHERE journals.alt_id=$1",
-      [`${req.params.id}`],
-      res,
-      req
-    );
-
-    res.render(`pages/edit-journal`, {
-      session: req.session,
-      journal: journalInfo[0],
-      cookies: req.cookies,
-    });
-  }
-);
-
-router.post(
-  "/alter/edit-journal/:id",
-  authUser,
-  validateParam("id"),
-  async (req, res) => {
-    // Is this their alter/their journal?
-    let journCheck = await db.query(
-      client,
-      "SELECT systems.user_id FROM systems INNER JOIN journals ON journals.sys_id = systems.sys_id WHERE journals.alt_id = $1;",
-      [`${req.params.id}`],
-      res,
-      req,
-      true
-    );
-    if (!journCheck) return;
-    if (!idCheck(req, journCheck[0].user_id)) return lostPage(res, req);
-
-    let isPixel = req.body.ispixel ? true : false;
-    if (req.files) {
-      // They uploaded something-- This is the uploaded skin!
-      await db.query(
-        client,
-        "UPDATE journals SET skin_blob=$2, skin_mimetype=$3, img_url=null, skin=1, is_pixelart=$4 WHERE alt_id=$1",
-        [
-          `${req.params.id}`,
-          req.files.imgupload.data,
-          req.files.imgupload.mimetype,
-          isPixel,
-        ],
-        res,
-        req
-      );
-    } else if (req.body.imgurl) {
-      // They put in a URL
-      await db.query(
-        client,
-        "UPDATE journals SET skin_blob=null, skin_mimetype=null, img_url=$2, skin=1, is_pixelart=$3 WHERE alt_id=$1",
-        [`${req.params.id}`, `${encryptWithAES(req.body.imgurl)}`, isPixel],
-        res,
-        req
-      );
-    } else if (req.body.journ) {
-      // They picked a preset.
-      await db.query(
-        client,
-        "UPDATE journals SET skin_blob=null, skin_mimetype=null, img_url=null, skin=$2, is_pixelart=true WHERE alt_id=$1",
-        [`${req.params.id}`, `${req.body.journ}`],
-        res,
-        req
-      );
-    }
-
-    return res.redirect(`/alter/${req.params.id}`);
-  }
-);
-
-// Refactored!
-router.get(
-  "/alter/:id",
-  authUser,
-  validateParam("id"),
+router.get("/alter/:id", authUser, validateParam("id"),
   async function (req, res) {
     // Get Alter.
     const altInfo = await db.query(
@@ -223,10 +133,37 @@ router.get(
     }
   }
 );
-router.get(
-  "/archive-alter/:id",
-  authUser,
-  validateParam("id"),
+
+router.get("/alter/edit-journal/:id", authUser, validateParam("id"),
+  async (req, res) => {
+    let journCheck = await db.query(
+      client,
+      "SELECT systems.user_id FROM systems INNER JOIN journals ON journals.sys_id = systems.sys_id WHERE journals.alt_id = $1;",
+      [`${req.params.id}`],
+      res,
+      req,
+      true
+    );
+    if (!journCheck) return;
+    if (!idCheck(req, journCheck[0].user_id)) return lostPage(res, req);
+
+    let journalInfo = await db.query(
+      client,
+      "SELECT journals.*, alters.*, systems.* FROM journals INNER JOIN alters ON journals.alt_id = alters.alt_id INNER JOIN systems ON systems.sys_id = alters.sys_id WHERE journals.alt_id=$1",
+      [`${req.params.id}`],
+      res,
+      req
+    );
+
+    res.render(`pages/edit-journal`, {
+      session: req.session,
+      journal: journalInfo[0],
+      cookies: req.cookies,
+    });
+  }
+);
+
+router.get("/archive-alter/:id", authUser, validateParam("id"),
   async (req, res, next) => {
     const altInfo = await db.query(
       client,
@@ -246,10 +183,7 @@ router.get(
   }
 );
 
-router.get(
-  "/edit-alter/:id",
-  authUser,
-  validateParam("id"),
+router.get("/edit-alter/:id", authUser, validateParam("id"),
   async function (req, res) {
     let sysInfo = await getSystems(getCookies(req)["u_id"], res, req);
     let altInfo = await db.query(
@@ -280,55 +214,56 @@ router.get(
   }
 );
 
-router.get("/mood/:id", authUser, validateParam("id"), async (req, res) => {
-  const moodInfo = await db.query(
-    client,
-    "SELECT alters.name, alters.alt_id, alters.sys_id, alter_moods.* FROM alters LEFT JOIN alter_moods ON alters.alt_id = alter_moods.alt_id WHERE alters.alt_id=$1",
-    [`${req.params.id}`],
-    res,
-    req,
-    false
-  );
-  let chosenAlter = moodInfo[0];
-  if (chosenAlter.reason) {
-    chosenAlter.reason = `${decryptWithAES(moodInfo[0].reason)}`;
-  }
-  res.render(`pages/set_mood`, {
-    session: req.session,
-    cookies: req.cookies,
-    alterTypes: alterTypes,
-    chosenAlter: chosenAlter,
-  });
-});
-
-router.get("/del-mood/:id", authUser, validateParam("id"), async (req, res) => {
-  client.query(
-    {
-      text: "DELETE FROM alter_moods WHERE alt_id=$1;",
-      values: [`${req.params.id}`],
-    },
-    (err, result) => {
-      if (err) {
-        console.log(err.stack);
-        res
-          .status(400)
-          .render("pages/400", {
-            session: req.session,
-            code: "Bad Request",
-            cookies: req.cookies,
-          });
-      } else {
-        // Redirect to the alter's page!
-        res.redirect(`/alter/${req.params.id}`);
-      }
+router.get("/mood/:id", authUser, validateParam("id"),
+  async (req, res) => {
+    const moodInfo = await db.query(
+      client,
+      "SELECT alters.name, alters.alt_id, alters.sys_id, alter_moods.* FROM alters LEFT JOIN alter_moods ON alters.alt_id = alter_moods.alt_id WHERE alters.alt_id=$1",
+      [`${req.params.id}`],
+      res,
+      req,
+      false
+    );
+    let chosenAlter = moodInfo[0];
+    if (chosenAlter.reason) {
+      chosenAlter.reason = `${decryptWithAES(moodInfo[0].reason)}`;
     }
-  );
-});
+    res.render(`pages/set_mood`, {
+      session: req.session,
+      cookies: req.cookies,
+      alterTypes: alterTypes,
+      chosenAlter: chosenAlter,
+    });
+  }
+);
 
-router.get(
-  "/alter/:id/delete",
-  authUser,
-  validateParam("id"),
+router.get("/del-mood/:id", authUser, validateParam("id"),
+  async (req, res) => {
+    client.query(
+      {
+        text: "DELETE FROM alter_moods WHERE alt_id=$1;",
+        values: [`${req.params.id}`],
+      },
+      (err, result) => {
+        if (err) {
+          console.log(err.stack);
+          res
+            .status(400)
+            .render("pages/400", {
+              session: req.session,
+              code: "Bad Request",
+              cookies: req.cookies,
+            });
+        } else {
+          // Redirect to the alter's page!
+          res.redirect(`/alter/${req.params.id}`);
+        }
+      }
+    );
+  }
+);
+
+router.get("/alter/:id/delete", authUser, validateParam("id"),
   async (req, res) => {
     let alterInfo = await db.query(
       client,
@@ -349,10 +284,64 @@ router.get(
   }
 );
 
-router.post(
-  "/alter/:id/delete",
-  authUser,
-  validateParam("id"),
+// #endregion
+
+// #region POST routes
+
+router.post("/alter/edit-journal/:id", authUser, validateParam("id"),
+  async (req, res) => {
+    // Is this their alter/their journal?
+    let journCheck = await db.query(
+      client,
+      "SELECT systems.user_id FROM systems INNER JOIN journals ON journals.sys_id = systems.sys_id WHERE journals.alt_id = $1;",
+      [`${req.params.id}`],
+      res,
+      req,
+      true
+    );
+    if (!journCheck) return;
+    if (!idCheck(req, journCheck[0].user_id)) return lostPage(res, req);
+
+    let isPixel = req.body.ispixel ? true : false;
+    if (req.files) {
+      // They uploaded something-- This is the uploaded skin!
+      await db.query(
+        client,
+        "UPDATE journals SET skin_blob=$2, skin_mimetype=$3, img_url=null, skin=1, is_pixelart=$4 WHERE alt_id=$1",
+        [
+          `${req.params.id}`,
+          req.files.imgupload.data,
+          req.files.imgupload.mimetype,
+          isPixel,
+        ],
+        res,
+        req
+      );
+    } else if (req.body.imgurl) {
+      // They put in a URL
+      await db.query(
+        client,
+        "UPDATE journals SET skin_blob=null, skin_mimetype=null, img_url=$2, skin=1, is_pixelart=$3 WHERE alt_id=$1",
+        [`${req.params.id}`, `${encryptWithAES(req.body.imgurl)}`, isPixel],
+        res,
+        req
+      );
+    } else if (req.body.journ) {
+      // They picked a preset.
+      await db.query(
+        client,
+        "UPDATE journals SET skin_blob=null, skin_mimetype=null, img_url=null, skin=$2, is_pixelart=true WHERE alt_id=$1",
+        [`${req.params.id}`, `${req.body.journ}`],
+        res,
+        req
+      );
+    }
+
+    return res.redirect(`/alter/${req.params.id}`);
+  }
+);
+
+router.post("/alter/:id/delete", authUser, validateParam("id"),
   async function (req, res) {
     let chosenAlt = await db.query(
       client,
@@ -393,10 +382,7 @@ router.post(
   }
 );
 
-router.post(
-  "/alter/:id",
-  authUser,
-  validateParam("id"),
+router.post("/alter/:id", authUser, validateParam("id"),
   async function (req, res) {
     if (!checkUUID(req.params.id)) return lostPage(res, req);
     let pass = req.body.jPass || null;
@@ -574,10 +560,8 @@ router.post(
     }
   }
 );
-router.post(
-  "/edit-alter/:id",
-  authUser,
-  validateParam("id"),
+
+router.post("/edit-alter/:id", authUser, validateParam("id"),
   async (req, res) => {
     // Is this their alter tho?
     let altInf = await db.query(
@@ -815,61 +799,67 @@ router.post(
   }
 );
 
-router.post("/archive-alter/:id", (req, res, next) => {
-	if (!checkUUID(req.params.id)) return lostPage(res, req);
-	if (isLoggedIn(req)) {
-		client.query({ text: "UPDATE alters SET is_archived= NOT is_archived WHERE alt_id=$1", values: [`${req.params.id}`] }, (err, result) => {
-			if (err) {
-				console.log(err.stack);
-				res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
-			} else {
-				if (req.body.archive) {
-					req.flash("flash", "Archived.");
-				} else {
-					req.flash("flash", "Un-Archived");
-				}
+router.post("/archive-alter/:id", authUser, validateParam("id"),
+  (req, res, next) => {
+    if (!checkUUID(req.params.id)) return lostPage(res, req);
+    if (isLoggedIn(req)) {
+      client.query({ text: "UPDATE alters SET is_archived= NOT is_archived WHERE alt_id=$1", values: [`${req.params.id}`] }, (err, result) => {
+        if (err) {
+          console.log(err.stack);
+          res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
+        } else {
+          if (req.body.archive) {
+            req.flash("flash", "Archived.");
+          } else {
+            req.flash("flash", "Un-Archived");
+          }
 
-				res.redirect(`/alter/${req.params.id}`);
-			}
-		});
-	} else {
-		res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies });
-	}
-});
+          res.redirect(`/alter/${req.params.id}`);
+        }
+      });
+    } else {
+      res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies });
+    }
+  }
+);
 
-router.post('/mood/:alt', function (req, res) {
-	if (!checkUUID(req.params.alt)) return lostPage(res, req);
-	var now = new Date();
-	client.query({ text: "SELECT * FROM alter_moods WHERE alt_id=$1", values: [`${req.params.alt}`] }, (err, result) => {
-		if (err) {
-			console.log(err.stack);
-			res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
-		} else {
-			if (result.rows.length == 0) {
-				// Woops. Add new mood!
-				// `${encryptWithAES(req.body.jTitle)}`
-				client.query({ text: "INSERT INTO alter_moods (alt_id, mood, reason, timestamp) VALUES ($1, $2, $3, $4);", values: [`${req.params.alt}`, req.body.mood, `${encryptWithAES(req.body.reason)}`, `${now.getUTCFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}+${now.getTimezoneOffset()}`] }, (err, result) => {
-					if (err) {
-						console.log(err.stack);
-						res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
-					}
-					req.flash("flash", (strings.mood.updated));
-					res.redirect(302, `/alter/${req.params.alt}`);
-				});
-			} else {
-				client.query({ text: "UPDATE alter_moods SET mood=$2, reason=$3, timestamp=$4 WHERE alt_id=$1;", values: [`${req.params.alt}`, req.body.mood, `${encryptWithAES(req.body.reason)}`, `${now.getUTCFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}+${now.getTimezoneOffset()}`] }, (err, result) => {
-					if (err) {
-						console.log(err.stack);
-						res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
-					}
-					req.flash("flash", strings.mood.updated);
-					res.redirect(302, `/alter/${req.params.alt}`);
-				});
-			}
-		}
-	});
+router.post('/mood/:alt', authUser, validateParam("alt"),
+  function (req, res) {
+    if (!checkUUID(req.params.alt)) return lostPage(res, req);
+    var now = new Date();
+    client.query({ text: "SELECT * FROM alter_moods WHERE alt_id=$1", values: [`${req.params.alt}`] }, (err, result) => {
+      if (err) {
+        console.log(err.stack);
+        res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
+      } else {
+        if (result.rows.length == 0) {
+          // Woops. Add new mood!
+          // `${encryptWithAES(req.body.jTitle)}`
+          client.query({ text: "INSERT INTO alter_moods (alt_id, mood, reason, timestamp) VALUES ($1, $2, $3, $4);", values: [`${req.params.alt}`, req.body.mood, `${encryptWithAES(req.body.reason)}`, `${now.getUTCFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}+${now.getTimezoneOffset()}`] }, (err, result) => {
+            if (err) {
+              console.log(err.stack);
+              res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
+            }
+            req.flash("flash", (strings.mood.updated));
+            res.redirect(302, `/alter/${req.params.alt}`);
+          });
+        } else {
+          client.query({ text: "UPDATE alter_moods SET mood=$2, reason=$3, timestamp=$4 WHERE alt_id=$1;", values: [`${req.params.alt}`, req.body.mood, `${encryptWithAES(req.body.reason)}`, `${now.getUTCFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}+${now.getTimezoneOffset()}`] }, (err, result) => {
+            if (err) {
+              console.log(err.stack);
+              res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
+            }
+            req.flash("flash", strings.mood.updated);
+            res.redirect(302, `/alter/${req.params.alt}`);
+          });
+        }
+      }
+    });
 
-});
+  }
+);
+
+// #endregion
 
 console.log(`Alters Router Loaded.`);
 module.exports = router;
