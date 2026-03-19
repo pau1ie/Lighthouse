@@ -8,16 +8,17 @@ const client = db.client;
 const CryptoJS = require("crypto-js");
 
 const {
-  getCookies,
-  encryptWithAES,
-  decryptWithAES,
-  lostPage,
-  idCheck,
-  checkUUID,
-  getSystems,
-  authUser,
-  validateParam,
-  base64encode,
+    isLoggedIn,
+    getCookies,
+    encryptWithAES,
+    decryptWithAES,
+    lostPage,
+    idCheck,
+    checkUUID,
+    base64encode,
+    getSystems,
+    authUser,
+    validateParam,
 } = require("../funcs.js");
 
 router.get(

@@ -14,7 +14,7 @@ const axios = require('axios');
 const pjson = require('./package.json');
 
 // Local files below
-const { isLoggedIn, getCookies, encryptWithAES, decryptWithAES, lostPage, truncate, validateParam, randomise, getRandomInt, base64encode, errorPage, createPassword } = require("./funcs")
+const { isLoggedIn, getCookies, truncate, randomise, getRandomInt, base64encode, errorPage, createPassword } = require("./funcs")
 const locals = require("./config/locals")
 let strings = require("./lang/en.json");
 const db = require("./db");
