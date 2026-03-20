@@ -52,11 +52,9 @@ async function query(client, customQuery, customValues, res, req, handleZero = f
 	}
 }
 
-Pool.on('error', (err, client) => {
+client.on('error', (err) => {
 	console.error('Unexpected error on idle client', err);
-	// Don't throw an error here, as it will crash the server. Instead, log it and move on.
 });
-
 client.connect();
 
 // MODULE EXPORTS
