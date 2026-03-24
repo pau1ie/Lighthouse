@@ -37,18 +37,26 @@ if (process.env['environment'] == "dev") {
  * @param {boolean} handleZero Determine if we need to handle if the result has 0 rows.
  * @returns {array} Array of matching rows to query.
  */
-async function query(client, customQuery, customValues, res, req, handleZero = false) {
+async function query(client, customQuery, customValues, res = null, req = null, handleZero = false) {
 	try {
 		const result = await client.query({ text: customQuery, values: customValues });
 
 		if (handleZero == true && result.rows.length < 1) {
 			// We need to handle if the result has no rows. This one has none.
-			return res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
+			if (res && req) {
+				return res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
+			} else {
+				return null;
+			}
 		}
 		return result.rows;
 	} catch (e) {
 		console.error(e.stack);
-		return res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
+		if (res && req) {
+			return res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
+		} else {
+			return null;
+		}
 	}
 }
 
