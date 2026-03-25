@@ -128,6 +128,13 @@ app.use(async (req, res) => {
 			// Now update strings to let it be what their language is.
 			strings = require(`./lang/${req.session.language}.json`);
 			app.locals.strings = strings;
+
+			const cookieFields = ['u_id', 'username', 'email', 'system_term', 'alter_term', 'subsystem_term', 'innerworld_term', 'plural_term', 'is_legacy', 'font'];
+			cookieFields.forEach(field => {
+				res.cookie(field, req.session[field], { maxAge: twoWeeks, httpOnly: true });
+			});
+			app.locals.cookies = req.cookies;
+			app.locals.session = req.session;
 		} catch (e) {
 			// They're likely logged out.
 			// console.error(e)
