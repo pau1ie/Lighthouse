@@ -3,7 +3,19 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db.js");
 const client = db.client;
-const { getCookies, encryptWithAES, decryptWithAES, idCheck, authUser, validateParam, isLoggedIn } = require("../funcs.js");
+const {
+  isLoggedIn,
+  getCookies,
+  encryptWithAES,
+  decryptWithAES,
+  forbidUser,
+  lostPage,
+  idCheck,
+  getKeyByValue,
+  base64decode,
+  authUser,
+  validateParam,
+} = require("../funcs.js");
 
 /**
  * Updates a journal post. Note to self: This should be a router.patch().
@@ -274,99 +286,99 @@ router.get(
 );
 
 router.get('/clearalter', (req, res, next) => {
-	req.session.journalUser = null;
-	res.redirect('/system');
+  req.session.journalUser = null;
+  res.redirect('/system');
 });
 
 router.get('/comm/:id/edit', validateParam("id"), async function (req, res) {
 
-	if (isLoggedIn(req)) {
-		const sysCheck = await db.query(client, "SELECT id FROM comm_posts WHERE u_id=$1", [getCookies(req)['u_id']], res, req);
-		const sysList = sysCheck.map(obj => obj.id);
-		if (!(sysList.includes(req.params.id))) return res.status(404).render(`pages/404`, { session: req.session, code: "Not Found", cookies: req.cookies });
+  if (isLoggedIn(req)) {
+    const sysCheck = await db.query(client, "SELECT id FROM comm_posts WHERE u_id=$1", [getCookies(req)['u_id']], res, req);
+    const sysList = sysCheck.map(obj => obj.id);
+    if (!(sysList.includes(req.params.id))) return res.status(404).render(`pages/404`, { session: req.session, code: "Not Found", cookies: req.cookies });
 
-		const postInfo = await db.query(client, "SELECT * FROM comm_posts WHERE id=$1", [`${req.params.id}`], res, req);
-		res.render(`pages/edit_post`, { session: req.session, cookies: req.cookies, cJourn: { id: postInfo[0].id, body: decryptWithAES(postInfo[0].body), title: decryptWithAES(postInfo[0].title), is_comm: true, date: postInfo[0].created_on, sysid: postInfo[0].system_id, feeling: postInfo[0].feeling ? decryptWithAES(postInfo[0].feeling) : "" } });
-	} else {
-		forbidUser(res, req);
-	}
+    const postInfo = await db.query(client, "SELECT * FROM comm_posts WHERE id=$1", [`${req.params.id}`], res, req);
+    res.render(`pages/edit_post`, { session: req.session, cookies: req.cookies, cJourn: { id: postInfo[0].id, body: decryptWithAES(postInfo[0].body), title: decryptWithAES(postInfo[0].title), is_comm: true, date: postInfo[0].created_on, sysid: postInfo[0].system_id, feeling: postInfo[0].feeling ? decryptWithAES(postInfo[0].feeling) : "" } });
+  } else {
+    forbidUser(res, req);
+  }
 
 
 });
 
 router.get('/comm/:id/delete', validateParam("id"), async function (req, res) {
-	if (isLoggedIn(req)) {
-		client.query({ text: "SELECT * FROM comm_posts WHERE id=$1;", values: [`${req.params.id}`] }, async function (err, result) {
-			if (err) {
-				console.log(err.stack);
-				res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
-			} else {
-				const sysCheck = await db.query(client, "SELECT id FROM comm_posts WHERE u_id=$1", [getCookies(req)['u_id']], res, req);
-				const sysList = sysCheck.map(obj => obj.id);
-				if (!(sysList.includes(req.params.id))) return res.status(404).render(`pages/404`, { session: req.session, code: "Not Found", cookies: req.cookies });
+  if (isLoggedIn(req)) {
+    client.query({ text: "SELECT * FROM comm_posts WHERE id=$1;", values: [`${req.params.id}`] }, async function (err, result) {
+      if (err) {
+        console.log(err.stack);
+        res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
+      } else {
+        const sysCheck = await db.query(client, "SELECT id FROM comm_posts WHERE u_id=$1", [getCookies(req)['u_id']], res, req);
+        const sysList = sysCheck.map(obj => obj.id);
+        if (!(sysList.includes(req.params.id))) return res.status(404).render(`pages/404`, { session: req.session, code: "Not Found", cookies: req.cookies });
 
-				// console.log(result.rows[0]);
-				req.session.jPost = result.rows[0];
-				req.session.jPost.body = decryptWithAES(req.session.jPost.body);
-				req.session.jPost.title = decryptWithAES(req.session.jPost.title);
-				let sysid = result.rows[0].system_id;
-				res.render(`pages/delete_post`, { session: req.session, cookies: req.cookies, sysid: sysid });
-			}
-		});
-	} else {
-		res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies });
-	}
+        // console.log(result.rows[0]);
+        req.session.jPost = result.rows[0];
+        req.session.jPost.body = decryptWithAES(req.session.jPost.body);
+        req.session.jPost.title = decryptWithAES(req.session.jPost.title);
+        let sysid = result.rows[0].system_id;
+        res.render(`pages/delete_post`, { session: req.session, cookies: req.cookies, sysid: sysid });
+      }
+    });
+  } else {
+    res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies });
+  }
 
 });
 
 router.post('/comm/:id/delete', validateParam("id"), (req, res) => {
-	if (isLoggedIn(req)) {
-		client.query({ text: "DELETE FROM comm_posts WHERE id=$1; ", values: [`${req.params.id}`] }, (err, result) => {
-			if (err) {
-				console.log(err.stack);
-				res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
-			} else {
-				req.session.jPost = null;
-				//   res.redirect(`/system`);
-				if (req.body.sysid) {
-					res.redirect(`/system/communal-journal?sys=${req.body.sysid}`);
-				} else {
-					res.redirect(`/system/communal-journal`);
-				}
-			}
-		});
-	} else {
-		res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies });
-	}
+  if (isLoggedIn(req)) {
+    client.query({ text: "DELETE FROM comm_posts WHERE id=$1; ", values: [`${req.params.id}`] }, (err, result) => {
+      if (err) {
+        console.log(err.stack);
+        res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
+      } else {
+        req.session.jPost = null;
+        //   res.redirect(`/system`);
+        if (req.body.sysid) {
+          res.redirect(`/system/communal-journal?sys=${req.body.sysid}`);
+        } else {
+          res.redirect(`/system/communal-journal`);
+        }
+      }
+    });
+  } else {
+    res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies });
+  }
 });
 
 router.post('/comm/:id/edit', validateParam("id"), (req, res) => {
-	if (isLoggedIn(req)) {
-		client.query({
-			text: "UPDATE comm_posts SET title=$1, body=$2, created_on=$4 WHERE id=$3; ",
-			values: [
-				`${encryptWithAES(req.body.jTitle)}`,
-				`${encryptWithAES(req.body.jBody)}`,
-				`${req.params.id}`,
-				`${req.body.jDate || new Date().toISOString()}`
-			]
-		}, (err, result) => {
-			if (err) {
-				console.log(err.stack);
-				res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
-			} else {
-				req.session.jPost = null;
-				if (req.body.sysid) {
-					res.redirect(`/system/communal-journal?sys=${req.body.sysid}`);
-				} else {
-					res.redirect(`/system/communal-journal`);
-				}
-			}
+  if (isLoggedIn(req)) {
+    client.query({
+      text: "UPDATE comm_posts SET title=$1, body=$2, created_on=$4 WHERE id=$3; ",
+      values: [
+        `${encryptWithAES(req.body.jTitle)}`,
+        `${encryptWithAES(req.body.jBody)}`,
+        `${req.params.id}`,
+        `${req.body.jDate || new Date().toISOString()}`
+      ]
+    }, (err, result) => {
+      if (err) {
+        console.log(err.stack);
+        res.status(400).render('pages/400', { session: req.session, code: "Bad Request", cookies: req.cookies });
+      } else {
+        req.session.jPost = null;
+        if (req.body.sysid) {
+          res.redirect(`/system/communal-journal?sys=${req.body.sysid}`);
+        } else {
+          res.redirect(`/system/communal-journal`);
+        }
+      }
 
-		});
-	} else {
-		res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies });
-	}
+    });
+  } else {
+    res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies });
+  }
 });
 
 console.log(`Journals Router Loaded.`);

@@ -8,7 +8,17 @@ const CryptoJS = require("crypto-js");
 var strings = require("../lang/en.json");
 const archiver = require('archiver');
 const { Readable } = require('stream');
-const { authUser, getCookies, checkUUID, apiEyesOnly, generateToken, encryptWithAES, decryptWithAES, createPassword, validateParam } = require('../funcs');
+const {
+  getCookies,
+  apiEyesOnly,
+  encryptWithAES,
+  decryptWithAES,
+  checkUUID,
+  generateToken,
+  authUser,
+  validateParam,
+  createPassword
+} = require('../funcs');
 
 // #region POST routes
 router.post('/generate-token', authUser,

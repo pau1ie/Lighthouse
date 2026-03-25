@@ -3,10 +3,10 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db.js");
 const client = db.client;
-const crypto = require("crypto");
-const CryptoJS = require("crypto-js");
-var strings = require("../lang/en.json");
-const { isLoggedIn } = require("../funcs.js");
+const {
+  isLoggedIn,
+  forbidUser,
+} = require("../funcs.js");
 
 router.get("/philosophy", (req, res, next) => {
   res.render(`pages/phil`, { session: req.session, cookies: req.cookies });

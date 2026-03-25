@@ -4,7 +4,18 @@ const router = express.Router();
 const db = require('../db');
 const client = db.client;
 
-const { getCookies, apiEyesOnly, encryptWithAES, decryptWithAES, idCheck, paginate, sortFunction, authUser, validateParam } = require("../funcs.js");
+const {
+    getCookies,
+    apiEyesOnly,
+    encryptWithAES,
+    decryptWithAES,
+    lostPage,
+    idCheck,
+    paginate,
+    sortFunction,
+    authUser,
+    validateParam,
+} = require("../funcs.js");
 
 // Refactored!
 router.get('/forum/:id/new', validateParam('id'), authUser, async function (req, res) {
@@ -119,7 +130,7 @@ router.get('/topic/:id/:pg?', validateParam('id'), authUser, (req, res) => {
         } else {
             // Here's the OP post
             /* issue */
-            if (result.rows.length == 0){
+            if (result.rows.length == 0) {
                 return lostPage(res, req);
             }
             let originalPost = {
