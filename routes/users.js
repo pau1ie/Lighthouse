@@ -3,7 +3,19 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db.js");
 const client = db.client;
-const { getCookies, apiEyesOnly } = require("../funcs.js");
+const {
+  isLoggedIn,
+  getCookies,
+  apiEyesOnly,
+  lostPage,
+  randomise,
+  getRandomInt,
+  createPassword
+} = require("../funcs.js");
+
+const strings = require("../lang/en.json");
+const ejs = require("ejs");
+const twoWeeks = 1000 * 60 * 60 * 24 * 14;
 
 router.get("/users", (req, res, next) => {
   if (apiEyesOnly(req)) {
@@ -658,7 +670,7 @@ router.post("/profile", function (req, res) {
           .cookie(
             "username",
             req.body.newName ||
-              Buffer.from(req.session.username, "base64").toString(),
+            Buffer.from(req.session.username, "base64").toString(),
             { maxAge: twoWeeks, httpOnly: true }
           )
           .cookie("email", req.body.newEmail || req.session.email, {

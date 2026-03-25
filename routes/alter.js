@@ -7,6 +7,8 @@ const alterTypes = tuning.alterTypes;
 const client = db.client;
 const CryptoJS = require("crypto-js");
 
+const strings = require("../lang/en.json");
+
 const {
   isLoggedIn,
   getCookies,
