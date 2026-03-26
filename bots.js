@@ -6,6 +6,7 @@ const db = require('./db');
 const client= db.client;
 const crypto= require('crypto');
 const CryptoJS = require("crypto-js");
+const config = require('./config');
 var strings= require("./lang/en.json");
 
 
@@ -14,41 +15,41 @@ router.get("/sitemap.xml", function(req, res) {
 res.setHeader('content-type', 'text/plain');
 res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <urlset
-xmlns="http://www.writelighthouse.com"
-xsi:schemaLocation="http://www.writelighthouse.com/sitemap.xml">
+xmlns="` + config.URL_PREFIX + `"
+xsi:schemaLocation="` + config.URL_PREFIX + `/sitemap.xml">
 
 <url>
-<loc>https://www.writelighthouse.com/</loc>
+<loc>` + config.URL_PREFIX + `</loc>
 <lastmod>2023-05-06T00:29:06+00:00</lastmod>
 <priority>1.00</priority>
 </url>
 <url>
-<loc>https://www.writelighthouse.com/signup</loc>
+<loc>` + config.URL_PREFIX + `signup</loc>
 <lastmod>2023-05-06T00:29:06+00:00</lastmod>
 <priority>0.80</priority>
 </url>
 <url>
-<loc>https://www.writelighthouse.com/login</loc>
+<loc>` + config.URL_PREFIX + `login</loc>
 <lastmod>2023-05-06T00:29:06+00:00</lastmod>
 <priority>0.80</priority>
 </url>
 <url>
-<loc>https://www.writelighthouse.com/about</loc>
+<loc>` + config.URL_PREFIX + `about</loc>
 <lastmod>2023-05-06T00:29:06+00:00</lastmod>
 <priority>0.80</priority>
 </url>
 <url>
-<loc>https://www.writelighthouse.com/changelog</loc>
+<loc>` + config.URL_PREFIX + `changelog</loc>
 <lastmod>2023-05-06T00:29:06+00:00</lastmod>
 <priority>0.80</priority>
 </url>
 <url>
-<loc>https://www.writelighthouse.com/glossary</loc>
+<loc>` + config.URL_PREFIX + `glossary</loc>
 <lastmod>2023-05-06T00:29:06+00:00</lastmod>
 <priority>0.90</priority>
 </url>
 <url>
-<loc>https://www.writelighthouse.com/tutorial</loc>
+<loc>` + config.URL_PREFIX + `tutorial</loc>
 <lastmod>2023-05-06T00:29:06+00:00</lastmod>
 <priority>0.75</priority>
 </url>
@@ -117,7 +118,7 @@ Allow: /about
 Allow: /glossary
 Allow: /tutorial
 Crawl-delay: 10
-Sitemap: www.writelighthouse.com/sitemap.xml`);
+Sitemap: ` + config.URL_PREFIX + `/sitemap.xml`);
 });
 
 console.log(`Web Crawler Router Loaded.`);

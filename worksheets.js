@@ -8,8 +8,8 @@ const CryptoJS = require("crypto-js");
 var strings= require("./lang/en.json");
 const ejs = require('ejs');
 const path = require('path');
-const PORT = process.env.PORT || 5000;
 const fs = require('fs');
+const config = require('./config');
 var pdf = require("html-pdf");
 
 
@@ -38,6 +38,7 @@ if (isLoggedIn(req)){
 	if(apiEyesOnly(req)){
 		const safetyPlan= await db.query(client, "SELECT * FROM safetyplans WHERE u_id=$1", [getCookies(req)['u_id']], res, req);
 		var user={
+			                url_prefix: config.URL_PREFIX,
 					id: safetyPlan[0].user,
 					name: getCookies(req)['username'],
 					symptoms: decryptWithAES(safetyPlan[0].symptoms),

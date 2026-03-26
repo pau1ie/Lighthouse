@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const config = require('./config');
 const db = require('./db');
 const client= db.client;
 const crypto= require('crypto');
@@ -103,7 +104,7 @@ function apiEyesOnly(req) {
  * @param {String} passphrase - The passphrase to use for encryption.
  * @returns {String} The encrypted text.
  */
-function encryptWithAES(text, passphrase = process.env.cryptkey){
+function encryptWithAES(text, passphrase = config.CRYPT_KEY){
   return CryptoJS.AES.encrypt(text, passphrase).toString();
 }
 
@@ -113,7 +114,7 @@ function encryptWithAES(text, passphrase = process.env.cryptkey){
  * @param {String} passphrase - The passphrase to use for decryption.
  * @returns {String} The decrypted text.
  */
-function decryptWithAES(ciphertext, passphrase = process.env.cryptkey){
+function decryptWithAES(ciphertext, passphrase = config.CRYPT_KEY){
   const bytes = CryptoJS.AES.decrypt(ciphertext, passphrase);
   try {
     const originalText = bytes.toString(CryptoJS.enc.Utf8);
@@ -522,7 +523,7 @@ function createPassword(plainTextPassword) {
     I'm gonna stop yapping, I got tasks at work to do ha.
     - Blue, Lighthouse System
     */
-    const encryptedSalt = encryptWithAES(rawSalt, process.env.SALT_KEY);
+    const encryptedSalt = encryptWithAES(rawSalt, config.SALT_KEY);
     const passwordHash = CryptoJS.SHA3(plainTextPassword + rawSalt).toString();
     
     return {

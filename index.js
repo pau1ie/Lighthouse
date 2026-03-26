@@ -11,6 +11,8 @@ const fs = require('fs');
 var pdf = require("html-pdf");
 const nodemailer = require('nodemailer');
 const ejs = require('ejs');
+const config = require('./config');
+const site_config = { admin_email: config.ADMIN_EMAIL, url_prefix: config.URL_PREFIX };
 var pluralize = require('pluralize');
 var pjson = require('./package.json');
 var flash = require('express-flash');
@@ -63,21 +65,18 @@ function getHourFormat(locale) {
 
 // const { start } = require('repl');
 
-require('dotenv').config();
-
-const PORT = process.env.PORT;
 
 // #endregion ------------------------------------------------------------------
 
-const hasMailConfig = Boolean(process.env.gmail_pass);
+const hasMailConfig = Boolean(config.GMAIL_PASS);
 const transporter = hasMailConfig
 	? nodemailer.createTransport({
 		host: 'smtp.gmail.com',
 		port: 465,
 		secure: true,
 		auth: {
-			user: 'dee_deyes@writelighthouse.com',
-			pass: process.env.gmail_pass,
+			user: config.ADMIN_EMAIL,
+			pass: config.GMAIL_PASS,
 		},
 	})
 	: null; // Not letting just anyone send emails through this account. Sorry!
@@ -103,7 +102,7 @@ app.use('/', express.static(__dirname + '/public'))
 app.use(session({
 	name: "session",
 	secure: true,
-	secret: process.env.sec,
+	secret: config.SECRET,
 	resave: true,
 	saveUninitialized: true,
 }));
@@ -125,6 +124,7 @@ app.use(methodOverride('_method'))
 
 
 // App Local Variables
+app.locals.url_prefix = config.URL_PREFIX;
 app.locals.version = pjson.version;
 app.locals.siteLanguage = langVar.siteLanguage;
 app.locals.editorColours = tuning.editorColours;
@@ -132,7 +132,7 @@ app.locals.journalArr = splitByGroup(tuning.journals);
 app.locals.journals = tuning.journals;
 app.locals.skinGroups = tuning.skinGroups;
 app.locals.strings = strings;
-app.locals.apiKey = process.env.apiKey;
+app.locals.cloudflare_key = config.CLOUDFLARE_KEY;
 app.locals.moods = tuning.moods;
 app.locals.isLoggedIn = function (cookies) {
 	if (!cookies.u_id) {
@@ -172,7 +172,7 @@ app.locals.timeOptions = {
 }
 app.locals.truncateAndStringify = truncateAndStringify;
 app.locals.renderNestedList = renderNestedList;
-app.locals.isDev = process.env.environment == "dev";
+app.locals.isDev = config.ENVIRONMENT == "dev";
 app.locals.getHourFormat = getHourFormat;
 app.locals.formatGMTToLocal = function (gmtTimestamp, userLocale, userTimezone) {
 	const date = new Date(gmtTimestamp);
@@ -217,7 +217,7 @@ app.use(async function (req, res) {
 			req.session.language = results.language || "en";
 			req.session.is_dev = Boolean(
 				results?.id &&
-				[process.env.dev1, process.env.dev2, process.env.dev3].includes(results.id)
+				config.DEVELOPERS.includes(results.id)
 			); // <-- So if ID is not defined, they can't access dev features. Hoo boy that's a scary hole.
 			req.session.textsize = results.textsize;
 			req.session.worksheets_enabled = results.worksheets_enabled;
@@ -266,7 +266,7 @@ app.use("/inbox", messagesRouter); // For the messages routes.
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs');
 
-if (process.env.maintenance == "true") {
+if (config.MAINTENANCE == "true") {
 	// Maintenance mode on.
 	app.use(function (req, res) {
 		return res.render(`pages/maintenance`, { session: req.session, cookies: req.cookies });
@@ -322,7 +322,7 @@ app.get('/verify/:id', async function (req, res) {
 // No need to refactor
 app.get('/simply-plural', (req, res) => {
 	if (isLoggedIn(req)) {
-		res.render(`pages/sp-import`, { session: req.session, cookies: req.cookies });
+		res.render(`pages/sp-import`, { session: req.session, cookies: req.cookies, config: site_config });
 	} else { forbidUser(res, req) }
 });
 
@@ -383,12 +383,12 @@ app.get('/search', (req, res) => {
 app.get('/mod', (req, res) => {
 	// console.log(req.socket.remoteAddress);
 	if (isLoggedIn(req)) {
-		if ([process.env.dev1, process.env.dev2, process.env.dev3].includes(getCookies(req)['u_id'])) {
+		if (config.DEVELOPERS.includes(getCookies(req)['u_id'])) {
 			res.render(`pages/mod-panel`, { session: req.session, cookies: req.cookies });
 		} else {
 			var mailOptions = {
-				from: '"Lighthouse" <dee_deyes@writelighthouse.com>',
-				to: 'dee_deyes@writelighthouse.com',
+				from: '"Lighthouse" <' + config.ADMIN_EMAIL + '>',
+				to: config.ADMIN_EMAIL,
 				subject: `Unauthorised attempt to access mod panel.`,
 				html: `<p>A user has attempted to enter the mod panel!</p><p>User: ID: ${getCookies(req)['u_id'] || "Guest/Logged Out User"}</p><p>Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}</p><p>IP Address: ${req.socket.remoteAddress}</p>`
 			};
@@ -400,15 +400,15 @@ app.get('/mod', (req, res) => {
 					}
 				});
 			} else {
-				console.log("Email skipped: gmail_pass is not configured.");
+				console.log("Email skipped: GMAIL_PASS is not configured.");
 			}
 			console.log(`An attempt to enter the mod panel was made.\n Attempt made by: ${getCookies(req)['u_id'] || "Guest/Logged Out User"} | Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}. IP Address: ${req.socket.remoteAddress}`);
 			res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies });
 		}
 	} else {
 		var mailOptions = {
-			from: '"Lighthouse" <dee_deyes@writelighthouse.com>',
-			to: 'dee_deyes@writelighthouse.com',
+			from: '"Lighthouse" <' + config.ADMIN_EMAIL + '>',
+			to: config.ADMIN_EMAIL,
 			subject: `Unauthorised attempt to access mod panel.`,
 			html: `<p>A user has attempted to enter the mod panel!</p><p>User: ID: ${getCookies(req)['u_id'] || "Guest/Logged Out User"}</p><p>Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}</p><p>IP Address: ${req.socket.remoteAddress}</p>`
 		};
@@ -420,7 +420,7 @@ app.get('/mod', (req, res) => {
 				}
 			});
 		} else {
-			console.log("Email skipped: gmail_pass is not configured.");
+			console.log("Email skipped: GMAIL_PASS is not configured.");
 		}
 		console.log(`An attempt to enter the mod panel was made.\n Attempt made by: ${getCookies(req)['u_id'] || "Guest/Logged Out User"} | Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}. IP Address: ${req.socket.remoteAddress}`);
 		res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies });
@@ -431,7 +431,7 @@ app.get('/mod', (req, res) => {
 
 app.get("/pluralkit", (req, res) => {
 	if (isLoggedIn(req)) {
-		res.render(`pages/pluralkit`, { session: req.session, cookies: req.cookies, lang: req.acceptsLanguages()[0] });
+		res.render(`pages/pluralkit`, { session: req.session, cookies: req.cookies, lang: req.acceptsLanguages()[0], config: site_config });
 	}
 });
 
@@ -460,7 +460,7 @@ app.get('/glossary', async function (req, res) {
 			return res.render(`pages/glossary-disabled`, { session: req.session, cookies: req.cookies, });
 		}
 	}
-	res.render(`pages/glossary`, { session: req.session, cookies: req.cookies, terms: terms, lang: req.acceptsLanguages()[0] });
+	res.render(`pages/glossary`, { session: req.session, cookies: req.cookies, terms: terms, lang: req.acceptsLanguages()[0], url_prefix: config.URL_PREFIX });
 });
 
 
@@ -969,7 +969,7 @@ app.get('/profile', (req, res) => {
 app.get("/profile/tokens", async function (req, res) {
 	if (isLoggedIn(req)) {
 		let tokens = await db.query(client, "SELECT * FROM tokens WHERE u_id=$1 ORDER BY name ASC;", [getCookies(req)['u_id']], res, req);
-		res.render(`pages/tokens`, { session: req.session, cookies: req.cookies, tokens: tokens });
+		res.render(`pages/tokens`, { session: req.session, cookies: req.cookies, tokens: tokens, config: site_config });
 	} else { res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies }); }
 });
 
@@ -1035,7 +1035,7 @@ app.post("/archive-alter/:id", (req, res, next) => {
 
 app.post('/mod', (req, res) => {
 	if (isLoggedIn(req)) {
-		if ([process.env.dev1, process.env.dev2, process.env.dev3].includes(getCookies(req)['u_id'])) {
+		if (config.DEVELOPERS.includes(getCookies(req)['u_id'])) {
 			//This is a developer account; let them in.
 			if (req.body.donor) {
 				// Add a donor!
@@ -1062,8 +1062,8 @@ app.post('/mod', (req, res) => {
 			}
 		} else {
 			var mailOptions = {
-				from: '"Lighthouse" <dee_deyes@writelighthouse.com>',
-				to: 'dee_deyes@writelighthouse.com',
+				from: '"Lighthouse" <' + config.ADMIN_EMAIL + '>',
+				to: config.ADMIN_EMAIL,
 				subject: `Unauthorised attempt to POST to mod panel.`,
 				html: `<p>A user has attempted to POST to the mod panel!</p><p>User: ID: ${getCookies(req)['u_id'] || "Guest/Logged Out User"}</p><p>Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}</p><p>IP Address: ${req.socket.remoteAddress}</p>`
 			};
@@ -1075,7 +1075,7 @@ app.post('/mod', (req, res) => {
 					}
 				});
 			} else {
-				console.log("Email skipped: gmail_pass is not configured.");
+				console.log("Email skipped: GMAIL_PASS is not configured.");
 			}
 			console.log(`An attempt to POST to the mod panel was made.\n Attempt made by: ${getCookies(req)['u_id'] || "Guest/Logged Out User"} | Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"} | IP Address: ${req.socket.remoteAddress}`);
 			res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies });
@@ -1083,8 +1083,8 @@ app.post('/mod', (req, res) => {
 
 	} else {
 		var mailOptions = {
-			from: '"Lighthouse" <dee_deyes@writelighthouse.com>',
-			to: 'dee_deyes@writelighthouse.com',
+			from: '"Lighthouse" <' + config.ADMIN_EMAIL + '>',
+			to: config.ADMIN_EMAIL,
 			subject: `Unauthorised attempt to POST to mod panel.`,
 			html: `<p>A user has attempted to POST to the mod panel!</p><p>User: ID: ${getCookies(req)['u_id'] || "Guest/Logged Out User"}</p><p>Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"}</p><p>IP Address: ${req.socket.remoteAddress}</p>`
 		};
@@ -1096,7 +1096,7 @@ app.post('/mod', (req, res) => {
 				}
 			});
 		} else {
-			console.log("Email skipped: gmail_pass is not configured.");
+			console.log("Email skipped: GMAIL_PASS is not configured.");
 		}
 		console.log(`An attempt to POST to the mod panel was made.\n Attempt made by: ${getCookies(req)['u_id'] || "Guest/Logged Out User"} | Email: ${Buffer.from(getCookies(req)['email'], "base64").toString() || "N/A"} | IP Address: ${req.socket.remoteAddress}`);
 		res.status(403).render('pages/403', { session: req.session, code: "Forbidden", cookies: req.cookies });
@@ -1149,12 +1149,12 @@ app.post('/profile', function (req, res) {
 			if (getCookies(req)['u_id'] == result.rows[0].id) {
 				// Logged account matches searched account.
 				if (req.body.deleteAcc) {
-					ejs.renderFile(__dirname + '/views/pages/email-goodbye.ejs', { alias: Buffer.from(result.rows[0].username, 'base64').toString() || randomise(["Buddy", "Friend", "Pal"]) }, (err, data) => {
+					ejs.renderFile(__dirname + '/views/pages/email-goodbye.ejs', { alias: Buffer.from(result.rows[0].username, 'base64').toString() || randomise(["Buddy", "Friend", "Pal"]), config: site_config }, (err, data) => {
 						if (err) {
 							console.log(err);
 						} else {
 							var mailOptions = {
-								from: '"Lighthouse" <dee_deyes@writelighthouse.com>',
+								from: '"Lighthouse" <' + config.ADMIN_EMAIL + '>',
 								to: Buffer.from(result.rows[0].email, 'base64').toString(),
 								subject: `Farewell, ${Buffer.from(result.rows[0].username, 'base64').toString()}.`,
 								html: data
@@ -1167,7 +1167,7 @@ app.post('/profile', function (req, res) {
 									}
 								});
 							} else {
-								console.log("Email skipped: gmail_pass is not configured.");
+								console.log("Email skipped: GMAIL_PASS is not configured.");
 							}
 						}
 					});
@@ -1433,12 +1433,12 @@ app.post('/forgot-password', (req, res) => {
 				req.session.user.email_pin = getRandomInt(1111, 9999);
 				client.query({ text: 'UPDATE users set email_pin=$1 WHERE email=$2 ', values: [`${req.session.user.email_pin}`, `'${Buffer.from(req.body.email).toString('base64')}'`] }, (err, result) => {
 					res.render(`pages/forgot_pass2`, { session: req.session, cookies: req.cookies });
-					ejs.renderFile(__dirname + '/views/pages/email-forgotpass.ejs', { alias: Buffer.from(req.session.user.username, 'base64').toString() || randomise(["Buddy", "Friend", "Pal"]), userPin: req.session.user.email_pin, resetLink: (req.session.user.email_link).replace(/'/gi, '') }, (err, data) => {
+					ejs.renderFile(__dirname + '/views/pages/email-forgotpass.ejs', { alias: Buffer.from(req.session.user.username, 'base64').toString() || randomise(["Buddy", "Friend", "Pal"]), userPin: req.session.user.email_pin, resetLink: (req.session.user.email_link).replace(/'/gi, ''), url_prefix: config.URL_PREFIX }, (err, data) => {
 						if (err) {
 							console.log(err);
 						} else {
 							var mailOptions = {
-								from: '"Lighthouse" <dee_deyes@writelighthouse.com>',
+								from: '"Lighthouse" <' + config.ADMIN_EMAIL + '>',
 								to: req.body.email,
 								subject: `Forgot your password, ${Buffer.from(req.session.user.username, 'base64').toString()}?`,
 								html: data
@@ -1451,7 +1451,8 @@ app.post('/forgot-password', (req, res) => {
 									}
 								});
 							} else {
-								console.log("Email skipped: gmail_pass is not configured.");
+								console.log("Email skipped: GMAIL_PASS is not configured.");
+								console.log(data);
 							}
 						}
 					});
@@ -1696,7 +1697,7 @@ app.post('/pluralkit', (req, res) => {
 		var splitList = new Array();
 		if (typeof req.body.alterChoice == "string") {
 			splitList = [JSON.parse(req.body.alterChoice)];
-			if (splitList[0].img == null) splitList[0].img = 'https://www.writelighthouse.com/img/avatar-default.jpg';
+			if (splitList[0].img == null) splitList[0].img = config.URL_PREFIX + '/img/avatar-default.jpg';
 			if (splitList[0].pronouns == null) splitList[0].pronouns = '';
 			if (splitList[0].birthday == null) splitList[0].birthday = '';
 		} else if (typeof req.body.alterChoice == "undefined") {
@@ -1705,7 +1706,7 @@ app.post('/pluralkit', (req, res) => {
 		} else {
 				/* Issue */ for (i in req.body.alterChoice) {
 				splitList.push(JSON.parse(req.body.alterChoice[i]));
-				if (splitList[i].img == null) splitList[i].img = 'https://www.writelighthouse.com/img/avatar-default.jpg';
+				if (splitList[i].img == null) splitList[i].img = config.URL_PREFIX + '/img/avatar-default.jpg';
 				if (splitList[i].pronouns == null) splitList[i].pronouns = null;
 				if (splitList[i].birthday == null) splitList[i].birthday = '';
 			}
@@ -1782,24 +1783,28 @@ app.post('/signup', async function (req, res) {
 	// Bookmarks: signup post, post signup
 
 
-	const secretKey = process.env.environment == "dev" ? "1x0000000000000000000000000000000AA" : process.env.cloudflareKey;
+	if (config.CLOUDFLARE_KEY) {
+		const secretKey = config.ENVIRONMENT == "dev" ? "1x0000000000000000000000000000000AA" : config.CLOUDFLARE_KEY;
 
-	const response = req.body['cf-turnstile-response'];
-	if (req.body.mjl2fbbz8s) return res.send("(:"); // It's a bot. Do not let them load anything.
+		const response = req.body['cf-turnstile-response'];
+		if (req.body.mjl2fbbz8s) return res.send("(:"); // It's a bot. Do not let them load anything.
 
-	try {
-		const verificationResponse = await axios.post('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-			secret: secretKey,
-			response: response,
-		});
-		if (!verificationResponse.data.success) {
-			// The Turnstile verification was successful
-			req.flash("flash", "CAPTCHA	verification unsuccessful.");
-			return res.render(`pages/signup`, { session: req.session, cookies: req.cookies });
+		try {
+			const verificationResponse = await axios.post('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+				secret: secretKey,
+				response: response,
+			});
+			if (!verificationResponse.data.success) {
+				// The Turnstile verification was successful
+				req.flash("flash", "CAPTCHA	verification unsuccessful.");
+				return res.render(`pages/signup`, { session: req.session, cookies: req.cookies });
+			}
+		} catch (error) {
+			console.error('Error verifying Turnstile:', error);
+			res.status(500).send('An error occurred while verifying Turnstile.');
 		}
-	} catch (error) {
-		console.error('Error verifying Turnstile:', error);
-		res.status(500).send('An error occurred while verifying Turnstile.');
+	} else {
+		console.log('CLOUDFLARE_KEY is not set up.');
 	}
 
 	let email = (req.body.email).toLowerCase();
@@ -1833,11 +1838,11 @@ app.post('/signup', async function (req, res) {
 
 	const userDat = await db.query(client, "SELECT * FROM users WHERE email=$1;", [`'${base64encode(email)}'`], res, req);
 
-	ejs.renderFile(__dirname + '/views/pages/email-welcome.ejs', { alias: req.body.username || randomise(["Buddy", "Friend", "Pal"]), userid: userDat[0].id }, (err, data) => {
+	ejs.renderFile(__dirname + '/views/pages/email-welcome.ejs', { alias: req.body.username || randomise(["Buddy", "Friend", "Pal"]), userid: userDat[0].id, config: site_config }, (err, data) => {
 		if (err) {
 			console.log(err);
 		} else {
-			var mailOptions = { from: '"Lighthouse" <dee_deyes@writelighthouse.com>', to: req.body.email, subject: `Welcome to Lighthouse, ${req.body.username}!`, html: data };
+			var mailOptions = { from: '"Lighthouse" <' + config.ADMIN_EMAIL + '>', to: req.body.email, subject: `Welcome to Lighthouse, ${req.body.username}!`, html: data };
 			if (transporter) {
 				transporter.sendMail(mailOptions, (error) => {
 					if (error) {
@@ -1845,7 +1850,7 @@ app.post('/signup', async function (req, res) {
 					}
 				});
 			} else {
-				console.log("Email skipped: gmail_pass is not configured.");
+				console.log("Email skipped: GMAIL_PASS is not configured.");
 			}
 		}
 	});
@@ -1935,7 +1940,7 @@ app.put('/system-data', async function (req, res) {
 				let altName = req.body.name == null ? `'${Buffer.from('New alter').toString('base64')}'` : `'${Buffer.from(req.body.name).toString('base64')}'`;
 				let altPro = req.body.pronouns == null ? null : `'${Buffer.from(req.body.pronouns).toString('base64')}'`;
 				let altBirth = req.body.birthday == null ? null : `'${Buffer.from(req.body.birthday).toString('base64')}'`;
-				let altAva = req.body.avatar == null ? `'${Buffer.from('https://www.writelighthouse.com/img/avatar-default.jpg').toString('base64')}'` : `'${Buffer.from(req.body.avatar).toString('base64')}'`;
+				let altAva = req.body.avatar == null ? `'${Buffer.from(config.URL_PREFIX + '/img/avatar-default.jpg').toString('base64')}'` : `'${Buffer.from(req.body.avatar).toString('base64')}'`;
 				let altpk = req.body.avatar == null ? null : `${encryptWithAES(req.body.pk_id)}`;
 				client.query({
 					text: "INSERT INTO alters (name, sys_id, pronouns, birthday, img_url, pk_id) VALUES($1, $2, $3, $4, $5, $6);", values: [
@@ -1991,7 +1996,7 @@ app.put('/system-data', async function (req, res) {
 				let altName = req.body.name == null ? `'${Buffer.from('New alter').toString('base64')}'` : `'${Buffer.from(req.body.name).toString('base64')}'`;
 				let altPro = req.body.pronouns == null ? null : `'${Buffer.from(req.body.pronouns).toString('base64')}'`;
 				let altBirth = req.body.birthday == null ? null : `'${Buffer.from(req.body.birthday).toString('base64')}'`;
-				let altAva = req.body.avatar == null ? `'${Buffer.from('https://www.writelighthouse.com/img/avatar-default.jpg').toString('base64')}'` : `'${Buffer.from(req.body.avatar).toString('base64')}'`;
+				let altAva = req.body.avatar == null ? `'${Buffer.from(config.URL_PREFIX + '/img/avatar-default.jpg').toString('base64')}'` : `'${Buffer.from(req.body.avatar).toString('base64')}'`;
 				let altNotes = req.body.notes == null ? null : `'${Buffer.from(req.body.notes).toString('base64')}'`;
 				client.query({
 					text: "INSERT INTO alters (name, sys_id, pronouns, img_url, colour, notes) VALUES($1, $2, $3, $4, $5, $6);", values: [
@@ -2013,7 +2018,7 @@ app.put('/system-data', async function (req, res) {
 				});
 			} else if (editMode == "add-ph-alter") {
 				// Place placeholder alters in database.
-				let iconNo = "https://www.writelighthouse.com/img/" + getRandomInt(1, 42) + ".png";
+				let iconNo = config.URL_PREFIX + "/img/" + getRandomInt(1, 42) + ".png";
 				client.query({
 					text: "INSERT INTO alters (name, sys_id, img_url, gender) VALUES($1, $2, $3, $4);", values: [
 						`'${Buffer.from(req.body.altName).toString('base64')}'`,
@@ -2159,7 +2164,7 @@ app.put('/system-data', async function (req, res) {
 
 
 // DEV MODE PAGES
-if (process.env["environment"] == "dev") {
+if (config.ENVIRONMENT == "dev") {
 	app.get("/dev-test", function (req, res) {
 		res.send("Congrats! You found a dev-only page.")
 	})
@@ -2184,8 +2189,8 @@ app.use(function (req, res) {
 
 
 // End pages.
-app.listen(PORT, async function (res, req) {
+app.listen(config.PORT, async function (res, req) {
 	let rn = await db.query(client, "SELECT NOW();", [], res, req);
-	console.log(`⚓ Docked at Port ${PORT}. The time is ${(rn[0].now).toLocaleString('en-GB', { timeZone: 'EST' })}\nOpen in browser: http://localhost:${PORT}/`)
+	console.log(`⚓ Docked at Port ${config.PORT}. The time is ${(rn[0].now).toLocaleString('en-GB', { timeZone: 'EST' })}\nOpen in browser: ${config.URL_PREFIX}/`)
 });
 

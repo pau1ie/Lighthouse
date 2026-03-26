@@ -1,6 +1,7 @@
 // API routes.
 const express = require('express');
 const router = express.Router();
+const config = require("./config");
 const db = require('./db');
 const client = db.client;
 const crypto = require('crypto');
@@ -169,7 +170,7 @@ router.get("/user/auth", async function (req, res) {
       // Decrypt the stored salt and use to compare.
       try {
         let cleanSalt = userCheck[0].salt.replace(/'/g, "");
-        storedSalt = decryptWithAES(cleanSalt, process.env.SALT_KEY);
+        storedSalt = decryptWithAES(cleanSalt, config.SALT_KEY);
         inputHash = CryptoJS.SHA3(req.headers.tok + storedSalt).toString();
       } catch (err) {
         console.error("Error decrypting salt: ", err);

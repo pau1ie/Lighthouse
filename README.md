@@ -26,8 +26,12 @@ Setting up Lighthouse is fairly straightforward.
     - `environment`: Set this to `prod` for now. We will update this when the `dev` environment no longer points to a hard-coded localhost address for the database.
     - `maintenance`: Set this to false. Not entirely necessary, because you probably won't need to put the site in maintenance mode on the dev environment, but it's here since you might see it in the code and wonder what it does.
     - `sec`: Secret for session management. This should also be a long, random string.
-    - `PORT`: The port you want the server to run on.
+    - `PORT`: The port you want the server to run on. (Default 5000)
     - `SALT_KEY`: This is a key we use to encrypt the salt for password hashing. Now, you might be thinking "This is a bit overkill", and it is. Like I've said in the past: Paranoia is a wonderful motivator for this project.
+    - `ADMIN_EMAIL` - Email address to contact the website. This is displayed in various places in the code.
+    - `GMAIL_PASSi` - Password for the above account to enable Lighthouse to send emails.
+    - `URL_PREFIX` - The prefix for all URLs on the website. Should be of the form _https://example.com:9999_, i.e. everything up to the first slash in the URL. It tries to default to something sensible (http://hostname:port).
+    - `CLOUDFLARE_KEY` - If set this uses the cloudflare turnstile captcha.
 4. Set up your PostgreSQL database using the provided SQL schema in the `local-db` folder. There's a README in that folder with more instructions, if you need that.
 5. Finally, you can run the server using `npm start`. When Lighthouse boots, it will provide you with an "Open in browser" link. Click that, and you should be good to go!
 

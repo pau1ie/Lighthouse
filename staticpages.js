@@ -5,6 +5,9 @@ const db = require('./db');
 const client= db.client;
 const crypto= require('crypto');
 const CryptoJS = require("crypto-js");
+const config = require('./config');
+const site_config = { admin_email: config.ADMIN_EMAIL, url_prefix: config.URL_PREFIX };
+
 var strings= require("./lang/en.json");
 const {errorPage} = require("./funcs.js");
 
@@ -16,11 +19,11 @@ const {errorPage} = require("./funcs.js");
     });
   
     router.get('/tos', (req, res) => {
-      res.render(`pages/tos`, { session: req.session, cookies:req.cookies });
+      res.render(`pages/tos`, { session: req.session, cookies:req.cookies, config: site_config });
   });
   
   router.get('/privacypolicy', (req, res) => {
-      res.render(`pages/privacypolicy`, { session: req.session, cookies:req.cookies });
+      res.render(`pages/privacypolicy`, { session: req.session, cookies:req.cookies, config: site_config });
   });
   
     router.get('/todos', (req, res, next) => {

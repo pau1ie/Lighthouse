@@ -18,11 +18,13 @@
         font-size: 0.85em;
       }
     </style>
+    <% if (cloudflare_key) { %>
     <script
       src="https://challenges.cloudflare.com/turnstile/v0/api.js"
       async
       defer
     ></script>
+    <% } %>
   </head>
   <body>
     <%- include ("../partials/nav.ejs") %>
@@ -161,9 +163,10 @@
           id="mjl2fbbz8s"
           placeholder="Users should not see this! This is a bot honeypot."
         />
-        <% var key = isDev ? '1x00000000000000000000AA' :
-        '0x4AAAAAAAyTMNcAMEfytCrt'; %>
-        <div class="cf-turnstile" data-sitekey="<%= key %>"></div>
+        <% if (cloudflare_key) {
+        %>
+        <div class="cf-turnstile" data-sitekey="<%= cloudflare_key %>"></div>
+	<% } %>
         <input type="submit" id="signup" value="Sign Up" disabled />
       </form>
       <% } %>
