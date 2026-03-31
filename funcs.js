@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const CryptoJS = require("crypto-js");
 var strings = require("./lang/en.json");
 
+const nodemailer = require('nodemailer');
 const hasMailConfig = Boolean(process.env.gmail_pass);
 const transporter = hasMailConfig
   ? nodemailer.createTransport({
