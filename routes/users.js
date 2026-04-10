@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db.js");
 const config = require("../config/config.js");
+const site_config = require("../config/site_config.js")
 const client = db.client;
 const {
   isLoggedIn,
@@ -156,6 +157,7 @@ router.get("/profile/tokens", async function (req, res) {
       session: req.session,
       cookies: req.cookies,
       tokens: tokens,
+      config: site_config,
     });
   } else {
     res
@@ -191,7 +193,7 @@ router.post("/profile", function (req, res) {
           // Logged account matches searched account.
           if (req.body.deleteAcc) {
             ejs.renderFile(
-              __dirname + "/views/pages/email-goodbye.ejs",
+              path.join(__dirname, '..', 'views', 'pages', "email-goodbye.ejs"),
               {
                 alias:
                   Buffer.from(result.rows[0].username, "base64").toString() ||

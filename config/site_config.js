@@ -1,7 +1,7 @@
 config = require("./config.js");
 
 module.exports = {
-    admin_email: config.ADMIN_EMAIL,
-    environment: config.ENVIRONMENT,
-    url_prefix: config.URL_PREFIX,
+    ADMIN_EMAIL: config.ADMIN_EMAIL,
+    ENVIRONMENT: config.ENVIRONMENT,
+    URL_PREFIX: config.URL_PREFIX,
 };

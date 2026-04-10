@@ -299,7 +299,7 @@ app.get('/glossary', async (req, res) => {
 			return res.render(`pages/glossary-disabled`, { session: req.session, cookies: req.cookies, });
 		}
 	}
-	res.render(`pages/glossary`, { session: req.session, cookies: req.cookies, terms, lang: req.acceptsLanguages()[0] });
+	res.render(`pages/glossary`, { session: req.session, cookies: req.cookies, terms, lang: req.acceptsLanguages()[0], config: site_config });
 });
 
 app.get('/logout', (req, res) => {
