@@ -27,6 +27,11 @@
     ></script>
   </head>
   <body>
+    <script
+      src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+      async
+      defer
+    ></script>
     <%- include ("../partials/nav.ejs") %>
     <div id="wrapper">
       <% if (cookies.loggedin){ %>
@@ -169,7 +174,8 @@
           id="mjl2fbbz8s"
           placeholder="Users should not see this! This is a bot honeypot."
         />
-        <div class="cf-turnstile" data-sitekey="<%= cloudflare_key.replace(/^['"]|['"]$/g, '') %>"></div>
+        <% const key = isDev ? '1x00000000000000000000AA' : cloudflare_key %>
+        <div class="cf-turnstile" data-sitekey="<%=key %>"></div>
         <% } %>
         <input type="submit" id="signup" value="Sign Up" disabled />
       </form>
