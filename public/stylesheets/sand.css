@@ -13,7 +13,7 @@
     --bg-img: url("../img/sand-tile.png");
     --wrapper: rgba(255, 246, 241, 0.527);
     --text: black;
-    --archivedtxt: dimgrey;
+    --archivedtxt: black;
     --archivedbg: silver;
     --lighthouse: rgb(248, 202, 183);
     --grad1: rgba(167, 94, 12, 0);

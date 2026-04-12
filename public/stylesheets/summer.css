@@ -37,7 +37,7 @@
     --bg-img: url("/img/summer-night.png");
     --wrapper: rgba(39, 14, 1, 0.527);
     --text: rgb(255, 251, 214);
-    --archivedtxt: dimgrey;
+    --archivedtxt: black;
     --archivedbg: silver;
     --lighthouse: rgb(255, 223, 117);
     --grad1: rgba(12, 35, 167, 0);

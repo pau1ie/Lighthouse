@@ -15,7 +15,7 @@
     --bg-img: url("../img/anchor-bg.png");
     --wrapper: rgba(255,255,255,.4);
     --text: rgb(24, 24, 24);
-    --archivedtxt: dimgrey;
+    --archivedtxt: black;
     --archivedbg: silver;
     --lighthouse: rgb(99, 232, 241);
     --grad1: rgba(32, 95, 189,0);
