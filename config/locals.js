@@ -77,5 +77,6 @@ module.exports = {
   timeOptions: { hour: "2-digit", minute: "2-digit" },
   formatGMTToLocal,
   isDev: config.ENVIRONMENT === "dev",
-  cloudflare_key: config.ENVIRONMENT == "dev" ? '1x00000000000000000000AA' : config.CLOUDFLARE_KEY
+  cloudflare_key: config.CLOUDFLARE_KEY,
+  cloudflare_site_key: config.CLOUDFLARE_SITE_KEY,
 };
