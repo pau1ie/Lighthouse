@@ -20,7 +20,9 @@
 }
 .archived{
     background: var(--archivedbg) !important;
-    color: var(--archivedtxt) !important;
+}
+.archived span, .archived small {
+    color:var(--archivedtxt);
 }
 
     </style>
@@ -103,10 +105,9 @@ var journSkin=[
             
             <div class="grid" id="sysContainer">
                 <% for ( i in alterArr) {
-                    if (alterArr[i].is_archived== false){
                     %>
                     <a href="/alter/<%= alterArr[i].a_id %>" style="text-decoration: none;">
-                        <div class="polaroid child" >
+                        <div class="polaroid child<% if (alterArr[i].is_archived) {%> archived<% } %>" >
                         <% if (alterArr[i].img_blob){ %> 
                             <img class="smallimg"src="data:<%= alterArr[i].blob_mimetype %>;base64,<%= Buffer.from(alterArr[i].img_blob).toString("base64") %>"> 
                             <% } else if (distill(alterArr[i].icon)) { %>
@@ -140,30 +141,7 @@ var journSkin=[
                         
                     </div></a> 
                     
-                <% }} %>
-                <% for ( i in alterArr) {  
-                    if (alterArr[i].is_archived== true){
-                    %>
-                    <a href="/alter/<%= alterArr[i].a_id %>" style="text-decoration: none;"><div class="polaroid archived child">
-                        <% if (alterArr[i].img_blob){ %> 
-                            <img class="smallimg" src="data:<%= alterArr[i].blob_mimetype %>;base64,<%= Buffer.from(alterArr[i].img_blob).toString("base64") %>"> 
-                            
-                            <% } else if (distill(alterArr[i].icon)) { %>
-                            <img src="<%= Buffer.from(alterArr[i].icon, 'base64').toString() %>" class="smallimg">
-                        <% } else { %> 
-                            <img src="https://i.ibb.co/vkwmWjF/avatar-default.jpg" class="smallimg" alt="Card Icon">
-                        <% } %>
-                        <br>
-                        <%= truncate(boil(alterArr[i].name), 13) %> 
-                        <% if (alterArr[i].mood) { %><%- moods[alterArr[i].mood].emoji %><% } %>
-                        <% if (alterArr[i].pronouns){ %>
-                            <% if (distill(alterArr[i].pronouns)){ %>
-                                <br><small><%- truncate(boil(Buffer.from(alterArr[i].pronouns, "base64").toString()), 32) %></small>
-                                <% } %>
-                                <% } %>
-                    </div></a>
-                    
-                <% }} %>
+                <% } %>
             </div>
             <% } %>
         
