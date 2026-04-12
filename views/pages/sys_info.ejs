@@ -52,7 +52,10 @@ var journSkin=[
     {name: "Trident", file: "trident"},
     {name: "Message in a Bottle", file: "bottle"},
     {name: "Beach", file: "island"},
-]
+];
+let queryString = new URLSearchParams(query).toString();
+queryString = queryString ? `?${queryString}` : "";
+console.log(`queryString: ${queryString}`);
     %>
     <div id="wrapper">
         <% if (environment == "dev"){ %>
@@ -80,44 +83,47 @@ var journSkin=[
                 </div>
             <% } %>
             
-            
             <div id="pagination" class="pageJump">
                 <ul>
-                    <% if (curPage > 1){ %><li><i class="fa fa-arrow-left" aria-hidden="true"></i> <a href="/system/<%= session.chosenSys.sys_id %>/<%= parseInt(curPage) - 1 %>">Previous</a></li><% } %>
+                    <% if (curPage > 1){ %><li><i class="fa fa-arrow-left" aria-hidden="true"></i> <a href="/system/<%= session.chosenSys.sys_id %>/<%= parseInt(curPage) - 1 %><%= queryString %>">Previous</a></li><% } %>
                   <li class="currPage"><%= curPage %></li>
-                  <% if (curPage < pgCount){ %><li><a href="/system/<%= session.chosenSys.sys_id %>/<%= parseInt(curPage) + 1 %>">Next <i class="fa fa-arrow-right" aria-hidden="true"></i></a></li>
-                  <li><a href="/system/<%= session.chosenSys.sys_id %>/<%= parseInt(pgCount) %>">Last (<%= parseInt(pgCount) %>) <i class="fa fa-arrow-right" aria-hidden="true"></i></a></li>
+                  <% if (curPage < pgCount){ %><li><a href="/system/<%= session.chosenSys.sys_id %>/<%= parseInt(curPage) + 1 %><%= queryString %>">Next <i class="fa fa-arrow-right" aria-hidden="true"></i></a></li>
+                  <li><a href="/system/<%= session.chosenSys.sys_id %>/<%= parseInt(pgCount) %><%= queryString %>">Last (<%= parseInt(pgCount) %>) <i class="fa fa-arrow-right" aria-hidden="true"></i></a></li>
                   <% } %>
                   </ul>
                   <form method="none">
-                  <label for="page">Go to page: </label><input type="number" min="1" max="<%= pgCount %>" name="page" id="page" style="width: 3em;">
+                  <label for="page">Go to page: </label><input type="number" min="1" max="<%= pgCount %>" name="page" id="page" style="width: 3em;" value="<%= curPage %>">
                   <button id="go">Go</button>
                   </form>
+                  <label for="display_archived">Show archived <%= pluralize(cookies.alter_term) %>:</label>
+                  <select onchange="window.location.href = updateQuery({display_archive: this.value})" name="display_archived" id="display_archived">
+                      <option value="false" <%- query.display_archive === "false" ? "selected" : "" %> >No</option>
+                      <option value="true" <%- query.display_archive === "true" ? "selected" : "" %> >Yes</option>
+                      <option value="only" <%- query.display_archive === "only" ? "selected" : "" %> >Only</option>
+                  </select>
                 </div>
                 <a class="dyn linkbutton" title="<%= siteLanguage[session.language || "en"].comm %>" href="/system/communal-journal?sys=<%= session.chosenSys.sys_id %>"><%= siteLanguage[session.language || "en"].comm %></a>
             <% if (parseInt(altCount) > 0){ %>
                 <a class="linkbutton" href="/search"><i class="fa fa-search"></i> <%= capitalise(cookies.alter_term) %> Search</a>
                 <p><%= capitalise(pluralize(cookies.alter_term)) %>: <strong><%= parseInt(altCount).toLocaleString() %></strong></p>
-                <p class="dyn">Showing you <%= numup %> [[ALTERS]] per page. [[ALTERSCAP]] marked with a ✦ have their primary [[SYSTEM]] listed differently.</p>
+                <p class="dyn">Showing you <%= numup %> [[A<%= query.display_archve === "false" ? "selected" : "" %>LTERS]] per page. [[ALTERSCAP]] marked with a ✦ have their primary [[SYSTEM]] listed differently.</p>
 
-            
             <div class="grid" id="sysContainer">
                 <% for ( i in alterArr) {
-                    if (alterArr[i].is_archived== false){
                     %>
                     <a href="/alter/<%= alterArr[i].a_id %>" style="text-decoration: none;">
-                        <div class="polaroid child" >
+                        <div class="polaroid <%- alterArr[i].is_archived ? "archived" : "" %> child">
                         <% if (alterArr[i].img_blob){ %> 
-                            <img class="smallimg"src="data:<%= alterArr[i].blob_mimetype %>;base64,<%= Buffer.from(alterArr[i].img_blob).toString("base64") %>"> 
+                            <img class="smallimg" src="data:<%= alterArr[i].blob_mimetype %>;base64,<%= Buffer.from(alterArr[i].img_blob).toString("base64") %>"> 
                             <% } else if (distill(alterArr[i].icon)) { %>
                             <img src="<%= Buffer.from(alterArr[i].icon, 'base64').toString() %>" class="smallimg">
                         <% } else { %> 
                             <img src="https://i.ibb.co/vkwmWjF/avatar-default.jpg" class="smallimg" alt="Card Icon">
                         <% } %>
-                     <br>
-                    
+                    <br/>
                     <span
-                    style="
+                    <% if (alterArr[i].is_archived== false) { %>
+                      style="
                         <% if(alterArr[i].colourEnabled==true){ %>
                             color: <%- alterArr[i].colour %>;
                         <% } %>
@@ -128,42 +134,16 @@ var journSkin=[
                                         1px 1px 0 <%- alterArr[i].outline %>;
                         <% } %>
                         "
+                    <% } %>
                         ><%= truncate(boil(alterArr[i].name), 13) %></span> 
                     <% if (alterArr[i].id !== currentSys){ %>✦<% } %>
-                     <% if (alterArr[i].mood) { %><%- moods[alterArr[i].mood].emoji %><% } %>
-                     <% if (alterArr[i].pronouns){ %> 
+                    <% if (alterArr[i].mood) { %><%- moods[alterArr[i].mood].emoji %><% } %>
+                    <% if (alterArr[i].pronouns){ %> 
                         <% if (distill(alterArr[i].pronouns)){ %><br><small><%= truncate(boil(Buffer.from(alterArr[i].pronouns, "base64").toString()), 16) %></small>
                         <% } %> 
-                        <% } %>
-
-                     
-                        
-                    </div></a> 
-                    
-                <% }} %>
-                <% for ( i in alterArr) {  
-                    if (alterArr[i].is_archived== true){
-                    %>
-                    <a href="/alter/<%= alterArr[i].a_id %>" style="text-decoration: none;"><div class="polaroid archived child">
-                        <% if (alterArr[i].img_blob){ %> 
-                            <img class="smallimg" src="data:<%= alterArr[i].blob_mimetype %>;base64,<%= Buffer.from(alterArr[i].img_blob).toString("base64") %>"> 
-                            
-                            <% } else if (distill(alterArr[i].icon)) { %>
-                            <img src="<%= Buffer.from(alterArr[i].icon, 'base64').toString() %>" class="smallimg">
-                        <% } else { %> 
-                            <img src="https://i.ibb.co/vkwmWjF/avatar-default.jpg" class="smallimg" alt="Card Icon">
-                        <% } %>
-                        <br>
-                        <%= truncate(boil(alterArr[i].name), 13) %> 
-                        <% if (alterArr[i].mood) { %><%- moods[alterArr[i].mood].emoji %><% } %>
-                        <% if (alterArr[i].pronouns){ %>
-                            <% if (distill(alterArr[i].pronouns)){ %>
-                                <br><small><%- truncate(boil(Buffer.from(alterArr[i].pronouns, "base64").toString()), 32) %></small>
-                                <% } %>
-                                <% } %>
+                    <% } %>
                     </div></a>
-                    
-                <% }} %>
+                <% } %>
             </div>
             <% } %>
         
@@ -309,13 +289,19 @@ var journSkin=[
         }
         $("#go").on("click", function(){
           event.preventDefault();
-          window.location= `/system/<%= session.chosenSys.sys_id %>/${$("#page").val()}`
+          window.location= `/system/<%= session.chosenSys.sys_id %>/${$("#page").val()}<%= queryString %>`
         })
         if (parseInt(<%= pgCount %>) <= 1){
             $("#pagination").hide()
         }
 
-
+        function updateQuery(updatedParams) {
+            const params = new URLSearchParams(window.location.search);
+            for (const key in updatedParams) {
+                params.set(key, updatedParams[key]);
+            }
+            return `${window.location.pathname}?` + params.toString();
+        }
     
     </script>
 </body>
