@@ -13,7 +13,7 @@
     --bg-img: url("../img/icecream-day.png");
     --wrapper: rgba(255, 226, 237, 0.863);
     --text: black;
-    --archivedtxt: grey;
+    --archivedtxt: rgb(0, 0, 0);
     --archivedbg: silver;
     --lighthouse: rgb(255, 239, 244);
     --grad1: rgba(167, 12, 97, 0);
@@ -36,7 +36,7 @@
     --bg-img: url("../img/icecream-day.png");
     --wrapper: rgba(34, 56, 82, 0.644);
     --text: rgb(245, 245, 213);
-    --archivedtxt: grey;
+    --archivedtxt: dimgrey;
     --archivedbg: silver;
     --lighthouse: rgb(250, 232, 154);
     --grad1: rgba(12, 66, 167, 0);

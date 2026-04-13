@@ -19,7 +19,8 @@ Setting up Lighthouse is fairly straightforward.
     - `ADMIN_EMAIL`: Your email that will be sending all email to users, including password reset emails.
     - `gmail_pass`: The app password for the account. Might work without gmail!
     - `URL_PREFIX`: The url for your project. Your dev environment should have this set to `localhost`, while your hosted instance will have the URL (like `www.example.com`)
-    - `CLOUDFLARE_KEY`: Optional. For if you want to protect signups on your instance.
+    - `CLOUDFLARE_KEY`: Optional. For if you want to protect signups on your instance. **This is the private/secret key.**
+    - `CLOUDFLARE_SITE_KEY`: Optional. For if you want to protect signups on your instance. **This is the public/site key.**
     - `LOG_EMAIL`: true/false for logging the email html to the console for debugging.
     - `cryptkey`: The key used for encrypting sensitive data. This should be a long, random string.
     - `DB_HOST`: The host of your PostgreSQL database.
@@ -41,9 +42,6 @@ Setting up Lighthouse is fairly straightforward.
 The code, as you will quickly see, is just a mess. This code is in dire need of cleanup. There needs to be a helper function file to reduce redundancy, the routes still need to be organized into separate files, and queries need to use the new await db.query call which handles all the errors and whatnot. 
 
 This project was built all the way back in 2021, when I was still fresh out of an Associates Degree program and had only been coding for a few months. That's why there's so much callback hell, redundant code and a general lack of organisation. This doesn't mean the data itself is unsafe! It's just that the backend is like the side of cross-stitch that you don't show people.
-
-### Login issues
-This one is still baffling me. For some reason, changing passwords has become a problem. Sign ups might also be broken when registering. Why that's happening is beyond me, as I've tested it repeatedly and have not been able to replicate the issue. I get a sneaking suspicion that we'll only get answers once cleanup is done. While sign ups are disabled, let's focus on cleaning up the code and making sure we understand how everything works. Once we do that, we can probably figure out what's going on with the login issues.
 
 ### Screen reader accessibility
 I've been emailed a couple times about how screenreaders cannot navigate Lighthouse. I don't have a screen reader myself, so I haven't been able to test this. Once the sign up and clean up issues are resolved, this should be our next priority.
