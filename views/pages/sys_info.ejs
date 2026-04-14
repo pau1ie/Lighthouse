@@ -95,18 +95,20 @@ console.log(`queryString: ${queryString}`);
                   <label for="page">Go to page: </label><input type="number" min="1" max="<%= pgCount %>" name="page" id="page" style="width: 3em;" value="<%= curPage %>">
                   <button id="go">Go</button>
                   </form>
-                  <label for="display_archived">Show archived <%= pluralize(cookies.alter_term) %>:</label>
-                  <select onchange="window.location.href = updateQuery({display_archive: this.value})" name="display_archived" id="display_archived">
-                      <option value="false" <%- query.display_archive === "false" ? "selected" : "" %> >No</option>
-                      <option value="true" <%- query.display_archive === "true" ? "selected" : "" %> >Yes</option>
-                      <option value="only" <%- query.display_archive === "only" ? "selected" : "" %> >Only</option>
-                  </select>
                 </div>
                 <a class="dyn linkbutton" title="<%= siteLanguage[session.language || "en"].comm %>" href="/system/communal-journal?sys=<%= session.chosenSys.sys_id %>"><%= siteLanguage[session.language || "en"].comm %></a>
             <% if (parseInt(altCount) > 0){ %>
                 <a class="linkbutton" href="/search"><i class="fa fa-search"></i> <%= capitalise(cookies.alter_term) %> Search</a>
-                <p><%= capitalise(pluralize(cookies.alter_term)) %>: <strong><%= parseInt(altCount).toLocaleString() %></strong></p>
-                <p class="dyn">Showing you <%= numup %> [[A<%= query.display_archve === "false" ? "selected" : "" %>LTERS]] per page. [[ALTERSCAP]] marked with a ✦ have their primary [[SYSTEM]] listed differently.</p>
+                <p>
+                    <label for="display_archived">Show archived <%= pluralize(cookies.alter_term) %>:</label>
+                    <select onchange="window.location.href = updateQuery({display_archive: this.value})" name="display_archived" id="display_archived" class="linkbutton">
+                        <option value="false" <%- query.display_archive === "false" ? "selected" : "" %> >No</option>
+                        <option value="true" <%- query.display_archive === "true" ? "selected" : "" %> >Yes</option>
+                        <option value="only" <%- query.display_archive === "only" ? "selected" : "" %> >Only</option>
+                    </select>
+                    <strong><%= parseInt(resCount).toLocaleString() %></strong> of <strong><%= parseInt(altCount).toLocaleString() %></strong> <%= pluralize(cookies.alter_term) %> listed.
+                </p>
+                <p class="dyn">Showing you <%= numup %> [[ALTERS]] per page. [[ALTERSCAP]] marked with a ✦ have their primary [[SYSTEM]] listed differently.</p>
 
             <div class="grid" id="sysContainer">
                 <% for ( i in alterArr) {

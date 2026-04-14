@@ -682,7 +682,6 @@ router.get("/:id/:pg?",
   authUser,
   validateParam("id"),
   async (req, res, next) => {
-    console.log(req.query);
     const display_archive = req.query.display_archive ?? "false";
     if (!req.session.worksheets_enabled) {
       // Quick, add that.
@@ -809,23 +808,24 @@ router.get("/:id/:pg?",
       });
     });
     const altCount = total_alters[0].count;
+    const resCount = alters.length;
     req.session.alters.sort((a, b) => a.name.localeCompare(b.name));
     req.session.alters = paginate(
       req.session.alters,
       Number(numUp[0].altupnum)
     );
-    const cp = (req.params.pg > req.session.alters.length) ? req.session.alters.length : (req.params.pg || 1);
-    console.log(`req.params.pg: ${req.params.pg}, req.session.alters.length: ${req.session.alters.length}, cp: ${cp}`);
+    /* Don't go past the end of the pages. */
+    const curPage = (req.params.pg > req.session.alters.length) ? req.session.alters.length : (req.params.pg || 1);
     res.render(`pages/sys_info`, {
       session: req.session,
-      alterArr: req.session.alters[req.params.pg - 1 || 0],
+      alterArr: req.session.alters[curPage - 1 || 0],
       cookies: req.cookies,
       query: req.query,
       sys_id: req.params.id,
       pgCount: req.session.alters.length,
       altCount,
-      /* Don't go past the end of the pages. */
-      curPage: (req.params.pg > req.session.alters.length) ? req.session.alters.length : (req.params.pg || 1),
+      resCount,
+      curPage,
       numup: Number(numUp[0].altupnum),
       currentSys: req.params.id,
       environment: config.ENVIRONMENT
