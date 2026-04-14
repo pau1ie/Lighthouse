@@ -15,7 +15,7 @@
     --wrapper: rgba(247, 228, 236, 0.671);
     --text: black;
     --button: gainsboro;
-    --archivedtxt: grey;
+    --archivedtxt: black;
     --archivedbg: silver;
     --lighthouse: rgb(252, 173, 255);
     --grad1: rgba(7, 112, 95, 0);
@@ -43,7 +43,7 @@
     --wrapper: rgba(9, 26, 16, 0.712);
     --text: rgb(230, 230, 230);
     --button: gainsboro;
-    --archivedtxt: grey;
+    --archivedtxt: dimgrey;
     --archivedbg: silver;
     --lighthouse: rgb(252, 173, 255);
     --grad1: rgba(1, 63, 53, 0);

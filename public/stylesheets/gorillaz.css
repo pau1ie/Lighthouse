@@ -14,8 +14,8 @@
     --bg-img: url("../img/plastic-beach.png");
     --wrapper: rgba(217, 247, 255, 0.747);
     --text: rgb(6, 2, 65);
-    --archivedtxt: grey;
-    --archivedbg: silver;
+    --archivedtxt: rgb(59, 2, 2);
+    --archivedbg: rgb(224, 181, 193);
     --lighthouse: rgb(255, 237, 156);
     --grad1: rgba(4, 104, 87, 0);
     --grad2: rgb(44, 0, 80);
@@ -39,7 +39,7 @@
     --bg-img: url("../img/night-gorillaz.png");
     --wrapper: rgba(51, 51, 51, 0.527);
     --text: rgb(255, 239, 245);
-    --archivedtxt: grey;
+    --archivedtxt: dimgrey;
     --archivedbg: silver;
     --lighthouse: rgb(255, 172, 172);
     --grad1: rgba(4, 104, 87, 0);

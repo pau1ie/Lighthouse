@@ -810,6 +810,12 @@ router.get("/:id/:pg?",
     const altCount = total_alters[0].count;
     const resCount = alters.length;
     req.session.alters.sort((a, b) => a.name.localeCompare(b.name));
+    req.session.alters.sort((a, b) => {
+      if (a.is_archived !== b.is_archived) {
+        return a.is_archived ? 1 : -1;
+      }
+      return a.name.localeCompare(b.name);
+    });
     req.session.alters = paginate(
       req.session.alters,
       Number(numUp[0].altupnum)

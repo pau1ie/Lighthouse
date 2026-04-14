@@ -13,7 +13,7 @@
     --bg-img: url("../img/snowfall.png");
     --wrapper: rgba(217, 247, 255, 0.527);
     --text: rgb(6, 2, 65);
-    --archivedtxt: grey;
+    --archivedtxt: black;
     --archivedbg: silver;
     --lighthouse: rgb(202, 255, 255);
     --grad1: rgba(12, 167, 141, 0);
@@ -37,7 +37,7 @@
     --bg-img: url("../img/snowfall-night.png");
     --wrapper: rgba(1, 44, 56, 0.527);
     --text: rgb(232, 230, 255);
-    --archivedtxt: grey;
+    --archivedtxt: dimgrey !important;
     --archivedbg: silver;
     --lighthouse: rgb(202, 255, 255);
     --grad1: rgba(12, 22, 167, 0);

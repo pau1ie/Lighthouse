@@ -20,7 +20,9 @@
 }
 .archived{
     background: var(--archivedbg) !important;
-    color: var(--archivedtxt) !important;
+}
+.archived span, .archived small {
+    color:var(--archivedtxt);
 }
 
     </style>
@@ -113,7 +115,7 @@ queryString = queryString ? `?${queryString}` : "";
                 <% for ( i in alterArr) {
                     %>
                     <a href="/alter/<%= alterArr[i].a_id %>" style="text-decoration: none;">
-                        <div class="polaroid <%- alterArr[i].is_archived ? "archived" : "" %> child">
+                        <div class="polaroid child<% if (alterArr[i].is_archived) {%> archived<% } %>" >
                         <% if (alterArr[i].img_blob){ %> 
                             <img class="smallimg" src="data:<%= alterArr[i].blob_mimetype %>;base64,<%= Buffer.from(alterArr[i].img_blob).toString("base64") %>"> 
                             <% } else if (distill(alterArr[i].icon)) { %>
@@ -142,8 +144,12 @@ queryString = queryString ? `?${queryString}` : "";
                     <% if (alterArr[i].pronouns){ %> 
                         <% if (distill(alterArr[i].pronouns)){ %><br><small><%= truncate(boil(Buffer.from(alterArr[i].pronouns, "base64").toString()), 16) %></small>
                         <% } %> 
-                    <% } %>
-                    </div></a>
+                        <% } %>
+
+                     
+                        
+                    </div></a> 
+                    
                 <% } %>
             </div>
             <% } %>
