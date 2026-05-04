@@ -573,7 +573,7 @@ router.put("/system-data", async function (req, res) {
 			} else if (editMode == "add-ph-alter") {
 				// Place placeholder alters in database.
 				let iconNo =
-					`${config.URL_PREFIX}/` + getRandomInt(1, 42) + ".png";
+					`${config.URL_PREFIX}/img/` + getRandomInt(1, 42) + ".png";
 				client.query(
 					{
 						text: "INSERT INTO alters (name, sys_id, img_url, gender) VALUES($1, $2, $3, $4);",
